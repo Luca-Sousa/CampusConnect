@@ -1,5 +1,5 @@
 import { useRoutes } from "react-router-dom";
-import routes from "~react-pages";
+import routes from "@/router";
 
 const App = () => {
   return useRoutes(routes);
