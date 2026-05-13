@@ -1,5 +1,5 @@
 import type { RouteObject } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import HomePage from "@/pages/home";
 import LoginPage from "@/pages/login";
 import NewsPage from "@/pages/news";
@@ -19,4 +19,3 @@ const routes: RouteObject[] = [
 ];
 
 export default routes;
-

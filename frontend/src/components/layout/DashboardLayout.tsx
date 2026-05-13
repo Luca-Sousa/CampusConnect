@@ -1,8 +1,8 @@
 import { Outlet } from "react-router-dom";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { SidebarLeft } from "@/components/sidebar-left";
-import { SidebarRight } from "@/components/sidebar-right";
-import AppHeader from "@/components/AppHeader";
+import { SidebarLeft } from "@/components/layout/sidebar-left";
+import { SidebarRight } from "@/components/layout/sidebar-right";
+import AppHeader from "@/components/layout/AppHeader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const DashboardLayout = () => {
