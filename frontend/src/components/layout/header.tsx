@@ -3,16 +3,53 @@ import { Input } from "@/components/ui/input";
 import { todayDate } from "@/lib/utils";
 import NavUser from "../nav-user";
 import { Button } from "../ui/button";
+import { SidebarTrigger, useSidebar } from "../ui/sidebar";
+import { Separator } from "../ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Kbd, KbdGroup } from "../ui/kbd";
 
 const Header = () => {
+  const { open } = useSidebar();
+
   return (
     <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b bg-sidebar px-6 gap-6">
-      {/* Welcome */}
-      <div className="min-w-0 shrink-0">
-        <h2 className="text-lg font-bold leading-tight text-foreground">
-          Bem-vindo, Lucas.
-        </h2>
-        <p className="text-xs text-muted-foreground capitalize">{todayDate}</p>
+      <div className="flex items-center justify-center gap-6">
+        <div className="flex gap-3">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SidebarTrigger />
+            </TooltipTrigger>
+            <TooltipContent>
+              {open ? (
+                <div className="flex flex-col items-center gap-1">
+                  <p>Ocultar Sidebar</p>
+                  <p className="text-muted-foreground text-xs">ou pressione</p>
+                  <KbdGroup>
+                    <Kbd>Ctrl</Kbd>
+                    <span>+</span>
+                    <Kbd>B</Kbd>
+                  </KbdGroup>
+                </div>
+              ) : (
+                <p>Mostrar Sidebar</p>
+              )}
+            </TooltipContent>
+          </Tooltip>
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-8"
+          />
+        </div>
+
+        {/* Welcome */}
+        <div className="min-w-0 shrink-0">
+          <h2 className="text-lg font-bold leading-tight text-foreground">
+            Bem-vindo, Lucas.
+          </h2>
+          <p className="text-xs text-muted-foreground capitalize">
+            {todayDate}
+          </p>
+        </div>
       </div>
 
       {/* Search */}
