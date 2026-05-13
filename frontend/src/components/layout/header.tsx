@@ -1,15 +1,9 @@
 import { BellIcon, SearchIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { today } from "@/lib/utils";
 
-const AppHeader = () => {
-  const today = new Intl.DateTimeFormat("pt-BR", {
-    weekday: "short",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  }).format(new Date());
-
+const Header = () => {
   return (
     <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b bg-sidebar px-6 gap-6">
       {/* Welcome */}
@@ -44,4 +38,4 @@ const AppHeader = () => {
   );
 };
 
-export default AppHeader;
+export default Header;

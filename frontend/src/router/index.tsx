@@ -1,5 +1,5 @@
 import type { RouteObject } from "react-router-dom";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import Layout from "@/components/layout/layout";
 import HomePage from "@/pages/home";
 import LoginPage from "@/pages/login";
 import NewsPage from "@/pages/news";
@@ -9,7 +9,7 @@ const routes: RouteObject[] = [
   { path: "/login", element: <LoginPage /> },
   {
     path: "/",
-    element: <DashboardLayout />,
+    element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
       { path: "news", element: <NewsPage /> },

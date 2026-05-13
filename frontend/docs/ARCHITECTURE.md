@@ -40,8 +40,8 @@ src/
 │
 ├── components/                 # Componentes compartilhados
 │   ├── layout/                 # Shell do layout da aplicação
-│   │   ├── DashboardLayout.tsx # Layout principal com sidebars
-│   │   ├── AppHeader.tsx       # Cabeçalho global
+│   │   ├── Layout.tsx # Layout principal com sidebars
+│   │   ├── Header.tsx       # Cabeçalho global
 │   │   ├── sidebar-left.tsx    # Navegação lateral esquerda
 │   │   └── sidebar-right.tsx   # Painel lateral direito
 │   └── ui/                     # Componentes de UI atômicos (shadcn/ui)
@@ -74,8 +74,8 @@ Cada módulo tem exatamente uma razão para mudar:
 
 - `PostCard` renderiza apenas um post — não sabe buscar dados, não sabe montar o feed.
 - `StoriesBar` cuida apenas da barra de stories.
-- `DashboardLayout` gerencia apenas a estrutura do shell da dashboard.
-- `AppHeader` gerencia apenas o cabeçalho.
+- `Layout` gerencia apenas a estrutura do shell da dashboard.
+- `Header` gerencia apenas o cabeçalho.
 
 **Regra prática:** se você precisa descrever um componente com "e também", é sinal de que ele faz mais de uma coisa.
 
@@ -182,7 +182,7 @@ No futuro, quando houver uma API real, apenas a camada de dados (`data.ts` → `
        ↓
 [router/index.tsx]
        ↓
-[components/layout/DashboardLayout]
+[components/layout/Layout]
        ↓
 [App.tsx → main.tsx]
 ```
