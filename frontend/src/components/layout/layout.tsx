@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { SidebarLeft } from "@/components/layout/sidebar-left";
-import { SidebarRight } from "@/components/layout/sidebar-right";
+import SidebarLeft from "@/components/layout/sidebar-left";
+import SidebarRight from "@/components/layout/sidebar-right";
 import Header from "@/components/layout/header";
 import { ScrollArea } from "@/components/ui/scroll-area";
 

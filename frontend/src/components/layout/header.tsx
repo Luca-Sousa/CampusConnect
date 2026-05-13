@@ -1,7 +1,8 @@
 import { BellIcon, SearchIcon } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { today } from "@/lib/utils";
+import { todayDate } from "@/lib/utils";
+import NavUser from "../nav-user";
+import { Button } from "../ui/button";
 
 const Header = () => {
   return (
@@ -11,7 +12,7 @@ const Header = () => {
         <h2 className="text-lg font-bold leading-tight text-foreground">
           Bem-vindo, Lucas.
         </h2>
-        <p className="text-xs text-muted-foreground capitalize">{today}</p>
+        <p className="text-xs text-muted-foreground capitalize">{todayDate}</p>
       </div>
 
       {/* Search */}
@@ -25,14 +26,17 @@ const Header = () => {
 
       {/* Actions */}
       <div className="flex items-center gap-2 shrink-0">
-        <button className="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted transition-colors">
-          <BellIcon className="h-5 w-5 text-muted-foreground" />
-        </button>
-        <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-orange-200">
-          <AvatarFallback className="bg-orange-100 text-orange-600 font-semibold text-sm">
-            LA
-          </AvatarFallback>
-        </Avatar>
+        <Button variant="secondary" size="icon">
+          <BellIcon className="size-5 text-muted-foreground" />
+        </Button>
+
+        <NavUser
+          user={{
+            name: "Lucas Almeida",
+            email: "lucas.almeida@example.com",
+            avatar: "https://github.com/shadcn.png",
+          }}
+        />
       </div>
     </header>
   );

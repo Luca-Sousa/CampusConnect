@@ -5,8 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const today = new Intl.DateTimeFormat("pt-BR", {
-  weekday: "short",
+export const todayDate = new Intl.DateTimeFormat("pt-BR", {
+  weekday: "long",
   day: "2-digit",
   month: "long",
   year: "numeric",

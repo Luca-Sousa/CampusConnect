@@ -13,20 +13,66 @@ import {
 
 // ---- Data ----------------------------------------------------------------
 const pages = [
-  { id: 1, name: "Dev Campus", initials: "DC", color: "bg-blue-100 text-blue-600" },
-  { id: 2, name: "Rifiu Team", initials: "RT", color: "bg-purple-100 text-purple-600" },
+  {
+    id: 1,
+    name: "Dev Campus",
+    initials: "DC",
+    color: "bg-blue-100 text-blue-600",
+  },
+  {
+    id: 2,
+    name: "Rifiu Team",
+    initials: "RT",
+    color: "bg-purple-100 text-purple-600",
+  },
 ];
 
 const contacts = [
-  { id: 1, name: "Ana Paula", initials: "AP", color: "bg-pink-100 text-pink-600", online: true },
-  { id: 2, name: "João Pedro", initials: "JP", color: "bg-green-100 text-green-600", online: true },
-  { id: 3, name: "Maria Silva", initials: "MS", color: "bg-amber-100 text-amber-600", online: true },
-  { id: 4, name: "Carlos Lima", initials: "CL", color: "bg-teal-100 text-teal-600", online: false },
+  {
+    id: 1,
+    name: "Ana Paula",
+    initials: "AP",
+    color: "bg-pink-100 text-pink-600",
+    online: true,
+  },
+  {
+    id: 2,
+    name: "João Pedro",
+    initials: "JP",
+    color: "bg-green-100 text-green-600",
+    online: true,
+  },
+  {
+    id: 3,
+    name: "Maria Silva",
+    initials: "MS",
+    color: "bg-amber-100 text-amber-600",
+    online: true,
+  },
+  {
+    id: 4,
+    name: "Carlos Lima",
+    initials: "CL",
+    color: "bg-teal-100 text-teal-600",
+    online: false,
+  },
 ];
 
 const groups = [
-  { id: 1, name: "Eng. de Software", initials: "ES", color: "bg-indigo-100 text-indigo-600", online: true },
-  { id: 2, name: "Dev Web", initials: "DW", color: "bg-rose-100 text-rose-600", online: true },
+  {
+    id: 1,
+    name: "Eng. de Software",
+    initials: "ES",
+    color: "bg-indigo-100 text-indigo-600",
+    online: true,
+  },
+  {
+    id: 2,
+    name: "Dev Web",
+    initials: "DW",
+    color: "bg-rose-100 text-rose-600",
+    online: true,
+  },
 ];
 
 // ---- Sub-components -------------------------------------------------------
@@ -60,7 +106,7 @@ const ContactItem = ({ name, initials, color, online }: ContactItemProps) => (
 );
 
 // ---- Main component -------------------------------------------------------
-export function SidebarRight() {
+const SidebarRight = () => {
   return (
     <Sidebar
       collapsible="none"
@@ -73,7 +119,9 @@ export function SidebarRight() {
           <SidebarGroupLabel>Suas Páginas</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {pages.map((p) => <ContactItem key={p.id} {...p} />)}
+              {pages.map((p) => (
+                <ContactItem key={p.id} {...p} />
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -82,7 +130,9 @@ export function SidebarRight() {
           <SidebarGroupLabel>Contatos</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {contacts.map((c) => <ContactItem key={c.id} {...c} />)}
+              {contacts.map((c) => (
+                <ContactItem key={c.id} {...c} />
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -91,11 +141,15 @@ export function SidebarRight() {
           <SidebarGroupLabel>Grupos</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {groups.map((g) => <ContactItem key={g.id} {...g} />)}
+              {groups.map((g) => (
+                <ContactItem key={g.id} {...g} />
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );
-}
+};
+
+export default SidebarRight;

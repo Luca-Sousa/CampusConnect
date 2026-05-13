@@ -1,4 +1,4 @@
-import React from "react"
+import React from "react";
 
 import {
   SidebarGroup,
@@ -7,19 +7,21 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-export function NavSecondary({
+interface NavSecondaryProps {
+  items: {
+    title: string;
+    url: string;
+    icon: React.ReactNode;
+    badge?: React.ReactNode;
+  }[];
+}
+
+const NavSecondary = ({
   items,
   ...props
-}: {
-  items: {
-    title: string
-    url: string
-    icon: React.ReactNode
-    badge?: React.ReactNode
-  }[]
-} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+}: NavSecondaryProps & React.ComponentPropsWithoutRef<typeof SidebarGroup>) => {
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
@@ -38,5 +40,7 @@ export function NavSecondary({
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  )
-}
+  );
+};
+
+export default NavSecondary;

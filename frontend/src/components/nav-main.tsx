@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-export function NavMain({
-  items,
-}: {
+interface NavMainProps {
   items: {
-    title: string
-    url: string
-    icon: React.ReactNode
-    isActive?: boolean
-  }[]
-}) {
+    title: string;
+    url: string;
+    icon: React.ReactNode;
+    isActive?: boolean;
+  }[];
+}
+
+const NavMain = ({ items }: NavMainProps) => {
   return (
     <SidebarMenu>
       {items.map((item) => (
@@ -29,5 +29,7 @@ export function NavMain({
         </SidebarMenuItem>
       ))}
     </SidebarMenu>
-  )
-}
+  );
+};
+
+export default NavMain;
