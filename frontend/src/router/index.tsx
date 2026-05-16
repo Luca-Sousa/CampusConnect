@@ -5,9 +5,12 @@ import NewsPage from "@/pages/news";
 import GroupsPage from "@/pages/groups";
 import FeedPage from "@/pages/feed";
 import EventsPage from "@/pages/events";
+import SignupPage from "@/pages/signup";
 
 const routes: RouteObject[] = [
   { path: "/login", element: <LoginPage /> },
+
+  { path: "/signup", element: <SignupPage /> },
   {
     path: "/",
     element: <Layout />,
