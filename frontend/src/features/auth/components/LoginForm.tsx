@@ -23,7 +23,7 @@ export function LoginForm() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor="email" className="text-sm font-medium">
-              E-mail Intitucional
+              E-mail institucional
             </label>
             <input
               id="email"

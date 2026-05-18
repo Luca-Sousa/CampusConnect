@@ -27,6 +27,7 @@ import {
   BellIcon,
   LogOutIcon,
 } from "lucide-react";
+import { ProfileDialog } from "@/features/auth/components/ProfileDialog";
 
 interface NavUserProps {
   user: {
@@ -81,10 +82,12 @@ const NavUser = ({ user }: NavUserProps) => {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheckIcon />
-                Conta
-              </DropdownMenuItem>
+              <ProfileDialog user={user}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <BadgeCheckIcon />
+                  Meu Perfil
+                </DropdownMenuItem>
+              </ProfileDialog>
               <DropdownMenuItem>
                 <BellIcon />
                 Notificações
