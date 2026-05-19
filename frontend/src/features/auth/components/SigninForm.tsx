@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,19 +11,8 @@ import {
 } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 import { signIn } from "@/lib/auth-client";
+import { signinSchema } from "../schemas";
 import { FormInput } from "./FormInput";
-
-const signinSchema = z.object({
-  email: z
-    .email("E-mail inválido.")
-    .refine(
-      (e) =>
-        e.toLowerCase().endsWith("@aluno.ifce.edu.br") ||
-        e.toLowerCase().endsWith("@ifce.edu.br"),
-      { message: "Use seu e-mail institucional do IFCE." },
-    ),
-  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres."),
-});
 
 export function SigninForm() {
   const navigate = useNavigate();

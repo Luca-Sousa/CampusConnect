@@ -1,6 +1,5 @@
 ﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { z } from "zod";
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,52 +10,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { signUp } from "@/lib/auth-client";
+import { alunoSchema, colaboradorSchema } from "../schemas";
+import { CargoSelect } from "./CargoSelect";
 import { FormInput } from "./FormInput";
-
-const CARGO_OPTIONS = [
-  { value: "professor", label: "Professor(a)" },
-  { value: "coordenador", label: "Coordenador(a) de Curso" },
-  { value: "direcao", label: "Direção" },
-  { value: "administracao", label: "Administração" },
-  { value: "secretaria", label: "Secretaria Acadêmica" },
-  { value: "centro_academico", label: "Centro Acadêmico (C.A.)" },
-  { value: "biblioteca", label: "Biblioteca" },
-  { value: "ti", label: "TI" },
-] as const;
-
-const alunoSchema = z.object({
-  name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres."),
-  email: z
-    .email("E-mail inválido.")
-    .refine((e) => e.toLowerCase().endsWith("@aluno.ifce.edu.br"), {
-      message: "Use um e-mail @aluno.ifce.edu.br.",
-    }),
-  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres."),
-});
-
-const colaboradorSchema = z.object({
-  name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres."),
-  email: z
-    .email("E-mail inválido.")
-    .refine(
-      (e) =>
-        e.toLowerCase().endsWith("@ifce.edu.br") &&
-        !e.toLowerCase().endsWith("@aluno.ifce.edu.br"),
-      { message: "Use um e-mail @ifce.edu.br" },
-    ),
-  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres."),
-  cargo: z.string().min(1, "Selecione seu cargo."),
-});
 
 function AlunoForm({ onSuccess }: { onSuccess: () => void }) {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -200,35 +158,15 @@ function ColaboradorForm({ onSuccess }: { onSuccess: () => void }) {
         </form.Field>
         <form.Field name="cargo">
           {(field) => (
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor={field.name}>Cargo</Label>
-              <Select
-                value={field.state.value}
-                onValueChange={(v) => field.handleChange(v)}
-              >
-                <SelectTrigger
-                  id={field.name}
-                  onBlur={field.handleBlur}
-                  className="w-full"
-                >
-                  <SelectValue placeholder="Selecione seu cargo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CARGO_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {field.state.meta.errors.length > 0 && (
-                <p className="text-destructive text-xs">
-                  {field.state.meta.errors
-                    .map((e) => (typeof e === "string" ? e : e?.message))
-                    .join(", ")}
-                </p>
+            <CargoSelect
+              id={field.name}
+              value={field.state.value}
+              onValueChange={(v) => field.handleChange(v)}
+              onBlur={field.handleBlur}
+              errors={field.state.meta.errors.map((e) =>
+                typeof e === "string" ? e : (e?.message ?? "")
               )}
-            </div>
+            />
           )}
         </form.Field>
       </FieldGroup>

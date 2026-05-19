@@ -32,62 +32,8 @@ import { signOut, useSession } from "@/lib/auth-client";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-
-const CARGO_CONFIG: Record<string, { label: string; className: string }> = {
-  aluno: {
-    label: "Aluno",
-    className:
-      "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  },
-  professor: {
-    label: "Professor(a)",
-    className:
-      "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
-  },
-  coordenador: {
-    label: "Coordenador(a)",
-    className:
-      "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
-  },
-  direcao: {
-    label: "Direção",
-    className: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
-  },
-  administracao: {
-    label: "Administração",
-    className:
-      "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
-  },
-  secretaria: {
-    label: "Secretaria",
-    className:
-      "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
-  },
-  centro_academico: {
-    label: "C.A.",
-    className:
-      "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  },
-  biblioteca: {
-    label: "Biblioteca",
-    className:
-      "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
-  },
-  ti: {
-    label: "TI",
-    className:
-      "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
-  },
-};
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
+import { CARGO_CONFIG, DEFAULT_CARGO_CONFIG } from "@/features/auth/constants";
+import { getInitials } from "@/lib/utils";
 
 const NavUser = () => {
   const { isMobile } = useSidebar();
@@ -124,10 +70,7 @@ const NavUser = () => {
     cargo: session.user.cargo ?? "aluno",
   };
 
-  const cargoConfig = CARGO_CONFIG[user.cargo] ?? {
-    label: user.cargo,
-    className: "bg-secondary text-secondary-foreground",
-  };
+  const cargoConfig = CARGO_CONFIG[user.cargo] ?? DEFAULT_CARGO_CONFIG;
 
   return (
     <SidebarMenu>
