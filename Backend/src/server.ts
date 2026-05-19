@@ -21,7 +21,7 @@ app.setSerializerCompiler(serializerCompiler);
 app.setErrorHandler(errorHandler);
 
 app.register(fastifyCors, {
-  origin: "*", // URL do seu frontend
+  origin: env.FRONTEND_URL, // URL do seu frontend
   credentials: true, // obrigatório para cookies de sessão
   methods: ["GET", "POST", "PUT", "DELETE"],
 });
