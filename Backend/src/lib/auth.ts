@@ -20,6 +20,7 @@ const ptBR: Record<string, string> = {
 };
 
 export const auth = betterAuth({
+  secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,

@@ -5,6 +5,7 @@ const envSchema = z.object({
   POSTGRES_URL: z.string(),
   FRONTEND_URL: z.string().default("http://localhost:5173"),
   BACKEND_URL: z.string().default("http://localhost:3333"),
+  BETTER_AUTH_SECRET: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);
