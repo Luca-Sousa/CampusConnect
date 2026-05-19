@@ -33,6 +33,11 @@ export const auth = betterAuth({
     database: {
       generateId: "uuid",
     },
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+      httpOnly: true,
+    },
   },
   plugins: [
     i18n({
