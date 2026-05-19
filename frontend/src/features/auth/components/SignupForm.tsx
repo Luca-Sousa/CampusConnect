@@ -37,7 +37,6 @@ const CARGO_OPTIONS = [
 const alunoSchema = z.object({
   name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres."),
   email: z
-    .string()
     .email("E-mail inválido.")
     .refine((e) => e.toLowerCase().endsWith("@aluno.ifce.edu.br"), {
       message: "Use um e-mail @aluno.ifce.edu.br.",
@@ -48,7 +47,6 @@ const alunoSchema = z.object({
 const colaboradorSchema = z.object({
   name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres."),
   email: z
-    .string()
     .email("E-mail inválido.")
     .refine(
       (e) =>
@@ -208,7 +206,11 @@ function ColaboradorForm({ onSuccess }: { onSuccess: () => void }) {
                 value={field.state.value}
                 onValueChange={(v) => field.handleChange(v)}
               >
-                <SelectTrigger id={field.name} onBlur={field.handleBlur}>
+                <SelectTrigger
+                  id={field.name}
+                  onBlur={field.handleBlur}
+                  className="w-full"
+                >
                   <SelectValue placeholder="Selecione seu cargo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -246,7 +248,7 @@ export function SignupForm() {
   const handleSuccess = () => navigate("/feed");
 
   return (
-    <Card className="w-full max-w-sm shadow-2xl border">
+    <Card className="w-full max-w-sm lg:max-w-md shadow-2xl border">
       <CardHeader>
         <CardTitle className="text-2xl text-center">Criar Conta</CardTitle>
         <CardDescription className="text-center">

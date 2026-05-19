@@ -45,7 +45,7 @@ export function SigninForm() {
   });
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm lg:max-w-md">
       <CardHeader>
         <CardTitle className="text-2xl text-center">Login</CardTitle>
         <CardDescription className="text-center">
