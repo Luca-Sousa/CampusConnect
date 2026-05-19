@@ -69,7 +69,7 @@ export function ProfileDialog({
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             placeholder="Biografia"
-            className="border rounded-md px-3 py-2 min-h-[100px]"
+            className="border rounded-md px-3 py-2 min-h-25"
           />
           <div className="text-sm text-muted-foreground">
             Tipo de usuário: {user.role || "Aluno"}

@@ -28,6 +28,8 @@ import {
   LogOutIcon,
 } from "lucide-react";
 import { ProfileDialog } from "@/features/auth/components/ProfileDialog";
+import { signOut } from "@/lib/auth-client";
+import { useNavigate } from "react-router-dom";
 
 interface NavUserProps {
   user: {
@@ -39,6 +41,12 @@ interface NavUserProps {
 
 const NavUser = ({ user }: NavUserProps) => {
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/signin");
+  };
 
   return (
     <SidebarMenu>
@@ -94,7 +102,7 @@ const NavUser = ({ user }: NavUserProps) => {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut}>
               <LogOutIcon />
               Sair
             </DropdownMenuItem>

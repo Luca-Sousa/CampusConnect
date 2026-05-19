@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { signOut } from "@/lib/auth-client";
 import {
   HomeIcon,
   NewspaperIcon,
@@ -29,11 +30,16 @@ const navItems = [
 
 const navBottom = [
   { title: "Ajuda", url: "/help", icon: HelpCircleIcon },
-  { title: "Sair", url: "/login", icon: LogOutIcon },
 ];
 
 const SidebarLeft = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/signin");
+  };
 
   return (
     <Sidebar className="border-r" {...props}>
@@ -95,6 +101,16 @@ const SidebarLeft = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleSignOut}
+              tooltip="Sair"
+              className="gap-3 px-4 py-2.5 h-auto text-muted-foreground hover:text-foreground"
+            >
+              <LogOutIcon className="h-5 w-5 shrink-0" />
+              <span className="text-sm font-medium">Sair</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
