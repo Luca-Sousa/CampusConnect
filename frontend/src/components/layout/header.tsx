@@ -7,9 +7,12 @@ import { SidebarTrigger, useSidebar } from "../ui/sidebar";
 import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Kbd, KbdGroup } from "../ui/kbd";
+import { useSession } from "@/lib/auth-client";
 
 const Header = () => {
   const { open } = useSidebar();
+  const { data: session } = useSession();
+  const firstName = session?.user.name.split(" ")[0] ?? "";
 
   return (
     <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b bg-sidebar px-6 gap-6">
@@ -44,7 +47,7 @@ const Header = () => {
         {/* Welcome */}
         <div className="min-w-0 shrink-0">
           <h2 className="text-lg font-bold leading-tight text-foreground">
-            Bem-vindo, Lucas.
+            Bem-vindo, {firstName}.
           </h2>
           <p className="text-xs text-muted-foreground capitalize">
             {todayDate}
@@ -67,13 +70,7 @@ const Header = () => {
           <BellIcon className="size-5 text-muted-foreground" />
         </Button>
 
-        <NavUser
-          user={{
-            name: "Lucas Almeida",
-            email: "lucas.almeida@example.com",
-            avatar: "https://github.com/shadcn.png",
-          }}
-        />
+        <NavUser />
       </div>
     </header>
   );
