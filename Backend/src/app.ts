@@ -10,8 +10,8 @@ import fastifyCors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import { env } from "./env";
-import { auth } from "./lib/auth";
 import { authOpenApiPaths } from "./lib/auth-openapi";
+import { authHandler } from "./lib/auth-handler";
 
 export function buildApp() {
   const app = fastify().withTypeProvider<ZodTypeProvider>();
@@ -48,37 +48,7 @@ export function buildApp() {
     routePrefix: "/docs",
   });
 
-  app.all("/api/auth/*", async (request, reply) => {
-    const host = request.headers.host ?? "localhost";
-    // Em produção (Vercel/proxy) usa x-forwarded-proto para detectar HTTPS corretamente
-    const protocol =
-      (request.headers["x-forwarded-proto"] as string) ?? request.protocol;
-    const url = `${protocol}://${host}${request.url}`;
-
-    const origin =
-      (request.headers.origin as string) ?? `${protocol}://${host}`;
-    const headers: Record<string, string> = {
-      "content-type":
-        (request.headers["content-type"] as string) ?? "application/json",
-      origin,
-    };
-    if (request.headers.cookie) headers["cookie"] = request.headers.cookie;
-    if (request.headers.authorization)
-      headers["authorization"] = request.headers.authorization as string;
-
-    const isBodyless = ["GET", "HEAD"].includes(request.method);
-    const body =
-      !isBodyless && request.body != null
-        ? JSON.stringify(request.body)
-        : undefined;
-
-    const webRequest = new Request(url, { method: request.method, headers, body });
-    const response = await auth.handler(webRequest);
-
-    reply.status(response.status);
-    response.headers.forEach((value, key) => reply.header(key, value));
-    return reply.send(Buffer.from(await response.arrayBuffer()));
-  });
+  app.all("/api/auth/*", authHandler);
 
   return app;
 }
