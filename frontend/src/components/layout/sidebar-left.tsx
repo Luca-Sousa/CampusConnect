@@ -22,15 +22,13 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
-  { title: "Feed", url: "/", icon: HomeIcon },
+  { title: "Feed", url: "/feed", icon: HomeIcon },
   { title: "Eventos", url: "/events", icon: CalendarDaysIcon },
   { title: "Notícias", url: "/news", icon: NewspaperIcon },
   { title: "Grupos", url: "/groups", icon: UserRoundIcon },
 ];
 
-const navBottom = [
-  { title: "Ajuda", url: "/help", icon: HelpCircleIcon },
-];
+const navBottom = [{ title: "Ajuda", url: "/help", icon: HelpCircleIcon }];
 
 const SidebarLeft = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const location = useLocation();
@@ -45,7 +43,7 @@ const SidebarLeft = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     <Sidebar className="border-r" {...props}>
       {/* Logo */}
       <SidebarHeader className="h-16 border-b border-sidebar-border flex justify-center px-4">
-        <Link to="/" className="flex items-center gap-3 py-2">
+        <div className="flex items-center gap-3 py-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-orange-400 to-rose-500 shadow-sm shrink-0">
             <span className="text-white font-bold text-sm tracking-tight">
               CC
@@ -54,7 +52,7 @@ const SidebarLeft = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
           <span className="font-semibold text-foreground text-base tracking-tight">
             CampusConnect
           </span>
-        </Link>
+        </div>
       </SidebarHeader>
 
       {/* Nav principal */}
