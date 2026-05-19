@@ -1,5 +1,7 @@
 ﻿import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,28 +10,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FieldGroup } from "@/components/ui/field";
 import { signUp } from "@/lib/auth-client";
+import { FormInput } from "./FormInput";
+
+const signupSchema = z.object({
+  name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres."),
+  email: z.email("E-mail inválido."),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres."),
+});
 
 export function SignupForm() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    const { error } = await signUp.email({ name, email, password });
-    setLoading(false);
-    if (error) {
-      setError(error.message ?? "Erro ao criar conta.");
-      return;
-    }
-    navigate("/feed");
-  };
+  const form = useForm({
+    defaultValues: { name: "", email: "", password: "" },
+    validators: { onSubmit: signupSchema },
+    onSubmit: async ({ value }) => {
+      setServerError(null);
+      const { error } = await signUp.email(value);
+      if (error) {
+        setServerError(error.message ?? "Erro ao criar conta.");
+        return;
+      }
+      navigate("/feed");
+    },
+  });
 
   return (
     <Card className="w-full max-w-sm shadow-2xl border">
@@ -40,55 +47,65 @@ export function SignupForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {error && (
-            <p className="text-sm text-destructive text-center">{error}</p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="flex flex-col gap-4"
+        >
+          {serverError && (
+            <p className="text-sm text-destructive text-center">
+              {serverError}
+            </p>
           )}
-          <div className="flex flex-col gap-1">
-            <label htmlFor="name" className="text-sm font-medium">
-              Nome
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Seu nome"
-              required
-              className="border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-            />
+          <FieldGroup>
+            <form.Field name="name">
+              {(field) => (
+                <FormInput field={field} label="Nome" placeholder="Seu nome" />
+              )}
+            </form.Field>
+            <form.Field name="email">
+              {(field) => (
+                <FormInput
+                  field={field}
+                  label="E-mail institucional"
+                  type="email"
+                  placeholder="seunome@uni.br"
+                />
+              )}
+            </form.Field>
+            <form.Field name="password">
+              {(field) => (
+                <FormInput
+                  field={field}
+                  label="Senha"
+                  type="password"
+                  placeholder="••••••••"
+                />
+              )}
+            </form.Field>
+          </FieldGroup>
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
+              <Button
+                type="submit"
+                className="w-full mt-2"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Criando conta..." : "Criar conta"}
+              </Button>
+            )}
+          </form.Subscribe>
+
+          <div className="flex items-center justify-center">
+            <p className="text-sm text-center text-muted-foreground">
+              Já possui conta?
+            </p>
+            <Link to="/signin">
+              <Button variant="link">Fazer login</Button>
+            </Link>
           </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium">
-              E-mail institucional
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seunome@uni.br"
-              required
-              className="border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm font-medium">
-              Senha
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              className="border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-          <Button type="submit" className="w-full mt-2" disabled={loading}>
-            {loading ? "Criando conta..." : "Criar conta"}
-          </Button>
         </form>
       </CardContent>
     </Card>
