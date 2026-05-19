@@ -27,7 +27,7 @@ export function CargoSelect({
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>Cargo</Label>
       <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger id={id} onBlur={onBlur}>
+        <SelectTrigger id={id} onBlur={onBlur} className="w-full">
           <SelectValue placeholder="Selecione seu cargo" />
         </SelectTrigger>
         <SelectContent>
