@@ -8,6 +8,20 @@
       "when": 1779200107540,
       "tag": "0000_lean_ultron",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779221293879,
+      "tag": "0001_whole_phantom_reporter",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779221527187,
+      "tag": "0002_public_mongoose",
+      "breakpoints": true
     }
   ]
 }

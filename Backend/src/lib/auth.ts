@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, APIError } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { i18n } from "@better-auth/i18n";
 import { db } from "../drizzle/client";
@@ -27,6 +27,40 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+  },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: true,
+        defaultValue: "aluno",
+      },
+      cargo: {
+        type: "string",
+        required: false,
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          const email = user.email.toLowerCase();
+          if (
+            !email.endsWith("@aluno.ifce.edu.br") &&
+            !email.endsWith("@ifce.edu.br")
+          ) {
+            throw new APIError("BAD_REQUEST", {
+              message:
+                "Use seu e-mail institucional do IFCE (@aluno.ifce.edu.br ou @ifce.edu.br).",
+            });
+          }
+          if (email.endsWith("@aluno.ifce.edu.br")) {
+            return { data: { ...user, role: "aluno", cargo: "aluno" } };
+          }
+        },
+      },
+    },
   },
   trustedOrigins: [env.FRONTEND_URL, env.BACKEND_URL],
   advanced: {

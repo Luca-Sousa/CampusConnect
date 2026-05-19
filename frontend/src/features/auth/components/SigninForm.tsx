@@ -15,7 +15,14 @@ import { signIn } from "@/lib/auth-client";
 import { FormInput } from "./FormInput";
 
 const signinSchema = z.object({
-  email: z.email("E-mail inválido."),
+  email: z
+    .email("E-mail inválido.")
+    .refine(
+      (e) =>
+        e.toLowerCase().endsWith("@aluno.ifce.edu.br") ||
+        e.toLowerCase().endsWith("@ifce.edu.br"),
+      { message: "Use seu e-mail institucional do IFCE." },
+    ),
   password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres."),
 });
 
@@ -65,7 +72,7 @@ export function SigninForm() {
                   field={field}
                   label="E-mail institucional"
                   type="email"
-                  placeholder="seunome@uni.br"
+                  placeholder="seuemail@ifce.edu.br"
                 />
               )}
             </form.Field>
