@@ -24,7 +24,7 @@ export default function CreatePostDialog() {
         </DialogHeader>
 
         <textarea
-            className="w-full border rounded-md p-3 min-h-[120px]"
+            className="w-full border rounded-md p-3 min-h-30"
             placeholder="Digite sua publicação..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
