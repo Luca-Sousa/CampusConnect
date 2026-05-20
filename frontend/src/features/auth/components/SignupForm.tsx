@@ -16,7 +16,7 @@ import { alunoSchema, colaboradorSchema } from "../schemas";
 import { CargoSelect } from "./CargoSelect";
 import { FormInput } from "./FormInput";
 
-function AlunoForm({ onSuccess }: { onSuccess: () => void }) {
+function AlunoForm({ onSuccess }: { onSuccess: (email: string) => void }) {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
@@ -35,7 +35,7 @@ function AlunoForm({ onSuccess }: { onSuccess: () => void }) {
         setServerError(error.message ?? "Erro ao criar conta.");
         return;
       }
-      onSuccess();
+      onSuccess(value.email);
     },
   });
 
@@ -92,7 +92,7 @@ function AlunoForm({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
-function ColaboradorForm({ onSuccess }: { onSuccess: () => void }) {
+function ColaboradorForm({ onSuccess }: { onSuccess: (email: string) => void }) {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
@@ -111,7 +111,7 @@ function ColaboradorForm({ onSuccess }: { onSuccess: () => void }) {
         setServerError(error.message ?? "Erro ao criar conta.");
         return;
       }
-      onSuccess();
+      onSuccess(value.email);
     },
   });
 
@@ -183,7 +183,8 @@ function ColaboradorForm({ onSuccess }: { onSuccess: () => void }) {
 
 export function SignupForm() {
   const navigate = useNavigate();
-  const handleSuccess = () => navigate("/feed");
+  const handleSuccess = (email: string) =>
+    navigate(`/verify-email?email=${encodeURIComponent(email)}`);
 
   return (
     <Card className="w-full max-w-sm lg:max-w-md shadow-2xl border">

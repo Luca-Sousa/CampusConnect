@@ -8,6 +8,15 @@ export function ProtectedRoute() {
 
   if (!session) return <Navigate to="/signin" replace />;
 
+  if (!session.user.emailVerified) {
+    return (
+      <Navigate
+        to={`/verify-email?email=${encodeURIComponent(session.user.email)}`}
+        replace
+      />
+    );
+  }
+
   return <Outlet />;
 }
 
@@ -15,6 +24,15 @@ export function PublicOnlyRoute() {
   const { data: session, isPending } = useSession();
 
   if (isPending) return null;
+
+  if (session && !session.user.emailVerified) {
+    return (
+      <Navigate
+        to={`/verify-email?email=${encodeURIComponent(session.user.email)}`}
+        replace
+      />
+    );
+  }
 
   if (session) return <Navigate to="/feed" replace />;
 

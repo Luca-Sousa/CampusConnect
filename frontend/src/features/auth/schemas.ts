@@ -33,6 +33,11 @@ export const signinSchema = z.object({
   password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres."),
 });
 
+export const otpSchema = z.object({
+  otp: z.string().length(6, "O código deve ter 6 dígitos."),
+});
+
 export type AlunoFormValues = z.infer<typeof alunoSchema>;
 export type ColaboradorFormValues = z.infer<typeof colaboradorSchema>;
 export type SigninFormValues = z.infer<typeof signinSchema>;
+export type OTPFormValues = z.infer<typeof otpSchema>;

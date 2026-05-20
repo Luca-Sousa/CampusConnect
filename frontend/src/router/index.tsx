@@ -11,9 +11,13 @@ import GroupsPage from "@/pages/groups";
 import FeedPage from "@/pages/feed";
 import EventsPage from "@/pages/events";
 import SignupPage from "@/pages/signup";
+import VerifyEmailPage from "@/pages/verify-email";
 
 const routes: RouteObject[] = [
   { index: true, element: <Navigate to="/feed" replace /> },
+
+  // Rota pública — acessível por todos, independente de autenticação
+  { path: "verify-email", element: <VerifyEmailPage /> },
 
   {
     path: "/",

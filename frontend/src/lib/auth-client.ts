@@ -1,6 +1,9 @@
 import { env } from "@/env";
 import { createAuthClient } from "better-auth/react";
-import { inferAdditionalFields } from "better-auth/client/plugins";
+import {
+  emailOTPClient,
+  inferAdditionalFields,
+} from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
   baseURL: env.API_URL,
@@ -11,7 +14,9 @@ export const authClient = createAuthClient({
         cargo: { type: "string", required: false },
       },
     }),
+    emailOTPClient(),
   ],
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;
+export const { emailOtp } = authClient;
