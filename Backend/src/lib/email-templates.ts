@@ -3,6 +3,30 @@
  */
 
 export function buildOtpEmailHtml(otp: string): string {
+  return buildTemplate({
+    title: "Verificação de e-mail",
+    body: "Use o código abaixo para verificar seu endereço de e-mail no CampusConnect.",
+    otp,
+  });
+}
+
+export function buildResetPasswordOtpEmailHtml(otp: string): string {
+  return buildTemplate({
+    title: "Redefinição de senha",
+    body: "Use o código abaixo para redefinir sua senha no CampusConnect.",
+    otp,
+  });
+}
+
+function buildTemplate({
+  title,
+  body,
+  otp,
+}: {
+  title: string;
+  body: string;
+  otp: string;
+}): string {
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -13,9 +37,9 @@ export function buildOtpEmailHtml(otp: string): string {
 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background: #f9fafb;">
   <div style="background: white; border-radius: 12px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
     <h1 style="color: #16a34a; font-size: 24px; margin: 0 0 8px;">CampusConnect</h1>
-    <h2 style="color: #1f2937; font-size: 20px; font-weight: 600; margin: 0 0 16px;">Verificação de e-mail</h2>
+      <h2 style="color: #1f2937; font-size: 20px; font-weight: 600; margin: 0 0 16px;">${title}</h2>
     <p style="color: #6b7280; margin: 0 0 24px;">
-      Use o código abaixo para verificar seu endereço de e-mail no CampusConnect.
+      ${body}
     </p>
     <div style="font-size: 42px; font-weight: 700; letter-spacing: 14px; text-align: center; padding: 24px; background: #f3f4f6; border-radius: 10px; margin: 0 0 24px; color: #111827; font-family: monospace;">
       ${otp}
