@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { emailOtp } from "@/lib/auth-client";
+import { showError, showSuccess } from "@/lib/toast";
 
 interface ResetPasswordFormProps {
   email: string;
@@ -27,7 +28,6 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [serverError, setServerError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
     otp?: string;
     password?: string;
@@ -55,29 +55,28 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
     return errors;
   }, [otp, password, confirmPassword]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errors = validate();
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
     setIsSubmitting(true);
-    setServerError(null);
 
     const { error } = await emailOtp.resetPassword({ email, otp, password });
 
     if (error) {
-      setServerError(error.message ?? "Erro ao redefinir senha.");
+      showError(error.message ?? "Erro ao redefinir senha.");
       setIsSubmitting(false);
       return;
     }
 
+    showSuccess("Senha redefinida com sucesso!", 10000);
     navigate("/signin");
   };
 
   const handleResend = async () => {
     setIsResending(true);
-    setServerError(null);
 
     const { error } = await emailOtp.sendVerificationOtp({
       email,
@@ -85,7 +84,7 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
     });
 
     if (error) {
-      setServerError(error.message ?? "Erro ao reenviar código.");
+      showError(error.message ?? "Erro ao reenviar código.");
     } else {
       setResendCooldown(60);
     }
@@ -105,12 +104,6 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {serverError && (
-            <p className="text-sm text-destructive text-center" role="alert">
-              {serverError}
-            </p>
-          )}
-
           {/* OTP */}
           <div className="flex flex-col items-center gap-2">
             <Label>Código de verificação</Label>

@@ -1,5 +1,4 @@
-﻿import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+﻿import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,18 +11,16 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { signUp } from "@/lib/auth-client";
+import { showError } from "@/lib/toast";
 import { alunoSchema, colaboradorSchema } from "../schemas";
 import { CargoSelect } from "./CargoSelect";
 import { FormInput } from "./FormInput";
 
 function AlunoForm({ onSuccess }: { onSuccess: (email: string) => void }) {
-  const [serverError, setServerError] = useState<string | null>(null);
-
   const form = useForm({
     defaultValues: { name: "", email: "", password: "" },
     validators: { onSubmit: alunoSchema },
     onSubmit: async ({ value }) => {
-      setServerError(null);
       const { error } = await signUp.email({
         name: value.name,
         email: value.email,
@@ -32,7 +29,7 @@ function AlunoForm({ onSuccess }: { onSuccess: (email: string) => void }) {
         cargo: "aluno",
       });
       if (error) {
-        setServerError(error.message ?? "Erro ao criar conta.");
+        showError(error.message ?? "Erro ao criar conta.");
         return;
       }
       onSuccess(value.email);
@@ -47,9 +44,6 @@ function AlunoForm({ onSuccess }: { onSuccess: (email: string) => void }) {
       }}
       className="flex flex-col gap-4"
     >
-      {serverError && (
-        <p className="text-sm text-destructive text-center">{serverError}</p>
-      )}
       <FieldGroup>
         <form.Field name="name">
           {(field) => (
@@ -93,13 +87,10 @@ function AlunoForm({ onSuccess }: { onSuccess: (email: string) => void }) {
 }
 
 function ColaboradorForm({ onSuccess }: { onSuccess: (email: string) => void }) {
-  const [serverError, setServerError] = useState<string | null>(null);
-
   const form = useForm({
     defaultValues: { name: "", email: "", password: "", cargo: "" },
     validators: { onSubmit: colaboradorSchema },
     onSubmit: async ({ value }) => {
-      setServerError(null);
       const { error } = await signUp.email({
         name: value.name,
         email: value.email,
@@ -108,7 +99,7 @@ function ColaboradorForm({ onSuccess }: { onSuccess: (email: string) => void }) 
         cargo: value.cargo,
       });
       if (error) {
-        setServerError(error.message ?? "Erro ao criar conta.");
+        showError(error.message ?? "Erro ao criar conta.");
         return;
       }
       onSuccess(value.email);
@@ -123,9 +114,6 @@ function ColaboradorForm({ onSuccess }: { onSuccess: (email: string) => void }) 
       }}
       className="flex flex-col gap-4"
     >
-      {serverError && (
-        <p className="text-sm text-destructive text-center">{serverError}</p>
-      )}
       <FieldGroup>
         <form.Field name="name">
           {(field) => (

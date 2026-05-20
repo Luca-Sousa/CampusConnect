@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
@@ -10,24 +9,30 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
+import { Separator } from "@/components/ui/separator";
 import { signIn } from "@/lib/auth-client";
+import { env } from "@/env";
+import { showError } from "@/lib/toast";
 import { signinSchema } from "../schemas";
 import { FormInput } from "./FormInput";
 
 export function SigninForm() {
   const navigate = useNavigate();
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: { email: "", password: "" },
     validators: { onSubmit: signinSchema },
     onSubmit: async ({ value }) => {
-      setServerError(null);
       const { error } = await signIn.email(value);
       if (error) {
-        setServerError(error.message ?? "Erro ao fazer login.");
+        showError(error.message ?? "Erro ao fazer login.");
         return;
       }
+      // Notificação de novo acesso — fire-and-forget
+      fetch(`${env.API_URL}/api/notifications/login`, {
+        method: "POST",
+        credentials: "include",
+      }).catch(() => {});
       navigate("/feed");
     },
   });
@@ -48,11 +53,6 @@ export function SigninForm() {
           }}
           className="flex flex-col gap-4"
         >
-          {serverError && (
-            <p className="text-sm text-destructive text-center">
-              {serverError}
-            </p>
-          )}
           <FieldGroup>
             <form.Field name="email">
               {(field) => (
@@ -96,6 +96,16 @@ export function SigninForm() {
               </Button>
             )}
           </form.Subscribe>
+
+          <div className="relative flex items-center gap-3 my-1">
+            <Separator className="flex-1" />
+            <span className="text-xs text-muted-foreground">ou</span>
+            <Separator className="flex-1" />
+          </div>
+
+          <Button variant="outline" className="w-full" asChild>
+            <Link to="/signin-otp">Entrar com código de acesso</Link>
+          </Button>
 
           <div className="flex items-center justify-center">
             <p className="text-sm text-center text-muted-foreground">

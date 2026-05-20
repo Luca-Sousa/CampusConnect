@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
@@ -11,20 +10,22 @@ import {
 } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 import { emailOtp } from "@/lib/auth-client";
+import { showError } from "@/lib/toast";
 import { forgotPasswordSchema } from "../schemas";
 import { FormInput } from "./FormInput";
 
 export function ForgotPasswordForm() {
   const navigate = useNavigate();
-  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: { email: "" },
     validators: { onSubmit: forgotPasswordSchema },
     onSubmit: async ({ value }) => {
-      setServerError(null);
-      // Ignoramos erros para não revelar se o e-mail existe
-      await emailOtp.requestPasswordReset({ email: value.email }).catch(() => {});
+      const { error } = await emailOtp.requestPasswordReset({ email: value.email });
+      if (error) {
+        showError(error.message ?? "Erro ao enviar código.");
+        return;
+      }
       navigate(`/reset-password?email=${encodeURIComponent(value.email)}`);
     },
   });
@@ -46,12 +47,6 @@ export function ForgotPasswordForm() {
           }}
           className="flex flex-col gap-4"
         >
-          {serverError && (
-            <p className="text-sm text-destructive text-center" role="alert">
-              {serverError}
-            </p>
-          )}
-
           <FieldGroup>
             <form.Field name="email">
               {(field) => (

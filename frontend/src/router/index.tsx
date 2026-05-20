@@ -14,6 +14,7 @@ import SignupPage from "@/pages/signup";
 import VerifyEmailPage from "@/pages/verify-email";
 import ForgotPasswordPage from "@/pages/forgot-password";
 import ResetPasswordPage from "@/pages/reset-password";
+import SigninOtpPage from "@/pages/signin-otp";
 
 const routes: RouteObject[] = [
   { index: true, element: <Navigate to="/feed" replace /> },
@@ -22,6 +23,7 @@ const routes: RouteObject[] = [
   { path: "verify-email", element: <VerifyEmailPage /> },
   { path: "forgot-password", element: <ForgotPasswordPage /> },
   { path: "reset-password", element: <ResetPasswordPage /> },
+  { path: "signin-otp", element: <SigninOtpPage /> },
 
   {
     path: "/",

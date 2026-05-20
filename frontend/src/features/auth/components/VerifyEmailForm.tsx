@@ -14,6 +14,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { emailOtp } from "@/lib/auth-client";
+import { showError } from "@/lib/toast";
 
 interface VerifyEmailFormProps {
   email: string;
@@ -21,7 +22,6 @@ interface VerifyEmailFormProps {
 
 export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
   const [otp, setOtp] = useState("");
-  const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(60);
   const [isResending, setIsResending] = useState(false);
@@ -39,12 +39,11 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
       if (code.length !== 6 || isSubmitting) return;
 
       setIsSubmitting(true);
-      setServerError(null);
 
       const { error } = await emailOtp.verifyEmail({ email, otp: code });
 
       if (error) {
-        setServerError(error.message ?? "Código inválido ou expirado.");
+        showError(error.message ?? "Código inválido ou expirado.");
         setIsSubmitting(false);
         return;
       }
@@ -64,7 +63,6 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
 
   const handleResend = async () => {
     setIsResending(true);
-    setServerError(null);
 
     const { error } = await emailOtp.sendVerificationOtp({
       email,
@@ -72,7 +70,7 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
     });
 
     if (error) {
-      setServerError(error.message ?? "Erro ao reenviar código.");
+      showError(error.message ?? "Erro ao reenviar código.");
     } else {
       setResendCooldown(60);
     }
@@ -90,12 +88,6 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-6">
-        {serverError && (
-          <p className="text-sm text-destructive text-center" role="alert">
-            {serverError}
-          </p>
-        )}
-
         <InputOTP
           maxLength={6}
           value={otp}
