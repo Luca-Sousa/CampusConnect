@@ -8,7 +8,7 @@ import { ptBR } from "./auth-i18n";
 import { authDatabaseHooks } from "./auth-hooks";
 import { emailOTP } from "better-auth/plugins";
 import { sendEmail } from "./email";
-import { buildOtpEmailHtml, buildResetPasswordOtpEmailHtml } from "./email-templates";
+import { buildOtpEmailHtml, buildResetPasswordOtpEmailHtml, buildSignInOtpEmailHtml } from "./email-templates";
 
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
@@ -64,6 +64,12 @@ export const auth = betterAuth({
             to: email,
             subject: "Redefinição de senha - CampusConnect",
             html: buildResetPasswordOtpEmailHtml(otp),
+          });
+        } else if (type === "sign-in") {
+          await sendEmail({
+            to: email,
+            subject: "Seu código de acesso - CampusConnect",
+            html: buildSignInOtpEmailHtml(otp),
           });
         }
       },
