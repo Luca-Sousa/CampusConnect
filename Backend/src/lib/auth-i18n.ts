@@ -12,6 +12,9 @@ export const ptBR: Record<string, string> = {
   USER_NOT_FOUND: "Usuário não encontrado.",
   FAILED_TO_CREATE_USER: "Não foi possível criar o usuário.",
   FAILED_TO_CREATE_SESSION: "Não foi possível criar a sessão.",
-  EMAIL_NOT_VERIFIED: "E-mail não verificado.",
+  EMAIL_NOT_VERIFIED: "E-mail não verificado. Verifique seu e-mail para continuar.",
   SESSION_EXPIRED: "Sessão expirada. Faça login novamente.",
+  OTP_EXPIRED: "O código expirou. Solicite um novo.",
+  INVALID_OTP: "Código inválido.",
+  TOO_MANY_ATTEMPTS: "Muitas tentativas. Aguarde e solicite um novo código.",
 };

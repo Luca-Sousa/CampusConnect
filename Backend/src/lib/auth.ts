@@ -6,6 +6,9 @@ import * as schema from "../drizzle/schema/auth";
 import { env } from "../env";
 import { ptBR } from "./auth-i18n";
 import { authDatabaseHooks } from "./auth-hooks";
+import { emailOTP } from "better-auth/plugins";
+import { sendEmail } from "./email";
+import { buildOtpEmailHtml } from "./email-templates";
 
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
@@ -47,6 +50,20 @@ export const auth = betterAuth({
       detection: ["callback"],
       getLocale: () => "pt",
       translations: { pt: ptBR },
+    }),
+    emailOTP({
+      async sendVerificationOTP({ email, otp, type }) {
+        if (type === "email-verification") {
+          await sendEmail({
+            to: email,
+            subject: "Código de verificação - CampusConnect",
+            html: buildOtpEmailHtml(otp),
+          });
+        }
+      },
+      sendVerificationOnSignUp: true,
+      expiresIn: 300,
+      otpLength: 6,
     }),
   ],
 });
