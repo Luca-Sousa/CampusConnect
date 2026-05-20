@@ -60,10 +60,11 @@ export function SigninForm() {
                   field={field}
                   label="E-mail institucional"
                   type="email"
-                  placeholder="seuemail@ifce.edu.br"
+                  placeholder="@ifce.edu.br"
                 />
               )}
             </form.Field>
+
             <form.Field name="password">
               {(field) => (
                 <FormInput
@@ -71,6 +72,14 @@ export function SigninForm() {
                   label="Senha"
                   type="password"
                   placeholder="••••••••"
+                  subLabel={
+                    <Link
+                      to="/forgot-password"
+                      className="text-sm text-muted-foreground underline-offset-2 hover:underline"
+                    >
+                      Esqueceu a senha?
+                    </Link>
+                  }
                 />
               )}
             </form.Field>

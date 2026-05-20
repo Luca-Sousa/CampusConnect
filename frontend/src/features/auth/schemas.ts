@@ -41,3 +41,25 @@ export type AlunoFormValues = z.infer<typeof alunoSchema>;
 export type ColaboradorFormValues = z.infer<typeof colaboradorSchema>;
 export type SigninFormValues = z.infer<typeof signinSchema>;
 export type OTPFormValues = z.infer<typeof otpSchema>;
+
+export const forgotPasswordSchema = z.object({
+  email: z
+    .email("E-mail inválido.")
+    .refine((e) => isAlunoEmail(e) || isIfceEmail(e), {
+      message: "Use seu e-mail institucional do IFCE.",
+    }),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    otp: z.string().length(6, "O código deve ter 6 dígitos."),
+    password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres."),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: "As senhas não coincidem.",
+    path: ["confirmPassword"],
+  });
+
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;

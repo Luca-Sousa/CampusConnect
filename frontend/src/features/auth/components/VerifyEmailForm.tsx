@@ -81,7 +81,7 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm lg:max-w-md">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Verificar e-mail</CardTitle>
         <CardDescription>

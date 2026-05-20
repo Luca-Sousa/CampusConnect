@@ -7,6 +7,7 @@ interface FormInputProps {
   label: string
   type?: string
   placeholder?: string
+  subLabel?: React.ReactNode
 }
 
 function toErrors(errors: AnyFieldApi["state"]["meta"]["errors"]) {
@@ -15,12 +16,15 @@ function toErrors(errors: AnyFieldApi["state"]["meta"]["errors"]) {
   }))
 }
 
-export function FormInput({ field, label, type = "text", placeholder }: FormInputProps) {
+export function FormInput({ field, label, type = "text", placeholder, subLabel  }: FormInputProps) {
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
 
   return (
     <Field data-invalid={isInvalid}>
-      <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+      <div className="flex items-center justify-between">
+        <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+        {subLabel}
+      </div>
       <Input
         id={field.name}
         name={field.name}
