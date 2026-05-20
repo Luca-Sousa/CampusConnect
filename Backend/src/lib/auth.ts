@@ -8,7 +8,32 @@ import { ptBR } from "./auth-i18n";
 import { authDatabaseHooks } from "./auth-hooks";
 import { emailOTP } from "better-auth/plugins";
 import { sendEmail } from "./email";
-import { buildOtpEmailHtml, buildResetPasswordOtpEmailHtml, buildSignInOtpEmailHtml } from "./email-templates";
+import {
+  buildOtpEmailHtml,
+  buildResetPasswordOtpEmailHtml,
+  buildSignInOtpEmailHtml,
+} from "./email-templates";
+
+type OtpType = "email-verification" | "forget-password" | "sign-in" | "change-email";
+
+const OTP_EMAIL_CONFIG: Record<OtpType, { subject: string; buildHtml: (otp: string) => string }> = {
+  "email-verification": {
+    subject: "Código de verificação - CampusConnect",
+    buildHtml: buildOtpEmailHtml,
+  },
+  "forget-password": {
+    subject: "Redefinição de senha - CampusConnect",
+    buildHtml: buildResetPasswordOtpEmailHtml,
+  },
+  "sign-in": {
+    subject: "Seu código de acesso - CampusConnect",
+    buildHtml: buildSignInOtpEmailHtml,
+  },
+  "change-email": {
+    subject: "Código de alteração de e-mail - CampusConnect",
+    buildHtml: buildOtpEmailHtml,
+  },
+};
 
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
@@ -53,25 +78,13 @@ export const auth = betterAuth({
     }),
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
-        if (type === "email-verification") {
-          await sendEmail({
-            to: email,
-            subject: "Código de verificação - CampusConnect",
-            html: buildOtpEmailHtml(otp),
-          });
-        } else if (type === "forget-password") {
-          await sendEmail({
-            to: email,
-            subject: "Redefinição de senha - CampusConnect",
-            html: buildResetPasswordOtpEmailHtml(otp),
-          });
-        } else if (type === "sign-in") {
-          await sendEmail({
-            to: email,
-            subject: "Seu código de acesso - CampusConnect",
-            html: buildSignInOtpEmailHtml(otp),
-          });
-        }
+        const config = OTP_EMAIL_CONFIG[type as OtpType];
+        if (!config) return;
+        await sendEmail({
+          to: email,
+          subject: config.subject,
+          html: config.buildHtml(otp),
+        });
       },
       sendVerificationOnSignUp: true,
       expiresIn: 300,

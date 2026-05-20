@@ -7,6 +7,23 @@ export interface SendEmailParams {
   html: string;
 }
 
+let _transporter: nodemailer.Transporter | null = null;
+
+function getTransporter(): nodemailer.Transporter {
+  if (!_transporter) {
+    _transporter = nodemailer.createTransport({
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: env.SMTP_PORT === 465,
+      auth: {
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS,
+      },
+    });
+  }
+  return _transporter;
+}
+
 /**
  * Envia um e-mail via SMTP.
  * Se as variáveis SMTP não estiverem configuradas, loga no console (modo dev).
@@ -17,18 +34,8 @@ export async function sendEmail({ to, subject, html }: SendEmailParams): Promise
     return;
   }
 
-  const transporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_PORT === 465,
-    auth: {
-      user: env.SMTP_USER,
-      pass: env.SMTP_PASS,
-    },
-  });
-
   try {
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: env.SMTP_FROM ?? env.SMTP_USER,
       to,
       subject,
