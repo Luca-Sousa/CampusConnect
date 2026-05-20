@@ -50,6 +50,14 @@ export const forgotPasswordSchema = z.object({
     }),
 });
 
+export const signinOtpSchema = z.object({
+  email: z
+    .email("E-mail inválido.")
+    .refine((e) => isAlunoEmail(e) || isIfceEmail(e), {
+      message: "Use seu e-mail institucional do IFCE.",
+    }),
+});
+
 export const resetPasswordSchema = z
   .object({
     otp: z.string().length(6, "O código deve ter 6 dígitos."),
@@ -62,4 +70,5 @@ export const resetPasswordSchema = z
   });
 
 export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+export type SigninOtpFormValues = z.infer<typeof signinOtpSchema>;
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;

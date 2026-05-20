@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -13,7 +14,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { emailOtp } from "@/lib/auth-client";
+import { emailOtp, signOut } from "@/lib/auth-client";
 import { showError, showSuccess } from "@/lib/toast";
 import { useResendCooldown } from "@/hooks/use-resend-cooldown";
 
@@ -22,6 +23,7 @@ interface VerifyEmailFormProps {
 }
 
 export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
+  const navigate = useNavigate();
   const [otp, setOtp] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -122,6 +124,20 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
             {resendCooldown > 0
               ? `Reenviar em ${resendCooldown}s`
               : "Reenviar código"}
+          </Button>
+        </div>
+
+        <div className="flex justify-center">
+          <Button
+            variant="link"
+            size="sm"
+            className="h-auto p-0 text-sm"
+            onClick={async () => {
+              await signOut();
+              navigate("/signup");
+            }}
+          >
+            Voltar para o cadastro
           </Button>
         </div>
       </CardContent>

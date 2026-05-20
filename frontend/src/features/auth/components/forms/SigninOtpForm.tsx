@@ -20,6 +20,7 @@ import { emailOtp, signIn } from "@/lib/auth-client";
 import { env } from "@/env";
 import { showError, showSuccess } from "@/lib/toast";
 import { useResendCooldown } from "@/hooks/use-resend-cooldown";
+import { signinOtpSchema } from "@/features/auth/schemas";
 
 type Step = "email" | "otp";
 
@@ -35,8 +36,8 @@ export function SigninOtpForm() {
   const { cooldown: resendCooldown, startCooldown } = useResendCooldown(0);
 
   const validateEmail = (value: string): string => {
-    if (!value) return "Informe o e-mail institucional.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "E-mail inválido.";
+    const result = signinOtpSchema.shape.email.safeParse(value);
+    if (!result.success) return result.error.issues[0]?.message ?? "E-mail inválido.";
     return "";
   };
 
