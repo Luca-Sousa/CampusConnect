@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { emailOtp } from "@/lib/auth-client";
 import { showError, showSuccess } from "@/lib/toast";
+import { useResendCooldown } from "@/hooks/use-resend-cooldown";
 
 interface ResetPasswordFormProps {
   email: string;
@@ -34,16 +35,8 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
     confirmPassword?: string;
   }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(60);
   const [isResending, setIsResending] = useState(false);
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
+  const { cooldown: resendCooldown, startCooldown } = useResendCooldown(60);
 
   const validate = useCallback(() => {
     const errors: typeof fieldErrors = {};
@@ -86,7 +79,7 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
     if (error) {
       showError(error.message ?? "Erro ao reenviar código.");
     } else {
-      setResendCooldown(60);
+      startCooldown();
     }
 
     setIsResending(false);

@@ -1,6 +1,6 @@
 import { Navigate, useSearchParams } from "react-router-dom";
 import { useSession } from "@/lib/auth-client";
-import { VerifyEmailForm } from "@/features/auth/components/VerifyEmailForm";
+import { VerifyEmailForm } from "@/features/auth/components/forms/VerifyEmailForm";
 
 const VerifyEmailPage = () => {
   const [searchParams] = useSearchParams();

@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 import { emailOtp } from "@/lib/auth-client";
-import { showError } from "@/lib/toast";
-import { forgotPasswordSchema } from "../schemas";
-import { FormInput } from "./FormInput";
+import { showError, showInfo } from "@/lib/toast";
+import { forgotPasswordSchema } from "../../schemas";
+import { FormInput } from "../FormInput";
 
 export function ForgotPasswordForm() {
   const navigate = useNavigate();
@@ -26,12 +26,13 @@ export function ForgotPasswordForm() {
         showError(error.message ?? "Erro ao enviar código.");
         return;
       }
+      showInfo("Código enviado! Verifique sua caixa de entrada.");
       navigate(`/reset-password?email=${encodeURIComponent(value.email)}`);
     },
   });
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm lg:max-w-md">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Esqueceu a senha?</CardTitle>
         <CardDescription>

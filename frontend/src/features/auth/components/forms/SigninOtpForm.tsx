@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,7 @@ import {
 import { emailOtp, signIn } from "@/lib/auth-client";
 import { env } from "@/env";
 import { showError, showSuccess } from "@/lib/toast";
+import { useResendCooldown } from "@/hooks/use-resend-cooldown";
 
 type Step = "email" | "otp";
 
@@ -30,16 +31,8 @@ export function SigninOtpForm() {
   const [isSending, setIsSending] = useState(false);
   const [otp, setOtp] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
   const [isResending, setIsResending] = useState(false);
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
+  const { cooldown: resendCooldown, startCooldown } = useResendCooldown(0);
 
   const validateEmail = (value: string): string => {
     if (!value) return "Informe o e-mail institucional.";
@@ -68,7 +61,7 @@ export function SigninOtpForm() {
       return;
     }
 
-    setResendCooldown(60);
+    startCooldown(60);
     setStep("otp");
     setIsSending(false);
   };
@@ -119,7 +112,7 @@ export function SigninOtpForm() {
       showError(error.message ?? "Erro ao reenviar código.");
     } else {
       setOtp("");
-      setResendCooldown(60);
+      startCooldown(60);
     }
 
     setIsResending(false);
@@ -127,7 +120,7 @@ export function SigninOtpForm() {
 
   if (step === "email") {
     return (
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm lg:max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Entrar com código</CardTitle>
           <CardDescription>

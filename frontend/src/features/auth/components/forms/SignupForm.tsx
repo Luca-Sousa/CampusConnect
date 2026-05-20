@@ -12,9 +12,9 @@ import { FieldGroup } from "@/components/ui/field";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { signUp } from "@/lib/auth-client";
 import { showError } from "@/lib/toast";
-import { alunoSchema, colaboradorSchema } from "../schemas";
-import { CargoSelect } from "./CargoSelect";
-import { FormInput } from "./FormInput";
+import { alunoSchema, colaboradorSchema } from "../../schemas";
+import { CargoSelect } from "../CargoSelect";
+import { FormInput } from "../FormInput";
 
 function AlunoForm({ onSuccess }: { onSuccess: (email: string) => void }) {
   const form = useForm({
@@ -60,7 +60,7 @@ function AlunoForm({ onSuccess }: { onSuccess: (email: string) => void }) {
               field={field}
               label="E-mail institucional"
               type="email"
-              placeholder="seuemail@aluno.ifce.edu.br"
+              placeholder="@aluno.ifce.edu.br"
             />
           )}
         </form.Field>
@@ -130,7 +130,7 @@ function ColaboradorForm({ onSuccess }: { onSuccess: (email: string) => void }) 
               field={field}
               label="E-mail institucional"
               type="email"
-              placeholder="seuemail@ifce.edu.br"
+              placeholder="@ifce.edu.br"
             />
           )}
         </form.Field>

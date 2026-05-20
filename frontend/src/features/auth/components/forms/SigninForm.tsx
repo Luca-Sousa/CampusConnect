@@ -13,8 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { signIn } from "@/lib/auth-client";
 import { env } from "@/env";
 import { showError } from "@/lib/toast";
-import { signinSchema } from "../schemas";
-import { FormInput } from "./FormInput";
+import { signinSchema } from "../../schemas";
+import { FormInput } from "../FormInput";
 
 export function SigninForm() {
   const navigate = useNavigate();

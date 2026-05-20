@@ -1,4 +1,4 @@
-import { ForgotPasswordForm } from "@/features/auth/components/ForgotPasswordForm";
+import { ForgotPasswordForm } from "@/features/auth/components/forms/ForgotPasswordForm";
 
 const ForgotPasswordPage = () => (
   <div className="min-h-screen bg-background flex items-center justify-center p-4">

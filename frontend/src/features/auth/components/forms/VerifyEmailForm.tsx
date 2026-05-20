@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -14,7 +14,8 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { emailOtp } from "@/lib/auth-client";
-import { showError } from "@/lib/toast";
+import { showError, showSuccess } from "@/lib/toast";
+import { useResendCooldown } from "@/hooks/use-resend-cooldown";
 
 interface VerifyEmailFormProps {
   email: string;
@@ -23,16 +24,8 @@ interface VerifyEmailFormProps {
 export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
   const [otp, setOtp] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(60);
   const [isResending, setIsResending] = useState(false);
-
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
+  const { cooldown: resendCooldown, startCooldown } = useResendCooldown(60);
 
   const handleVerify = useCallback(
     async (code: string) => {
@@ -48,6 +41,7 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
         return;
       }
 
+      showSuccess("E-mail verificado com sucesso!");
       // Reload completo para garantir que a sessão reflita emailVerified: true
       window.location.replace("/feed");
     },
@@ -72,7 +66,7 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
     if (error) {
       showError(error.message ?? "Erro ao reenviar código.");
     } else {
-      setResendCooldown(60);
+      startCooldown();
     }
 
     setIsResending(false);
