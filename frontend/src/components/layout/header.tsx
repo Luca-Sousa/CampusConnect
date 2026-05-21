@@ -27,7 +27,9 @@ const Header = () => {
                 {open ? (
                   <div className="flex flex-col items-center gap-1">
                     <p>Ocultar Sidebar</p>
-                    <p className="text-muted-foreground text-xs">ou pressione</p>
+                    <p className="text-muted-foreground text-xs">
+                      ou pressione
+                    </p>
                     <KbdGroup>
                       <Kbd>Ctrl</Kbd>
                       <span>+</span>
@@ -50,7 +52,7 @@ const Header = () => {
 
         {/* Welcome */}
         <div className="min-w-0 shrink-0">
-          <h2 className="text-lg font-bold leading-tight text-foreground">
+          <h2 className="text-md lg:text-lg font-bold leading-tight text-foreground">
             Bem-vindo, {firstName}.
           </h2>
           <p className="text-xs text-muted-foreground capitalize">
@@ -69,15 +71,13 @@ const Header = () => {
       </div>
 
       {/* Actions */}
-      {!isMobile && (
-        <div className="flex items-center gap-2 shrink-0">
-          <Button variant="secondary" size="icon">
-            <BellIcon className="size-5 text-muted-foreground" />
-          </Button>
+      <div className="flex items-center gap-2 shrink-0">
+        <Button variant="secondary" size="icon">
+          <BellIcon className="size-5 text-muted-foreground" />
+        </Button>
 
-          <NavUser />
-        </div>
-      )}
+        {!isMobile && <NavUser />}
+      </div>
     </header>
   );
 };
