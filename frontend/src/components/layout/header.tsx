@@ -15,29 +15,33 @@ const Header = () => {
   const firstName = session?.user.name.split(" ")[0] ?? "";
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b bg-sidebar px-6 gap-6">
-      <div className="flex items-center justify-center gap-6">
+    <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b bg-sidebar px-4 lg:px-6 gap-6">
+      <div className="flex items-center justify-center gap-3 lg:gap-6">
         <div className="flex gap-3">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <SidebarTrigger />
-            </TooltipTrigger>
-            <TooltipContent>
-              {open ? (
-                <div className="flex flex-col items-center gap-1">
-                  <p>Ocultar Sidebar</p>
-                  <p className="text-muted-foreground text-xs">ou pressione</p>
-                  <KbdGroup>
-                    <Kbd>Ctrl</Kbd>
-                    <span>+</span>
-                    <Kbd>B</Kbd>
-                  </KbdGroup>
-                </div>
-              ) : (
-                <p>Mostrar Sidebar</p>
-              )}
-            </TooltipContent>
-          </Tooltip>
+          {!isMobile ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <SidebarTrigger />
+              </TooltipTrigger>
+              <TooltipContent>
+                {open ? (
+                  <div className="flex flex-col items-center gap-1">
+                    <p>Ocultar Sidebar</p>
+                    <p className="text-muted-foreground text-xs">ou pressione</p>
+                    <KbdGroup>
+                      <Kbd>Ctrl</Kbd>
+                      <span>+</span>
+                      <Kbd>B</Kbd>
+                    </KbdGroup>
+                  </div>
+                ) : (
+                  <p>Mostrar Sidebar</p>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <SidebarTrigger />
+          )}
           <Separator
             orientation="vertical"
             className="data-[orientation=vertical]:h-8"
@@ -65,13 +69,15 @@ const Header = () => {
       </div>
 
       {/* Actions */}
-      {!isMobile && <div className="flex items-center gap-2 shrink-0">
-        <Button variant="secondary" size="icon">
-          <BellIcon className="size-5 text-muted-foreground" />
-        </Button>
+      {!isMobile && (
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="secondary" size="icon">
+            <BellIcon className="size-5 text-muted-foreground" />
+          </Button>
 
-        <NavUser />
-      </div>}
+          <NavUser />
+        </div>
+      )}
     </header>
   );
 };
