@@ -10,7 +10,7 @@ import { Kbd, KbdGroup } from "../ui/kbd";
 import { useSession } from "@/lib/auth-client";
 
 const Header = () => {
-  const { open } = useSidebar();
+  const { open, isMobile } = useSidebar();
   const { data: session } = useSession();
   const firstName = session?.user.name.split(" ")[0] ?? "";
 
@@ -65,13 +65,13 @@ const Header = () => {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2 shrink-0">
+      {!isMobile && <div className="flex items-center gap-2 shrink-0">
         <Button variant="secondary" size="icon">
           <BellIcon className="size-5 text-muted-foreground" />
         </Button>
 
         <NavUser />
-      </div>
+      </div>}
     </header>
   );
 };
