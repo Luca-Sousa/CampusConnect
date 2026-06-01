@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 import { BrowserRouter } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { queryClient } from "@/lib/query-client";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -9,11 +12,14 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <BrowserRouter>
-      <TooltipProvider>
-        {children}
-        <Toaster position="bottom-right" richColors closeButton />
-      </TooltipProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <TooltipProvider>
+          {children}
+          <Toaster position="bottom-right" richColors closeButton />
+        </TooltipProvider>
+      </BrowserRouter>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
