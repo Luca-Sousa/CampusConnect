@@ -1,8 +1,8 @@
-import postgres from "postgres";
+import { neon } from "@neondatabase/serverless";
 import { env } from "../env";
-import { drizzle } from "drizzle-orm/postgres-js";
+import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema/auth";
 
-export const pg = postgres(env.POSTGRES_URL);
+const sql = neon(env.POSTGRES_URL);
 
-export const db = drizzle(pg, { schema });
+export const db = drizzle(sql, { schema });
