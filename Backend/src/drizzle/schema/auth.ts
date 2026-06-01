@@ -1,5 +1,6 @@
 ﻿import { relations } from "drizzle-orm";
 import {
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -8,14 +9,32 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 
+export const userRoleEnum = pgEnum("user_role", [
+  "aluno",
+  "colaborador",
+  "admin",
+]);
+
+export const userCargoEnum = pgEnum("user_cargo", [
+  "aluno",
+  "professor",
+  "coordenador",
+  "direcao",
+  "administracao",
+  "secretaria",
+  "centro_academico",
+  "biblioteca",
+  "ti",
+]);
+
 export const user = pgTable("user", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
-  role: text("role").notNull().default("aluno"),
-  cargo: text("cargo").notNull().default("aluno"),
+  role: userRoleEnum("role").notNull().default("aluno"),
+  cargo: userCargoEnum("cargo").notNull().default("aluno"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

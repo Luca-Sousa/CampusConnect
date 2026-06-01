@@ -13,6 +13,7 @@ import { env } from "./env";
 import { authOpenApiPaths } from "./lib/auth-openapi";
 import { authHandler } from "./lib/auth-handler";
 import { notificationsRoute } from "./routes/notifications-route";
+import { postsRoute } from "./routes/posts-route";
 
 export function buildApp() {
   const app = fastify().withTypeProvider<ZodTypeProvider>();
@@ -50,6 +51,7 @@ export function buildApp() {
   });
 
   app.register(notificationsRoute);
+  app.register(postsRoute);
   app.all("/api/auth/*", authHandler);
 
   return app;
