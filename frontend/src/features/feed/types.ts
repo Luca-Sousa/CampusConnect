@@ -1,11 +1,3 @@
-export interface Story {
-  id: number;
-  name: string;
-  initials: string;
-  from: string;
-  to: string;
-}
-
 export interface PostAuthor {
   id: string;
   name: string;
