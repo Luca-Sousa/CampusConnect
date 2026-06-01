@@ -7,7 +7,7 @@ let ready = false;
 
 export default async function handler(
   req: IncomingMessage,
-  res: ServerResponse
+  res: ServerResponse,
 ): Promise<void> {
   if (!ready) {
     await app.ready();

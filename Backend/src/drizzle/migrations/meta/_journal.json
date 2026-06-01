@@ -22,6 +22,27 @@
       "when": 1779221527187,
       "tag": "0002_public_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780339357604,
+      "tag": "0003_condemned_echo",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1780342977061,
+      "tag": "0004_burly_malcolm_colcord",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780343175387,
+      "tag": "0005_abandoned_blink",
+      "breakpoints": true
     }
   ]
 }
