@@ -1,6 +1,5 @@
 import { useForm } from "@tanstack/react-form"
 
-import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { showError, showSuccess } from "@/lib/toast"
 import { FormTextarea } from "@/components/form/form-textarea"
@@ -11,12 +10,14 @@ import {
   type TextPostValues,
 } from "../../schemas"
 
+export const TEXT_POST_FORM_ID = "post-form-text"
+
 interface TextPostFormProps {
   onSuccess: () => void
 }
 
 export function TextPostForm({ onSuccess }: TextPostFormProps) {
-  const { mutateAsync, isPending } = useCreatePost()
+  const { mutateAsync } = useCreatePost()
 
   const form = useForm({
     defaultValues: { content: "" } as TextPostValues,
@@ -38,6 +39,7 @@ export function TextPostForm({ onSuccess }: TextPostFormProps) {
 
   return (
     <form
+      id={TEXT_POST_FORM_ID}
       onSubmit={(e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -59,17 +61,6 @@ export function TextPostForm({ onSuccess }: TextPostFormProps) {
           )}
         </form.Field>
       </FieldGroup>
-      <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(isSubmitting) => (
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting || isPending}
-          >
-            {isSubmitting || isPending ? "Publicando..." : "Publicar"}
-          </Button>
-        )}
-      </form.Subscribe>
     </form>
   )
 }

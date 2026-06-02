@@ -37,13 +37,58 @@ export function formatRelativeTime(isoDate: string): string {
 }
 
 /**
- * Formata uma data de evento (YYYY-MM-DD) para o padrão longo em pt-BR.
+ * Normaliza o `eventDate` para um `Date` válido.
+ *
+ * Aceita:
+ *  - "YYYY-MM-DD" (formato vindo do form / armazenado no banco)
+ *  - ISO 8601 completo (ex.: "2024-06-03T00:00:00.000Z")
+ *  - já um `Date`
+ *
+ * Retorna `undefined` se o valor for vazio, nulo ou não parseável — em vez
+ * de explodir em "Invalid time value" no `date-fns` e derrubar a árvore
+ * React inteira.
+ */
+function parseEventDate(value: string | Date | null | undefined): Date | undefined {
+  if (value == null || value === "") return undefined
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? undefined : value
+  }
+  const raw = String(value).trim()
+  if (!raw) return undefined
+
+  // YYYY-MM-DD (sem parte de tempo) → ancora em local time para o dia certo
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const d = new Date(`${raw}T00:00:00`)
+    return Number.isNaN(d.getTime()) ? undefined : d
+  }
+
+  // ISO 8601 ou qualquer string que o `Date` aceite nativamente
+  const d = new Date(raw)
+  return Number.isNaN(d.getTime()) ? undefined : d
+}
+
+/**
+ * Formata uma data de evento para o padrão longo em pt-BR.
  *
  * @example
  * formatEventDate("2024-06-03") // "segunda-feira, 3 de junho"
+ *
+ * Retorna a string original (ou vazia) se a data não for parseável,
+ * em vez de quebrar a renderização.
  */
-export function formatEventDate(date: string): string {
-  return format(new Date(`${date}T00:00:00`), "EEEE',' d 'de' MMMM", {
-    locale: ptBR,
-  });
+export function formatEventDate(date: string | Date | null | undefined): string {
+  const d = parseEventDate(date)
+  if (!d) return typeof date === "string" ? date : ""
+  return format(d, "EEEE',' d 'de' MMMM", { locale: ptBR })
+}
+
+/**
+ * Formata um range de horários (HH:mm) para exibição.
+ * Sem end: mostra só o start. Com end: "14:00 – 18:00".
+ */
+export function formatEventTimeRange(
+  start: string,
+  end: string | null,
+): string {
+  return end ? `${start} – ${end}` : start;
 }

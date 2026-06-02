@@ -24,6 +24,7 @@ export class PostDrizzleRepository implements IPostRepository {
         eventTitle: input.eventTitle ?? null,
         eventDate: input.eventDate ?? null,
         eventTime: input.eventTime ?? null,
+        eventEndTime: input.eventEndTime ?? null,
         eventLocation: input.eventLocation ?? null,
         newsTitle: input.newsTitle ?? null,
       })

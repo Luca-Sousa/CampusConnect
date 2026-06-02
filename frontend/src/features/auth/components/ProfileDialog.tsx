@@ -1,6 +1,16 @@
 import { useState } from "react";
+import { UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog";
+import {
+  AppDialog,
+  AppDialogAction,
+  AppDialogBody,
+  AppDialogCancel,
+  AppDialogContent,
+  AppDialogFooter,
+  AppDialogHeader,
+  DialogTrigger,
+} from "@/components/dialog";
 
 interface ProfileDialogProps {
   user: {
@@ -31,54 +41,57 @@ export function ProfileDialog({
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Editar Perfil</DialogTitle>
-        </DialogHeader>
+    <AppDialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col items-center gap-2">
-            <img
-              src={user.avatar}
-              alt={user.name}
-              className="w-20 h-20 rounded-full object-cover border"
+      <AppDialogContent>
+        <AppDialogHeader
+          icon={UserIcon}
+          title="Editar perfil"
+          description="Atualize suas informações pessoais."
+        />
+
+        <AppDialogBody>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col items-center gap-2">
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="w-20 h-20 rounded-full object-cover border"
+              />
+              <Button variant="outline">Alterar foto</Button>
+            </div>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nome"
+              className="border rounded-md px-3 py-2"
             />
-            <Button variant="outline">
-              Alterar foto
-            </Button>
+            <input
+              type="text"
+              value={course}
+              onChange={(e) => setCourse(e.target.value)}
+              placeholder="Curso"
+              className="border rounded-md px-3 py-2"
+            />
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Biografia"
+              className="border rounded-md px-3 py-2 min-h-25"
+            />
+            <div className="text-sm text-muted-foreground">
+              Tipo de usuário: {user.role || "Aluno"}
+            </div>
           </div>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nome"
-            className="border rounded-md px-3 py-2"
-          />
-          <input
-            type="text"
-            value={course}
-            onChange={(e) => setCourse(e.target.value)}
-            placeholder="Curso"
-            className="border rounded-md px-3 py-2"
-          />
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="Biografia"
-            className="border rounded-md px-3 py-2 min-h-25"
-          />
-          <div className="text-sm text-muted-foreground">
-            Tipo de usuário: {user.role || "Aluno"}
-          </div>
-          <Button onClick={handleSave}>
-            Salvar alterações
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </AppDialogBody>
+
+        <AppDialogFooter>
+          <AppDialogCancel>Cancelar</AppDialogCancel>
+          <AppDialogAction onClick={handleSave}>Salvar alterações</AppDialogAction>
+        </AppDialogFooter>
+      </AppDialogContent>
+    </AppDialog>
   );
 }

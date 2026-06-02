@@ -1,32 +1,37 @@
 import { useForm } from "@tanstack/react-form"
-import { CalendarIcon, ClockIcon, MapPinIcon } from "lucide-react"
+import { CalendarIcon, MapPinIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { showError, showSuccess } from "@/lib/toast"
 import { FormInput } from "@/components/form/form-input"
 import { FormTextarea } from "@/components/form/form-textarea"
+import { EventDateTimePicker } from "@/components/form/event-date-time-picker"
 import { useCreatePost } from "../../hooks/use-create-post"
 import {
   EVENT_CONTENT_MAX,
   eventPostSchema,
   type EventPostValues,
 } from "../../schemas"
+import { PostImageUpload } from "./post-image-upload"
+
+export const EVENT_POST_FORM_ID = "post-form-event"
 
 interface EventPostFormProps {
   onSuccess: () => void
 }
 
 export function EventPostForm({ onSuccess }: EventPostFormProps) {
-  const { mutateAsync, isPending } = useCreatePost()
+  const { mutateAsync } = useCreatePost()
 
   const form = useForm({
     defaultValues: {
       eventTitle: "",
       eventDate: "",
       eventTime: "",
+      eventEndTime: "",
       eventLocation: "",
       content: "",
+      imageUrl: "",
     } as EventPostValues,
     validators: { onSubmit: eventPostSchema },
     onSubmit: async ({ value }) => {
@@ -36,10 +41,13 @@ export function EventPostForm({ onSuccess }: EventPostFormProps) {
           eventTitle: value.eventTitle.trim(),
           eventDate: value.eventDate,
           eventTime: value.eventTime,
+          eventEndTime: value.eventEndTime || null,
           eventLocation: value.eventLocation.trim(),
         }
         const trimmed = value.content?.trim()
         if (trimmed) body.content = trimmed
+        const imageUrl = value.imageUrl?.trim()
+        if (imageUrl) body.imageUrl = imageUrl
         await mutateAsync(body)
         showSuccess("Evento publicado com sucesso!")
         onSuccess()
@@ -55,6 +63,7 @@ export function EventPostForm({ onSuccess }: EventPostFormProps) {
 
   return (
     <form
+      id={EVENT_POST_FORM_ID}
       onSubmit={(e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -73,36 +82,29 @@ export function EventPostForm({ onSuccess }: EventPostFormProps) {
           )}
         </form.Field>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <form.Field name="eventDate">
-            {(field) => (
-              <FormInput
-                field={field}
-                label={
-                  <span className="flex items-center gap-1.5">
-                    <CalendarIcon className="h-3.5 w-3.5" />
-                    Data
-                  </span>
-                }
-                type="date"
-              />
-            )}
-          </form.Field>
-          <form.Field name="eventTime">
-            {(field) => (
-              <FormInput
-                field={field}
-                label={
-                  <span className="flex items-center gap-1.5">
-                    <ClockIcon className="h-3.5 w-3.5" />
-                    Horário
-                  </span>
-                }
-                type="time"
-              />
-            )}
-          </form.Field>
-        </div>
+        <form.Field name="eventDate">
+          {(dateField) => (
+            <form.Field name="eventTime">
+              {(timeField) => (
+                <form.Field name="eventEndTime">
+                  {(endTimeField) => (
+                    <EventDateTimePicker
+                      dateField={dateField}
+                      startTimeField={timeField}
+                      endTimeField={endTimeField}
+                      label={
+                        <span className="flex items-center gap-1.5">
+                          <CalendarIcon className="h-3.5 w-3.5" />
+                          Data e horário
+                        </span>
+                      }
+                    />
+                  )}
+                </form.Field>
+              )}
+            </form.Field>
+          )}
+        </form.Field>
 
         <form.Field name="eventLocation">
           {(field) => (
@@ -130,18 +132,26 @@ export function EventPostForm({ onSuccess }: EventPostFormProps) {
             />
           )}
         </form.Field>
+
+        <form.Field name="imageUrl">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <PostImageUpload
+                id={field.name}
+                value={field.state.value}
+                onChange={field.handleChange}
+                onBlur={field.handleBlur}
+                isInvalid={isInvalid}
+                errors={field.state.meta.errors}
+                label="Imagem do evento (opcional)"
+                description="Adicione uma imagem para o evento (opcional)."
+              />
+            )
+          }}
+        </form.Field>
       </FieldGroup>
-      <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(isSubmitting) => (
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting || isPending}
-          >
-            {isSubmitting || isPending ? "Publicando..." : "Publicar evento"}
-          </Button>
-        )}
-      </form.Subscribe>
     </form>
   )
 }

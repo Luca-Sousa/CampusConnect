@@ -1,6 +1,5 @@
 import { useForm } from "@tanstack/react-form"
 
-import { Button } from "@/components/ui/button"
 import { FieldGroup } from "@/components/ui/field"
 import { showError, showSuccess } from "@/lib/toast"
 import { FormInput } from "@/components/form/form-input"
@@ -11,24 +10,34 @@ import {
   newsPostSchema,
   type NewsPostValues,
 } from "../../schemas"
+import { PostImageUpload } from "./post-image-upload"
+
+export const NEWS_POST_FORM_ID = "post-form-news"
 
 interface NewsPostFormProps {
   onSuccess: () => void
 }
 
 export function NewsPostForm({ onSuccess }: NewsPostFormProps) {
-  const { mutateAsync, isPending } = useCreatePost()
+  const { mutateAsync } = useCreatePost()
 
   const form = useForm({
-    defaultValues: { newsTitle: "", content: "" } as NewsPostValues,
+    defaultValues: {
+      newsTitle: "",
+      content: "",
+      imageUrl: "",
+    } as NewsPostValues,
     validators: { onSubmit: newsPostSchema },
     onSubmit: async ({ value }) => {
       try {
-        await mutateAsync({
+        const body: Record<string, unknown> = {
           type: "news",
           newsTitle: value.newsTitle.trim(),
           content: value.content.trim(),
-        })
+        }
+        const imageUrl = value.imageUrl?.trim()
+        if (imageUrl) body.imageUrl = imageUrl
+        await mutateAsync(body)
         showSuccess("Comunicado publicado com sucesso!")
         onSuccess()
       } catch (error) {
@@ -43,6 +52,7 @@ export function NewsPostForm({ onSuccess }: NewsPostFormProps) {
 
   return (
     <form
+      id={NEWS_POST_FORM_ID}
       onSubmit={(e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -72,18 +82,25 @@ export function NewsPostForm({ onSuccess }: NewsPostFormProps) {
             />
           )}
         </form.Field>
+        <form.Field name="imageUrl">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <PostImageUpload
+                id={field.name}
+                value={field.state.value}
+                onChange={field.handleChange}
+                onBlur={field.handleBlur}
+                isInvalid={isInvalid}
+                errors={field.state.meta.errors}
+                label="Imagem do comunicado (opcional)"
+                description="Adicione uma imagem de capa para o comunicado (opcional)."
+              />
+            )
+          }}
+        </form.Field>
       </FieldGroup>
-      <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(isSubmitting) => (
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting || isPending}
-          >
-            {isSubmitting || isPending ? "Publicando..." : "Publicar comunicado"}
-          </Button>
-        )}
-      </form.Subscribe>
     </form>
   )
 }

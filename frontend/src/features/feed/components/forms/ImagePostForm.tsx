@@ -1,39 +1,24 @@
-import { useRef } from "react"
 import { useForm } from "@tanstack/react-form"
-import { ImageIcon, XIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "@/components/ui/field"
 import { FieldGroup } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 import { showError, showSuccess } from "@/lib/toast"
 import { FormTextarea } from "@/components/form/form-textarea"
 import { useCreatePost } from "../../hooks/use-create-post"
 import {
   IMAGE_CAPTION_MAX,
-  IMAGE_MAX_BYTES,
   imagePostSchema,
   type ImagePostValues,
 } from "../../schemas"
+import { PostImageUpload } from "./post-image-upload"
+
+export const IMAGE_POST_FORM_ID = "post-form-image"
 
 interface ImagePostFormProps {
   onSuccess: () => void
 }
 
-function toErrors(errors: Array<{ message?: string } | string | undefined>) {
-  return errors.map((e) => ({
-    message: typeof e === "string" ? e : e?.message,
-  }))
-}
-
 export function ImagePostForm({ onSuccess }: ImagePostFormProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const { mutateAsync, isPending } = useCreatePost()
+  const { mutateAsync } = useCreatePost()
 
   const form = useForm({
     defaultValues: { imageUrl: "", content: "" } as ImagePostValues,
@@ -59,38 +44,9 @@ export function ImagePostForm({ onSuccess }: ImagePostFormProps) {
     },
   })
 
-  function handleFileChange(
-    e: React.ChangeEvent<HTMLInputElement>,
-    setValue: (v: string) => void,
-  ) {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (file.size > IMAGE_MAX_BYTES) {
-      showError("A imagem deve ter no máximo 2 MB.")
-      e.target.value = ""
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result
-      if (typeof dataUrl === "string") {
-        setValue(dataUrl)
-      }
-    }
-    reader.readAsDataURL(file)
-  }
-
-  function clearImage(
-    setValue: (v: string) => void,
-  ) {
-    setValue("")
-    if (fileInputRef.current) fileInputRef.current.value = ""
-  }
-
   return (
     <form
+      id={IMAGE_POST_FORM_ID}
       onSubmit={(e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -103,54 +59,15 @@ export function ImagePostForm({ onSuccess }: ImagePostFormProps) {
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid
-            const preview = field.state.value
             return (
-              <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Imagem</FieldLabel>
-                <Input
-                  id={field.name}
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  className="hidden"
-                  onChange={(e) => handleFileChange(e, field.handleChange)}
-                  onBlur={field.handleBlur}
-                />
-                {preview ? (
-                  <div className="relative">
-                    <img
-                      src={preview}
-                      alt="Prévia da imagem"
-                      className="w-full max-h-60 sm:max-h-72 object-cover rounded-md border"
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="icon-sm"
-                      onClick={() => clearImage(field.handleChange)}
-                      className="absolute top-2 right-2 rounded-full"
-                      aria-label="Remover imagem"
-                    >
-                      <XIcon />
-                    </Button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-32 sm:h-40 rounded-md border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-2 text-sm text-muted-foreground hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    <ImageIcon className="h-8 w-8 opacity-40" />
-                    <span>Clique para selecionar uma imagem (máx. 2 MB)</span>
-                  </button>
-                )}
-                <FieldDescription>
-                  Formatos suportados: JPEG, PNG, GIF, WebP.
-                </FieldDescription>
-                {isInvalid && (
-                  <FieldError errors={toErrors(field.state.meta.errors)} />
-                )}
-              </Field>
+              <PostImageUpload
+                id={field.name}
+                value={field.state.value}
+                onChange={field.handleChange}
+                onBlur={field.handleBlur}
+                isInvalid={isInvalid}
+                errors={field.state.meta.errors}
+              />
             )
           }}
         </form.Field>
@@ -167,17 +84,6 @@ export function ImagePostForm({ onSuccess }: ImagePostFormProps) {
           )}
         </form.Field>
       </FieldGroup>
-      <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(isSubmitting) => (
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting || isPending}
-          >
-            {isSubmitting || isPending ? "Publicando..." : "Publicar"}
-          </Button>
-        )}
-      </form.Subscribe>
     </form>
   )
 }

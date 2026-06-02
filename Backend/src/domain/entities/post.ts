@@ -9,6 +9,7 @@ export interface Post {
   eventTitle: string | null;
   eventDate: string | null;
   eventTime: string | null;
+  eventEndTime: string | null;
   eventLocation: string | null;
   newsTitle: string | null;
   createdAt: Date;
@@ -35,6 +36,7 @@ export interface CreatePostInput {
   eventTitle?: string | null;
   eventDate?: string | null;
   eventTime?: string | null;
+  eventEndTime?: string | null;
   eventLocation?: string | null;
   newsTitle?: string | null;
 }

@@ -3,6 +3,7 @@ import {
   CalendarIcon,
   ImageIcon,
   NewspaperIcon,
+  PencilLineIcon,
   TextIcon,
 } from "lucide-react"
 
@@ -10,13 +11,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
+  AppDialog,
+  AppDialogBody,
+  AppDialogContent,
+  AppDialogFooter,
+  AppDialogHeader,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/dialog"
 import {
   Tabs,
   TabsContent,
@@ -26,12 +27,38 @@ import {
 import { useSession } from "@/lib/auth-client"
 import { OFFICIAL_CARGOS } from "@/features/auth/constants"
 import type { CargoValue } from "@/features/auth/types"
-import { EventPostForm } from "./forms/EventPostForm"
-import { ImagePostForm } from "./forms/ImagePostForm"
-import { NewsPostForm } from "./forms/NewsPostForm"
-import { TextPostForm } from "./forms/TextPostForm"
+import {
+  EventPostForm,
+  EVENT_POST_FORM_ID,
+} from "./forms/EventPostForm"
+import {
+  ImagePostForm,
+  IMAGE_POST_FORM_ID,
+} from "./forms/ImagePostForm"
+import {
+  NewsPostForm,
+  NEWS_POST_FORM_ID,
+} from "./forms/NewsPostForm"
+import {
+  TextPostForm,
+  TEXT_POST_FORM_ID,
+} from "./forms/TextPostForm"
 
 type PostTab = "text" | "image" | "event" | "news"
+
+const FORM_ID_BY_TAB: Record<PostTab, string> = {
+  text: TEXT_POST_FORM_ID,
+  image: IMAGE_POST_FORM_ID,
+  event: EVENT_POST_FORM_ID,
+  news: NEWS_POST_FORM_ID,
+}
+
+const SUBMIT_LABEL_BY_TAB: Record<PostTab, string> = {
+  text: "Publicar",
+  image: "Publicar",
+  event: "Publicar evento",
+  news: "Publicar comunicado",
+}
 
 export function PostComposer() {
   const { data: session } = useSession()
@@ -60,7 +87,7 @@ export function PostComposer() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <AppDialog open={open} onOpenChange={setOpen}>
       <Card className="shadow-sm">
         <CardContent className="p-4 flex flex-col gap-3">
           <div className="flex items-center gap-3">
@@ -119,62 +146,73 @@ export function PostComposer() {
         </CardContent>
       </Card>
 
-      <DialogContent className="sm:max-w-lg lg:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-        <DialogHeader>
-          <DialogTitle>Criar publicação</DialogTitle>
-          <DialogDescription>
-            Escolha o tipo de publicação e preencha os campos.
-          </DialogDescription>
-        </DialogHeader>
+      <AppDialogContent maxWidth="2xl">
+        <AppDialogHeader
+          icon={PencilLineIcon}
+          title="Criar publicação"
+          description="Escolha o tipo de publicação e preencha os campos."
+        />
 
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as PostTab)}
-        >
-          <TabsList
-            className={`grid w-full ${
-              canPostNews ? "grid-cols-4" : "grid-cols-3"
-            }`}
+        <AppDialogBody>
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as PostTab)}
           >
-            <TabsTrigger value="text" className="gap-1.5">
-              <TextIcon className="h-3.5 w-3.5" />
-              Texto
-            </TabsTrigger>
-            <TabsTrigger value="image" className="gap-1.5">
-              <ImageIcon className="h-3.5 w-3.5" />
-              Foto
-            </TabsTrigger>
-            <TabsTrigger value="event" className="gap-1.5">
-              <CalendarIcon className="h-3.5 w-3.5" />
-              Evento
-            </TabsTrigger>
-            {canPostNews && (
-              <TabsTrigger value="news" className="gap-1.5">
-                <NewspaperIcon className="h-3.5 w-3.5" />
-                Notícia
+            <TabsList
+              className={`grid w-full ${
+                canPostNews ? "grid-cols-4" : "grid-cols-3"
+              }`}
+            >
+              <TabsTrigger value="text" className="gap-1.5">
+                <TextIcon className="h-3.5 w-3.5" />
+                Texto
               </TabsTrigger>
-            )}
-          </TabsList>
+              <TabsTrigger value="image" className="gap-1.5">
+                <ImageIcon className="h-3.5 w-3.5" />
+                Foto
+              </TabsTrigger>
+              <TabsTrigger value="event" className="gap-1.5">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                Evento
+              </TabsTrigger>
+              {canPostNews && (
+                <TabsTrigger value="news" className="gap-1.5">
+                  <NewspaperIcon className="h-3.5 w-3.5" />
+                  Notícia
+                </TabsTrigger>
+              )}
+            </TabsList>
 
-          <TabsContent value="text" className="pt-4">
-            <TextPostForm onSuccess={handleSuccess} />
-          </TabsContent>
-
-          <TabsContent value="image" className="pt-4">
-            <ImagePostForm onSuccess={handleSuccess} />
-          </TabsContent>
-
-          <TabsContent value="event" className="pt-4">
-            <EventPostForm onSuccess={handleSuccess} />
-          </TabsContent>
-
-          {canPostNews && (
-            <TabsContent value="news" className="pt-4">
-              <NewsPostForm onSuccess={handleSuccess} />
+            <TabsContent value="text" className="pt-4">
+              <TextPostForm onSuccess={handleSuccess} />
             </TabsContent>
-          )}
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+
+            <TabsContent value="image" className="pt-4">
+              <ImagePostForm onSuccess={handleSuccess} />
+            </TabsContent>
+
+            <TabsContent value="event" className="pt-4">
+              <EventPostForm onSuccess={handleSuccess} />
+            </TabsContent>
+
+            {canPostNews && (
+              <TabsContent value="news" className="pt-4">
+                <NewsPostForm onSuccess={handleSuccess} />
+              </TabsContent>
+            )}
+          </Tabs>
+        </AppDialogBody>
+
+        <AppDialogFooter>
+          <Button
+            type="submit"
+            form={FORM_ID_BY_TAB[activeTab]}
+            className="w-full! sm:w-auto"
+          >
+            {SUBMIT_LABEL_BY_TAB[activeTab]}
+          </Button>
+        </AppDialogFooter>
+      </AppDialogContent>
+    </AppDialog>
   )
 }

@@ -20,6 +20,7 @@ import { useToggleRsvp } from "../hooks/use-toggle-rsvp";
 import type { EventPost, ImagePost, NewsPost, Post, TextPost } from "../types";
 import {
   formatEventDate,
+  formatEventTimeRange,
   formatRelativeTime,
   getInitials,
 } from "../utils/format";
@@ -244,13 +245,22 @@ function EventPostCard({
         </span>
         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-700 dark:text-violet-300 bg-white dark:bg-violet-900/30 rounded-full px-3 py-1 border border-violet-200/60 dark:border-violet-700/40">
           <ClockIcon className="h-3.5 w-3.5 shrink-0" />
-          {post.eventTime}
+          {formatEventTimeRange(post.eventTime, post.eventEndTime)}
         </span>
         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-700 dark:text-violet-300 bg-white dark:bg-violet-900/30 rounded-full px-3 py-1 border border-violet-200/60 dark:border-violet-700/40">
           <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
           {post.eventLocation}
         </span>
       </div>
+
+      {/* Imagem opcional do evento */}
+      {post.imageUrl && (
+        <img
+          src={post.imageUrl}
+          alt="Imagem do evento"
+          className="w-full max-h-100 object-cover"
+        />
+      )}
 
       {/* Descrição opcional */}
       {post.content && (
@@ -314,6 +324,15 @@ function NewsPostCard({
 
       {/* Autor abaixo do banner */}
       <PostHeader post={post} currentUserId={currentUserId} />
+
+      {/* Imagem opcional do comunicado */}
+      {post.imageUrl && (
+        <img
+          src={post.imageUrl}
+          alt="Imagem do comunicado"
+          className="w-full max-h-100 object-cover"
+        />
+      )}
 
       {/* Conteúdo */}
       {post.content && (

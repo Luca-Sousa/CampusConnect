@@ -30,6 +30,7 @@ export const post = pgTable(
     eventTitle: text("event_title"),
     eventDate: text("event_date"),
     eventTime: text("event_time"),
+    eventEndTime: text("event_end_time"),
     eventLocation: text("event_location"),
     newsTitle: text("news_title"),
     createdAt: timestamp("created_at").defaultNow().notNull(),

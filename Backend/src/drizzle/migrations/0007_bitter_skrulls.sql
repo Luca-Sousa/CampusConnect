@@ -1,0 +1,1 @@
+ALTER TABLE "post" DROP COLUMN IF EXISTS "event_end_date";

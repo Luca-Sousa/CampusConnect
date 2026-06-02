@@ -21,7 +21,71 @@ async function getSession(request: { headers: { cookie?: string } }) {
   return auth.api.getSession({ headers }).catch(() => null);
 }
 
+// ——— Helpers de validação temporal ———
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const ISO_TIME = /^\d{2}:\d{2}$/;
+const pad2 = (n: number) => String(n).padStart(2, "0");
+const toIsoDate = (d: Date) =>
+  `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
 // ——— Schema de validação ———
+const eventSchema = z
+  .object({
+    type: z.literal("event"),
+    content: z.string().max(2000).optional(),
+    eventTitle: z
+      .string()
+      .min(1, "Título do evento obrigatório.")
+      .max(200),
+    eventDate: z
+      .string()
+      .regex(ISO_DATE, "Data inválida.")
+      .min(1, "Data de início obrigatória."),
+    eventTime: z
+      .string()
+      .regex(ISO_TIME, "Horário inválido.")
+      .min(1, "Horário de início obrigatório."),
+    eventEndTime: z
+      .union([
+        z.literal(""),
+        z.string().regex(ISO_TIME, "Horário final inválido."),
+      ])
+      .optional(),
+    eventLocation: z
+      .string()
+      .min(1, "Local obrigatório.")
+      .max(300),
+    imageUrl: z
+      .union([z.literal(""), z.string().min(1)])
+      .optional(),
+  })
+  .superRefine((val, ctx) => {
+    // ⚠️ Validação em UTC (Vercel serverless). Diferença de até 3h vs BRT é aceitável.
+    const now = new Date();
+    const todayIso = toIsoDate(now);
+    const nowHHmm = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+    if (val.eventDate < todayIso) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["eventDate"],
+        message: "Data de início não pode ser no passado.",
+      });
+    } else if (val.eventDate === todayIso && val.eventTime <= nowHHmm) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["eventTime"],
+        message: "Horário deve ser posterior ao atual.",
+      });
+    }
+    if (val.eventEndTime && val.eventEndTime <= val.eventTime) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["eventEndTime"],
+        message: "Horário final deve ser posterior ao inicial.",
+      });
+    }
+  });
+
 const createPostSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("text"),
@@ -32,18 +96,14 @@ const createPostSchema = z.discriminatedUnion("type", [
     content: z.string().max(2000).optional(),
     imageUrl: z.string().min(1, "Imagem obrigatória."),
   }),
-  z.object({
-    type: z.literal("event"),
-    content: z.string().max(2000).optional(),
-    eventTitle: z.string().min(1, "Título do evento obrigatório.").max(200),
-    eventDate: z.string().min(1, "Data obrigatória."),
-    eventTime: z.string().min(1, "Horário obrigatório."),
-    eventLocation: z.string().min(1, "Local obrigatório.").max(300),
-  }),
+  eventSchema,
   z.object({
     type: z.literal("news"),
     newsTitle: z.string().min(1, "Título obrigatório.").max(200),
     content: z.string().min(1, "Conteúdo obrigatório.").max(5000),
+    imageUrl: z
+      .union([z.literal(""), z.string().min(1)])
+      .optional(),
   }),
 ]);
 
@@ -90,10 +150,17 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
         authorId: session.user.id,
         type: body.type,
         content: "content" in body ? (body.content ?? null) : null,
-        imageUrl: "imageUrl" in body ? body.imageUrl : null,
+        imageUrl:
+          "imageUrl" in body && body.imageUrl
+            ? body.imageUrl
+            : null,
         eventTitle: "eventTitle" in body ? body.eventTitle : null,
         eventDate: "eventDate" in body ? body.eventDate : null,
         eventTime: "eventTime" in body ? body.eventTime : null,
+        eventEndTime:
+          "eventEndTime" in body && body.eventEndTime
+            ? body.eventEndTime
+            : null,
         eventLocation: "eventLocation" in body ? body.eventLocation : null,
         newsTitle: "newsTitle" in body ? body.newsTitle : null,
         userRole:

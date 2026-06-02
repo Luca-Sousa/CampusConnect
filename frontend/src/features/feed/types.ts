@@ -27,7 +27,9 @@ export interface EventPost extends PostBase {
   eventTitle: string;
   eventDate: string;
   eventTime: string;
+  eventEndTime: string | null;
   eventLocation: string;
+  imageUrl: string | null;
   rsvpCount: number;
   hasRsvp: boolean;
 }
@@ -35,6 +37,7 @@ export interface EventPost extends PostBase {
 export interface NewsPost extends PostBase {
   type: "news";
   newsTitle: string;
+  imageUrl: string | null;
 }
 
 export type Post = TextPost | ImagePost | EventPost | NewsPost;

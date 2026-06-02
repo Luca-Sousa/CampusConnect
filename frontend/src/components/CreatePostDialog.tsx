@@ -1,39 +1,54 @@
 import { useState } from "react";
+import { PencilLineIcon } from "lucide-react";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+  AppDialog,
+  AppDialogAction,
+  AppDialogBody,
+  AppDialogCancel,
+  AppDialogContent,
+  AppDialogFooter,
+  AppDialogHeader,
+  DialogTrigger,
+} from "@/components/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function CreatePostDialog() {
     const [content, setContent] = useState("");
 
+    const handlePublish = () => {
+        console.log({ content });
+        // TODO: integração com PostComposer / create-post
+    };
+
     return (
-    <Dialog>
+    <AppDialog>
         <DialogTrigger asChild>
-        <button className="bg-orange-500 text-white px-4 py-2 rounded-lg">
-            Criar publicação
-        </button>
+            <Button className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600">
+                Criar publicação
+            </Button>
         </DialogTrigger>
 
-        <DialogContent>
-        <DialogHeader>
-            <DialogTitle>Nova publicação</DialogTitle>
-        </DialogHeader>
+        <AppDialogContent maxWidth="md">
+            <AppDialogHeader
+                icon={PencilLineIcon}
+                title="Nova publicação"
+                description="Escreva o que você está pensando."
+            />
 
-        <textarea
-            className="w-full border rounded-md p-3 min-h-30"
-            placeholder="Digite sua publicação..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-        />
+            <AppDialogBody>
+                <textarea
+                    className="w-full border rounded-md p-3 min-h-30"
+                    placeholder="Digite sua publicação..."
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                />
+            </AppDialogBody>
 
-        <button className="bg-orange-500 text-white px-4 py-2 rounded-lg mt-4">
-            Publicar
-        </button>
-        </DialogContent>
-    </Dialog>
+            <AppDialogFooter>
+                <AppDialogCancel>Cancelar</AppDialogCancel>
+                <AppDialogAction onClick={handlePublish}>Publicar</AppDialogAction>
+            </AppDialogFooter>
+        </AppDialogContent>
+    </AppDialog>
     );
 }
