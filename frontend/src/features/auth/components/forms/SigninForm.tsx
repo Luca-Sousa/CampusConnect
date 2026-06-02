@@ -14,7 +14,7 @@ import { signIn } from "@/lib/auth-client";
 import { env } from "@/env";
 import { showError } from "@/lib/toast";
 import { signinSchema } from "../../schemas";
-import { FormInput } from "../FormInput";
+import { FormInput } from "@/components/form/form-input";
 
 export function SigninForm() {
   const navigate = useNavigate();

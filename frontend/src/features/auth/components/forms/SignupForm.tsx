@@ -14,7 +14,7 @@ import { signUp } from "@/lib/auth-client";
 import { showError } from "@/lib/toast";
 import { alunoSchema, colaboradorSchema } from "../../schemas";
 import { CargoSelect } from "../CargoSelect";
-import { FormInput } from "../FormInput";
+import { FormInput } from "@/components/form/form-input";
 
 function AlunoForm({ onSuccess }: { onSuccess: (email: string) => void }) {
   const form = useForm({

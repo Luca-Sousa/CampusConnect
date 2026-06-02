@@ -1,13 +1,22 @@
 import type { AnyFieldApi } from "@tanstack/react-form"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
 interface FormInputProps {
   field: AnyFieldApi
-  label: string
+  label: React.ReactNode
   type?: string
   placeholder?: string
+  description?: string
   subLabel?: React.ReactNode
+  autoComplete?: string
+  disabled?: boolean
 }
 
 function toErrors(errors: AnyFieldApi["state"]["meta"]["errors"]) {
@@ -16,7 +25,16 @@ function toErrors(errors: AnyFieldApi["state"]["meta"]["errors"]) {
   }))
 }
 
-export function FormInput({ field, label, type = "text", placeholder, subLabel  }: FormInputProps) {
+export function FormInput({
+  field,
+  label,
+  type = "text",
+  placeholder,
+  description,
+  subLabel,
+  autoComplete,
+  disabled,
+}: FormInputProps) {
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
 
   return (
@@ -34,7 +52,10 @@ export function FormInput({ field, label, type = "text", placeholder, subLabel  
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         aria-invalid={isInvalid}
+        autoComplete={autoComplete}
+        disabled={disabled}
       />
+      {description && <FieldDescription>{description}</FieldDescription>}
       {isInvalid && <FieldError errors={toErrors(field.state.meta.errors)} />}
     </Field>
   )

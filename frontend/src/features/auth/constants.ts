@@ -62,3 +62,11 @@ export const DEFAULT_CARGO_CONFIG: CargoBadgeConfig = {
   label: "Colaborador",
   className: "bg-secondary text-secondary-foreground",
 };
+
+/** Cargos com permissão para publicar comunicados/notícias oficiais. */
+export const OFFICIAL_CARGOS: ReadonlySet<CargoValue> = new Set([
+  "direcao",
+  "administracao",
+  "coordenador",
+  "centro_academico",
+]);

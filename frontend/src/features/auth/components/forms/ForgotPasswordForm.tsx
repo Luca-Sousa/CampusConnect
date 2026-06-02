@@ -12,7 +12,7 @@ import { FieldGroup } from "@/components/ui/field";
 import { emailOtp } from "@/lib/auth-client";
 import { showError, showInfo } from "@/lib/toast";
 import { forgotPasswordSchema } from "../../schemas";
-import { FormInput } from "../FormInput";
+import { FormInput } from "@/components/form/form-input";
 
 export function ForgotPasswordForm() {
   const navigate = useNavigate();
