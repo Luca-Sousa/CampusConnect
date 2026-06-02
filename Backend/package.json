@@ -12,10 +12,12 @@
     "push": "drizzle-kit push",
     "studio": "drizzle-kit studio"
   },
+   "engines": {
+    "node": ">=22"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "@better-auth/i18n": "^1.6.11",
     "@fastify/cors": "^11.2.0",

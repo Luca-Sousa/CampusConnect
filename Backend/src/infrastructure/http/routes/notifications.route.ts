@@ -1,12 +1,13 @@
 import type { FastifyInstance } from "fastify";
-import { auth } from "../lib/auth";
-import { sendEmail } from "../lib/email";
-import { buildNewLoginEmailHtml } from "../lib/email-templates";
+import { auth } from "../../auth/better-auth.js";
+import { emailService } from "../../email/nodemailer.service.js";
+import { buildNewLoginEmailHtml } from "../../email/templates.js";
+import { SendLoginNotificationUseCase } from "../../../application/use-cases/notifications/send-login-notification.use-case.js";
 
-/**
- * Rota de notificações transacionais.
- * Envia e-mails informativos de segurança para o usuário autenticado.
- */
+const sendLoginNotificationUseCase = new SendLoginNotificationUseCase(
+  emailService,
+);
+
 export async function notificationsRoute(app: FastifyInstance): Promise<void> {
   /**
    * POST /api/notifications/login
@@ -24,11 +25,13 @@ export async function notificationsRoute(app: FastifyInstance): Promise<void> {
     }
 
     // Fire-and-forget: não bloqueia a resposta em caso de falha de SMTP
-    sendEmail({
-      to: session.user.email,
-      subject: "Novo acesso à sua conta - CampusConnect",
-      html: buildNewLoginEmailHtml(session.user.name),
-    }).catch(console.error);
+    sendLoginNotificationUseCase
+      .execute({
+        userEmail: session.user.email,
+        userName: session.user.name,
+        htmlBody: buildNewLoginEmailHtml(session.user.name),
+      })
+      .catch(console.error);
 
     return reply.send({ ok: true });
   });

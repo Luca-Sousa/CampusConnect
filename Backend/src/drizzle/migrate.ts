@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import path from "path";
-import { env } from "../env";
+import { env } from "../shared/env.js";
 
 async function runMigrations() {
   const sql = postgres(env.POSTGRES_URL, { ssl: "require", max: 1 });

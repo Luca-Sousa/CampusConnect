@@ -1,8 +1,6 @@
 /**
  * Templates HTML para e-mails transacionais do CampusConnect.
- *
- * Exporta funções puras que recebem dados e retornam HTML pronto
- * para envio via nodemailer — sem efeitos colaterais.
+ * Funções puras — sem efeitos colaterais.
  */
 
 // ——— E-mails com código OTP ———
@@ -82,9 +80,7 @@ function buildOtpTemplate({
   <div style="background: white; border-radius: 12px; padding: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
     <h1 style="color: #16a34a; font-size: 24px; margin: 0 0 8px;">CampusConnect</h1>
     <h2 style="color: #1f2937; font-size: 20px; font-weight: 600; margin: 0 0 16px;">${title}</h2>
-    <p style="color: #6b7280; margin: 0 0 24px;">
-      ${body}
-    </p>
+    <p style="color: #6b7280; margin: 0 0 24px;">${body}</p>
     <div style="font-size: 42px; font-weight: 700; letter-spacing: 14px; text-align: center; padding: 24px; background: #f3f4f6; border-radius: 10px; margin: 0 0 24px; color: #111827; font-family: monospace;">
       ${otp}
     </div>
@@ -123,9 +119,7 @@ function buildNotificationTemplate({
     <h1 style="color: #16a34a; font-size: 24px; margin: 0 0 8px;">CampusConnect</h1>
     <h2 style="color: #1f2937; font-size: 20px; font-weight: 600; margin: 0 0 16px;">${title}</h2>
     <p style="color: #374151; margin: 0 0 12px;">Olá, <strong>${name}</strong>!</p>
-    <p style="color: #6b7280; margin: 0 0 24px; line-height: 1.6;">
-      ${body}
-    </p>
+    <p style="color: #6b7280; margin: 0 0 24px; line-height: 1.6;">${body}</p>
     <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
     <p style="color: #9ca3af; font-size: 12px; margin: 0;">${footer}</p>
   </div>

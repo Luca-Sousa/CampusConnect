@@ -1,8 +1,8 @@
 import type { Config } from "drizzle-kit";
-import { env } from "./src/env";
+import { env } from "./src/shared/env.js";
 
 export default {
-  schema: "./src/drizzle/schema",
+  schema: "./src/infrastructure/database/schema",
   out: "./src/drizzle/migrations",
   dialect: "postgresql",
   dbCredentials: {

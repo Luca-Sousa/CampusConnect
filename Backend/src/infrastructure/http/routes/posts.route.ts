@@ -1,25 +1,27 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { and, count, desc, eq } from "drizzle-orm";
-import { db } from "../drizzle/client";
-import { post, rsvp } from "../drizzle/schema/posts";
-import { user } from "../drizzle/schema/auth";
-import { auth } from "../lib/auth";
+import { auth } from "../../auth/better-auth.js";
+import { PostDrizzleRepository } from "../../database/repositories/post.drizzle-repository.js";
+import { CreatePostUseCase } from "../../../application/use-cases/posts/create-post.use-case.js";
+import { ListPostsUseCase } from "../../../application/use-cases/posts/list-posts.use-case.js";
+import { DeletePostUseCase } from "../../../application/use-cases/posts/delete-post.use-case.js";
+import { ToggleRsvpUseCase } from "../../../application/use-cases/posts/toggle-rsvp.use-case.js";
 
-/** Cargos que têm permissão para publicar notícias oficiais. */
-const OFFICIAL_CARGOS = new Set([
-  "direcao",
-  "administracao",
-  "coordenador",
-  "centro_academico",
-]);
+// ——— Singletons de repositório e casos de uso ———
+const postRepository = new PostDrizzleRepository();
+const createPostUseCase = new CreatePostUseCase(postRepository);
+const listPostsUseCase = new ListPostsUseCase(postRepository);
+const deletePostUseCase = new DeletePostUseCase(postRepository);
+const toggleRsvpUseCase = new ToggleRsvpUseCase(postRepository);
 
+// ——— Helper de sessão ———
 async function getSession(request: { headers: { cookie?: string } }) {
   const headers = new Headers();
   if (request.headers.cookie) headers.set("cookie", request.headers.cookie);
   return auth.api.getSession({ headers }).catch(() => null);
 }
 
+// ——— Schema de validação ———
 const createPostSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("text"),
@@ -57,51 +59,11 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
 
     const session = await getSession(request);
 
-    const rows = await db
-      .select({
-        post,
-        author: {
-          id: user.id,
-          name: user.name,
-          cargo: user.cargo,
-        },
-        rsvpCount: count(rsvp.id),
-      })
-      .from(post)
-      .leftJoin(user, eq(post.authorId, user.id))
-      .leftJoin(rsvp, eq(rsvp.postId, post.id))
-      .groupBy(post.id, user.id)
-      .orderBy(desc(post.createdAt))
-      .limit(limit)
-      .offset(offset);
-
-    const posts = await Promise.all(
-      rows.map(async (row) => {
-        if (row.post.type !== "event" || !session) {
-          return {
-            ...row.post,
-            author: row.author,
-            rsvpCount: Number(row.rsvpCount),
-            hasRsvp: false,
-          };
-        }
-
-        const [existingRsvp] = await db
-          .select({ id: rsvp.id })
-          .from(rsvp)
-          .where(
-            and(eq(rsvp.postId, row.post.id), eq(rsvp.userId, session.user.id)),
-          )
-          .limit(1);
-
-        return {
-          ...row.post,
-          author: row.author,
-          rsvpCount: Number(row.rsvpCount),
-          hasRsvp: !!existingRsvp,
-        };
-      }),
-    );
+    const posts = await listPostsUseCase.execute({
+      limit,
+      offset,
+      currentUserId: session?.user.id,
+    });
 
     return reply.send(posts);
   });
@@ -123,19 +85,8 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
 
     const body = parsed.data;
 
-    if (body.type === "news") {
-      const cargo = session.user.cargo ?? "";
-      const role = session.user.role ?? "";
-      if (role !== "admin" && !OFFICIAL_CARGOS.has(cargo)) {
-        return reply
-          .status(403)
-          .send({ error: "Apenas perfis oficiais podem publicar notícias." });
-      }
-    }
-
-    const [created] = await db
-      .insert(post)
-      .values({
+    try {
+      const created = await createPostUseCase.execute({
         authorId: session.user.id,
         type: body.type,
         content: "content" in body ? (body.content ?? null) : null,
@@ -145,10 +96,22 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
         eventTime: "eventTime" in body ? body.eventTime : null,
         eventLocation: "eventLocation" in body ? body.eventLocation : null,
         newsTitle: "newsTitle" in body ? body.newsTitle : null,
-      })
-      .returning();
+        userRole:
+          ((session.user as Record<string, unknown>).role as string) ?? "aluno",
+        userCargo:
+          ((session.user as Record<string, unknown>).cargo as string) ??
+          "aluno",
+      });
 
-    return reply.status(201).send(created);
+      return reply.status(201).send(created);
+    } catch (err) {
+      if (err instanceof Error && err.message === "FORBIDDEN") {
+        return reply
+          .status(403)
+          .send({ error: "Apenas perfis oficiais podem publicar notícias." });
+      }
+      throw err;
+    }
   });
 
   /**
@@ -163,25 +126,30 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
 
     const { id } = request.params as { id: string };
 
-    const [existing] = await db
-      .select({ authorId: post.authorId })
-      .from(post)
-      .where(eq(post.id, id))
-      .limit(1);
+    try {
+      await deletePostUseCase.execute({
+        postId: id,
+        userId: session.user.id,
+        userRole:
+          ((session.user as Record<string, unknown>).role as string) ?? "aluno",
+      });
 
-    if (!existing) {
-      return reply.status(404).send({ error: "Publicação não encontrada." });
+      return reply.status(204).send();
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === "NOT_FOUND") {
+          return reply
+            .status(404)
+            .send({ error: "Publicação não encontrada." });
+        }
+        if (err.message === "FORBIDDEN") {
+          return reply
+            .status(403)
+            .send({ error: "Sem permissão para remover esta publicação." });
+        }
+      }
+      throw err;
     }
-
-    const role = session.user.role ?? "";
-    if (existing.authorId !== session.user.id && role !== "admin") {
-      return reply
-        .status(403)
-        .send({ error: "Sem permissão para remover esta publicação." });
-    }
-
-    await db.delete(post).where(eq(post.id, id));
-    return reply.status(204).send();
   });
 
   /**
@@ -196,34 +164,29 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
 
     const { id: postId } = request.params as { id: string };
 
-    const [existing] = await db
-      .select({ type: post.type })
-      .from(post)
-      .where(eq(post.id, postId))
-      .limit(1);
+    try {
+      const result = await toggleRsvpUseCase.execute({
+        postId,
+        userId: session.user.id,
+      });
 
-    if (!existing) {
-      return reply.status(404).send({ error: "Publicação não encontrada." });
+      return reply.send(result);
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === "NOT_FOUND") {
+          return reply
+            .status(404)
+            .send({ error: "Publicação não encontrada." });
+        }
+        if (err.message.startsWith("INVALID:")) {
+          return reply
+            .status(400)
+            .send({
+              error: "RSVP só é válido para publicações do tipo evento.",
+            });
+        }
+      }
+      throw err;
     }
-
-    if (existing.type !== "event") {
-      return reply
-        .status(400)
-        .send({ error: "RSVP só é válido para publicações do tipo evento." });
-    }
-
-    const [existingRsvp] = await db
-      .select({ id: rsvp.id })
-      .from(rsvp)
-      .where(and(eq(rsvp.postId, postId), eq(rsvp.userId, session.user.id)))
-      .limit(1);
-
-    if (existingRsvp) {
-      await db.delete(rsvp).where(eq(rsvp.id, existingRsvp.id));
-      return reply.send({ hasRsvp: false });
-    }
-
-    await db.insert(rsvp).values({ postId, userId: session.user.id });
-    return reply.send({ hasRsvp: true });
   });
 }

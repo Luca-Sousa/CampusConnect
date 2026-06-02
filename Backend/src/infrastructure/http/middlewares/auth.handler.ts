@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { auth } from "./auth";
+import { auth } from "../../auth/better-auth.js";
 
 /**
  * Handler Fastify para todas as rotas do Better Auth (`/api/auth/*`).
@@ -12,7 +12,6 @@ export async function authHandler(
   reply: FastifyReply,
 ): Promise<void> {
   const host = request.headers.host ?? "localhost";
-  // Em produção (Vercel/proxy) usa x-forwarded-proto para detectar HTTPS corretamente
   const protocol =
     (request.headers["x-forwarded-proto"] as string) ?? request.protocol;
   const url = `${protocol}://${host}${request.url}`;
@@ -23,7 +22,6 @@ export async function authHandler(
       (request.headers["content-type"] as string) ?? "application/json",
     origin,
   };
-
   if (request.headers.cookie) headers["cookie"] = request.headers.cookie;
   if (request.headers.authorization)
     headers["authorization"] = request.headers.authorization as string;
@@ -42,6 +40,8 @@ export async function authHandler(
   const response = await auth.handler(webRequest);
 
   reply.status(response.status);
-  response.headers.forEach((value, key) => reply.header(key, value));
+  response.headers.forEach((value: string, key: string) =>
+    reply.header(key, value),
+  );
   return reply.send(Buffer.from(await response.arrayBuffer()));
 }

@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import { buildApp } from "../src/app";
+import { buildApp } from "../src/infrastructure/http/app.js";
 
 // O app é criado uma vez e reutilizado em invocações quentes (warm starts)
 const app = buildApp();

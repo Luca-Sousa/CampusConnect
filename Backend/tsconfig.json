@@ -1,13 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "lib": ["ES2023"],
-    "module": "nodenext",
-    "target": "ES2022",
+    "target": "ES2024",
+    "module": "commonjs",
+    "lib": ["ES2024"],
     "strict": true,
+    "outDir": "dist",
+    "rootDir": "src",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node16",
-    "outDir": "dist"
-  }
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", "dist", "api", "drizzle.config.ts", "index.ts"]
 }

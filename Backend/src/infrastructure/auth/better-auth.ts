@@ -1,18 +1,23 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { i18n } from "@better-auth/i18n";
-import { db } from "../drizzle/client";
-import { user, session, account, verification } from "../drizzle/schema/auth";
-import { env } from "../env";
-import { ptBR } from "./auth-i18n";
-import { authDatabaseHooks } from "./auth-hooks";
 import { emailOTP } from "better-auth/plugins";
-import { sendEmail } from "./email";
+import { db } from "../database/client.js";
+import {
+  user,
+  session,
+  account,
+  verification,
+} from "../database/schema/auth.schema.js";
+import { env } from "../../shared/env.js";
+import { ptBR } from "./i18n.js";
+import { authDatabaseHooks } from "./hooks.js";
+import { emailService } from "../email/nodemailer.service.js";
 import {
   buildOtpEmailHtml,
   buildResetPasswordOtpEmailHtml,
   buildSignInOtpEmailHtml,
-} from "./email-templates";
+} from "../email/templates.js";
 
 type OtpType =
   | "email-verification"
@@ -87,7 +92,7 @@ export const auth = betterAuth({
       async sendVerificationOTP({ email, otp, type }) {
         const config = OTP_EMAIL_CONFIG[type as OtpType];
         if (!config) return;
-        await sendEmail({
+        await emailService.send({
           to: email,
           subject: config.subject,
           html: config.buildHtml(otp),

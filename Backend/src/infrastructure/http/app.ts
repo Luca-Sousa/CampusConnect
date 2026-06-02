@@ -5,28 +5,37 @@ import {
   validatorCompiler,
   ZodTypeProvider,
 } from "fastify-type-provider-zod";
-import { errorHandler } from "./error-handler";
 import fastifyCors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
-import { env } from "./env";
-import { authOpenApiPaths } from "./lib/auth-openapi";
-import { authHandler } from "./lib/auth-handler";
-import { notificationsRoute } from "./routes/notifications-route";
-import { postsRoute } from "./routes/posts-route";
+import { errorHandler } from "./error-handler.js";
+import { env } from "../../shared/env.js";
+import { authOpenApiPaths } from "./openapi/auth.openapi.js";
+import { authHandler } from "./middlewares/auth.handler.js";
+import { notificationsRoute } from "./routes/notifications.route.js";
+import { postsRoute } from "./routes/posts.route.js";
 
 export function buildApp() {
   const app = fastify().withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
-
   app.setErrorHandler(errorHandler);
 
+  const allowedOrigins = env.FRONTEND_URL.split(",").map((o) => o.trim());
+
   app.register(fastifyCors, {
-    origin: env.FRONTEND_URL,
+    origin: (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        cb(null, true);
+      } else {
+        cb(new Error(`Origin not allowed: ${origin}`), false);
+      }
+    },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    exposedHeaders: ["Set-Cookie"],
   });
 
   app.register(fastifySwagger, {
@@ -46,9 +55,7 @@ export function buildApp() {
     },
   });
 
-  app.register(fastifySwaggerUi, {
-    routePrefix: "/docs",
-  });
+  app.register(fastifySwaggerUi, { routePrefix: "/docs" });
 
   app.register(notificationsRoute);
   app.register(postsRoute);

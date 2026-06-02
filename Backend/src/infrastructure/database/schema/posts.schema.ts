@@ -8,7 +8,7 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-import { user } from "./auth";
+import { user } from "./auth.schema.js";
 
 export const postTypeEnum = pgEnum("post_type", [
   "text",
