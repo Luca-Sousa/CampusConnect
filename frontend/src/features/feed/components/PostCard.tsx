@@ -4,18 +4,15 @@ import {
   ClockIcon,
   MapPinIcon,
   MessageCircleIcon,
-  MoreHorizontalIcon,
   NewspaperIcon,
   Share2Icon,
   ThumbsUpIcon,
-  Trash2Icon,
   UsersIcon,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CARGO_CONFIG } from "@/features/auth/constants";
-import { useDeletePost } from "../hooks/use-delete-post";
 import { useToggleRsvp } from "../hooks/use-toggle-rsvp";
 import type { EventPost, ImagePost, NewsPost, Post, TextPost } from "../types";
 import {
@@ -24,10 +21,12 @@ import {
   formatRelativeTime,
   getInitials,
 } from "../utils/format";
+import { PostActionsMenu } from "./PostActionsMenu";
 
 interface PostCardProps {
   post: Post;
   currentUserId?: string;
+  onEdit: (post: Post) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -37,13 +36,13 @@ interface PostCardProps {
 interface PostHeaderProps {
   post: Post;
   currentUserId?: string;
+  onEdit: (post: Post) => void;
 }
 
-function PostHeader({ post, currentUserId }: PostHeaderProps) {
+function PostHeader({ post, currentUserId, onEdit }: PostHeaderProps) {
   const authorName = post.author?.name ?? "Usuário";
   const cargo = post.author?.cargo ?? "aluno";
   const cargoConfig = CARGO_CONFIG[cargo] ?? CARGO_CONFIG["aluno"];
-  const { mutate: deletePost } = useDeletePost();
 
   return (
     <div className="flex items-center justify-between px-4 pt-4 pb-2">
@@ -71,14 +70,7 @@ function PostHeader({ post, currentUserId }: PostHeaderProps) {
       </div>
 
       {currentUserId === post.authorId && (
-        <Button
-          onClick={() => deletePost(post.id)}
-          aria-label="Remover publicação"
-          size="icon"
-          variant="destructive"
-        >
-          <Trash2Icon className="size-4" />
-        </Button>
+        <PostActionsMenu post={post} onEdit={onEdit} />
       )}
     </div>
   );
@@ -91,11 +83,11 @@ function PostHeader({ post, currentUserId }: PostHeaderProps) {
 interface BannerAuthorRowProps {
   post: Post;
   currentUserId?: string;
+  onEdit: (post: Post) => void;
 }
 
-function BannerAuthorRow({ post, currentUserId }: BannerAuthorRowProps) {
+function BannerAuthorRow({ post, currentUserId, onEdit }: BannerAuthorRowProps) {
   const authorName = post.author?.name ?? "Usuário";
-  const { mutate: deletePost } = useDeletePost();
 
   return (
     <div className="flex items-center justify-between">
@@ -115,13 +107,7 @@ function BannerAuthorRow({ post, currentUserId }: BannerAuthorRowProps) {
         </div>
       </div>
       {currentUserId === post.authorId && (
-        <button
-          onClick={() => deletePost(post.id)}
-          className="p-1.5 rounded-full hover:bg-white/15 text-white/70 hover:text-white transition-colors"
-          aria-label="Remover publicação"
-        >
-          <MoreHorizontalIcon className="h-4 w-4" />
-        </button>
+        <PostActionsMenu post={post} onEdit={onEdit} variant="banner" />
       )}
     </div>
   );
@@ -169,14 +155,16 @@ function ActionBar() {
 function TextPostCard({
   post,
   currentUserId,
+  onEdit,
 }: {
   post: TextPost;
   currentUserId?: string;
+  onEdit: (post: Post) => void;
 }) {
   return (
     <Card className="shadow-sm overflow-hidden">
       <CardContent className="p-0">
-        <PostHeader post={post} currentUserId={currentUserId} />
+        <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
         <p className="px-4 pb-3 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
           {post.content}
         </p>
@@ -189,14 +177,16 @@ function TextPostCard({
 function ImagePostCard({
   post,
   currentUserId,
+  onEdit,
 }: {
   post: ImagePost;
   currentUserId?: string;
+  onEdit: (post: Post) => void;
 }) {
   return (
     <Card className="shadow-sm overflow-hidden">
       <CardContent className="p-0">
-        <PostHeader post={post} currentUserId={currentUserId} />
+        <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
         {post.content && (
           <p className="px-4 pb-3 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
             {post.content}
@@ -216,9 +206,11 @@ function ImagePostCard({
 function EventPostCard({
   post,
   currentUserId,
+  onEdit,
 }: {
   post: EventPost;
   currentUserId?: string;
+  onEdit: (post: Post) => void;
 }) {
   const { mutate: toggleRsvp, isPending } = useToggleRsvp();
 
@@ -226,7 +218,11 @@ function EventPostCard({
     <article className="rounded-xl border border-violet-200/60 dark:border-violet-800/40 bg-card shadow-sm overflow-hidden">
       {/* Gradient banner com autor e título do evento */}
       <div className="bg-linear-to-br from-violet-600 to-indigo-700 px-4 pt-4 pb-5">
-        <BannerAuthorRow post={post} currentUserId={currentUserId} />
+        <BannerAuthorRow
+          post={post}
+          currentUserId={currentUserId}
+          onEdit={onEdit}
+        />
         <div className="mt-4 flex items-start gap-3">
           <div className="rounded-lg bg-white/15 p-2 shrink-0 mt-0.5">
             <CalendarIcon className="h-5 w-5 text-white" />
@@ -305,9 +301,11 @@ function EventPostCard({
 function NewsPostCard({
   post,
   currentUserId,
+  onEdit,
 }: {
   post: NewsPost;
   currentUserId?: string;
+  onEdit: (post: Post) => void;
 }) {
   return (
     <article className="rounded-xl border border-orange-200/60 dark:border-orange-800/40 bg-card shadow-sm overflow-hidden">
@@ -323,7 +321,7 @@ function NewsPostCard({
       </div>
 
       {/* Autor abaixo do banner */}
-      <PostHeader post={post} currentUserId={currentUserId} />
+      <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
 
       {/* Imagem opcional do comunicado */}
       {post.imageUrl && (
@@ -350,15 +348,39 @@ function NewsPostCard({
 // Public API
 // ---------------------------------------------------------------------------
 
-export function PostCard({ post, currentUserId }: PostCardProps) {
-  switch (post.type) {  
+export function PostCard({ post, currentUserId, onEdit }: PostCardProps) {
+  switch (post.type) {
     case "text":
-      return <TextPostCard post={post} currentUserId={currentUserId} />;
+      return (
+        <TextPostCard
+          post={post}
+          currentUserId={currentUserId}
+          onEdit={onEdit}
+        />
+      );
     case "image":
-      return <ImagePostCard post={post} currentUserId={currentUserId} />;
+      return (
+        <ImagePostCard
+          post={post}
+          currentUserId={currentUserId}
+          onEdit={onEdit}
+        />
+      );
     case "event":
-      return <EventPostCard post={post} currentUserId={currentUserId} />;
+      return (
+        <EventPostCard
+          post={post}
+          currentUserId={currentUserId}
+          onEdit={onEdit}
+        />
+      );
     case "news":
-      return <NewsPostCard post={post} currentUserId={currentUserId} />;
+      return (
+        <NewsPostCard
+          post={post}
+          currentUserId={currentUserId}
+          onEdit={onEdit}
+        />
+      );
   }
 }

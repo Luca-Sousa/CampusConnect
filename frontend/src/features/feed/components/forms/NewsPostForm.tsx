@@ -5,46 +5,80 @@ import { showError, showSuccess } from "@/lib/toast"
 import { FormInput } from "@/components/form/form-input"
 import { FormTextarea } from "@/components/form/form-textarea"
 import { useCreatePost } from "../../hooks/use-create-post"
+import { useUpdatePost } from "../../hooks/use-update-post"
 import {
   NEWS_CONTENT_MAX,
   newsPostSchema,
   type NewsPostValues,
 } from "../../schemas"
+import { buildEditBody } from "../../utils/diff"
 import { PostImageUpload } from "./post-image-upload"
 
 export const NEWS_POST_FORM_ID = "post-form-news"
 
 interface NewsPostFormProps {
   onSuccess: () => void
+  mode?: "create" | "edit"
+  postId?: string
+  defaultValues?: Partial<NewsPostValues>
 }
 
-export function NewsPostForm({ onSuccess }: NewsPostFormProps) {
-  const { mutateAsync } = useCreatePost()
+export function NewsPostForm({
+  onSuccess,
+  mode = "create",
+  postId,
+  defaultValues,
+}: NewsPostFormProps) {
+  const { mutateAsync: createPost } = useCreatePost()
+  const { mutateAsync: updatePost } = useUpdatePost()
 
   const form = useForm({
     defaultValues: {
-      newsTitle: "",
-      content: "",
-      imageUrl: "",
+      newsTitle: defaultValues?.newsTitle ?? "",
+      content: defaultValues?.content ?? "",
+      imageUrl: defaultValues?.imageUrl ?? "",
     } as NewsPostValues,
     validators: { onSubmit: newsPostSchema },
     onSubmit: async ({ value }) => {
       try {
-        const body: Record<string, unknown> = {
-          type: "news",
-          newsTitle: value.newsTitle.trim(),
-          content: value.content.trim(),
+        if (mode === "edit" && postId) {
+          const body = buildEditBody(
+            {
+              newsTitle: value.newsTitle.trim(),
+              content: value.content,
+              imageUrl: value.imageUrl,
+            },
+            {
+              newsTitle: defaultValues?.newsTitle ?? "",
+              content: defaultValues?.content ?? "",
+              imageUrl: defaultValues?.imageUrl ?? "",
+            },
+          )
+          if (Object.keys(body).length === 0) {
+            onSuccess()
+            return
+          }
+          await updatePost({ id: postId, body })
+          showSuccess("Comunicado atualizado com sucesso!")
+        } else {
+          const body: Record<string, unknown> = {
+            type: "news",
+            newsTitle: value.newsTitle.trim(),
+            content: value.content.trim(),
+          }
+          const imageUrl = value.imageUrl?.trim()
+          if (imageUrl) body.imageUrl = imageUrl
+          await createPost(body)
+          showSuccess("Comunicado publicado com sucesso!")
         }
-        const imageUrl = value.imageUrl?.trim()
-        if (imageUrl) body.imageUrl = imageUrl
-        await mutateAsync(body)
-        showSuccess("Comunicado publicado com sucesso!")
         onSuccess()
       } catch (error) {
         showError(
           error instanceof Error
             ? error.message
-            : "Erro ao publicar.",
+            : mode === "edit"
+              ? "Erro ao atualizar."
+              : "Erro ao publicar.",
         )
       }
     },

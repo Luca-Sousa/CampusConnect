@@ -112,3 +112,53 @@ export type TextPostValues = z.infer<typeof textPostSchema>
 export type ImagePostValues = z.infer<typeof imagePostSchema>
 export type EventPostValues = z.infer<typeof eventPostSchema>
 export type NewsPostValues = z.infer<typeof newsPostSchema>
+
+/**
+ * Schema de edição de evento — igual ao de criação MAS sem o `superRefine`
+ * temporal (passado + mesmo-dia). A UI desabilita a edição de eventos que
+ * já começaram, então não precisamos rejeitar a salvamento. Mantemos a
+ * invariante `eventEndTime > eventTime` para o usuário não salvar um range
+ * inválido.
+ */
+export const eventPostEditSchema = z
+  .object({
+    eventTitle: z
+      .string()
+      .min(1, "Título do evento obrigatório.")
+      .max(EVENT_TITLE_MAX, `Título deve ter no máximo ${EVENT_TITLE_MAX} caracteres.`),
+    eventDate: z
+      .string()
+      .regex(ISO_DATE, "Data inválida.")
+      .min(1, "Data de início obrigatória."),
+    eventTime: z
+      .string()
+      .regex(ISO_TIME, "Horário inválido.")
+      .min(1, "Horário de início obrigatório."),
+    eventEndTime: z
+      .union([z.literal(""), z.string().regex(ISO_TIME, "Horário final inválido.")])
+      .optional(),
+    eventLocation: z
+      .string()
+      .min(1, "Local obrigatório.")
+      .max(EVENT_LOCATION_MAX, `Local deve ter no máximo ${EVENT_LOCATION_MAX} caracteres.`),
+    content: z
+      .string()
+      .max(EVENT_CONTENT_MAX, `Descrição deve ter no máximo ${EVENT_CONTENT_MAX} caracteres.`)
+      .optional()
+      .or(z.literal("")),
+    imageUrl: z
+      .string()
+      .optional()
+      .or(z.literal("")),
+  })
+  .superRefine((val, ctx) => {
+    if (val.eventEndTime && val.eventEndTime <= val.eventTime) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["eventEndTime"],
+        message: "Horário final deve ser posterior ao inicial.",
+      })
+    }
+  })
+
+export type EventPostEditValues = z.infer<typeof eventPostEditSchema>

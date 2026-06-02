@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { EventPost } from "../types";
 
 /**
  * Extrai as iniciais de um nome (máximo 2 letras).
@@ -91,4 +92,24 @@ export function formatEventTimeRange(
   end: string | null,
 ): string {
   return end ? `${start} – ${end}` : start;
+}
+
+/**
+ * Verifica se o horário de início de um evento já passou.
+ *
+ * Considera a combinação de `eventDate` (YYYY-MM-DD) e `eventTime` (HH:mm)
+ * — o `eventEndTime` é ignorado porque a "passagem" do evento é definida
+ * pelo seu início. Retorna `false` se a data/hora não forem parseáveis
+ * (eventos com dados corrompidos continuam editáveis por segurança).
+ */
+export function isEventInPast(
+  event: Pick<EventPost, "eventDate" | "eventTime">,
+): boolean {
+  if (!event.eventDate || !event.eventTime) return false;
+  // Combina as duas strings em um ISO local (YYYY-MM-DDTHH:mm) — o
+  // `Date` do JS interpreta sem sufixo como horário local, que é o
+  // que o usuário espera ao ver o card.
+  const d = parseEventDate(`${event.eventDate}T${event.eventTime}`);
+  if (!d) return false;
+  return d.getTime() < Date.now();
 }

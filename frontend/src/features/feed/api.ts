@@ -36,6 +36,24 @@ export async function deletePost(id: string): Promise<void> {
   if (!res.ok) throw new Error("Erro ao remover publicação.");
 }
 
+export async function updatePost(id: string, body: unknown): Promise<Post> {
+  const res = await fetch(`${env.API_URL}/api/posts/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(
+      (data as { message?: string; error?: string }).message ??
+        (data as { error?: string }).error ??
+        "Erro ao atualizar publicação.",
+    );
+  }
+  return res.json();
+}
+
 export async function toggleRsvp(
   postId: string,
 ): Promise<{ hasRsvp: boolean }> {

@@ -7,55 +7,105 @@ import { FormInput } from "@/components/form/form-input"
 import { FormTextarea } from "@/components/form/form-textarea"
 import { EventDateTimePicker } from "@/components/form/event-date-time-picker"
 import { useCreatePost } from "../../hooks/use-create-post"
+import { useUpdatePost } from "../../hooks/use-update-post"
 import {
   EVENT_CONTENT_MAX,
+  eventPostEditSchema,
   eventPostSchema,
   type EventPostValues,
 } from "../../schemas"
+import { buildEditBody } from "../../utils/diff"
 import { PostImageUpload } from "./post-image-upload"
 
 export const EVENT_POST_FORM_ID = "post-form-event"
 
 interface EventPostFormProps {
   onSuccess: () => void
+  mode?: "create" | "edit"
+  postId?: string
+  defaultValues?: Partial<EventPostValues>
 }
 
-export function EventPostForm({ onSuccess }: EventPostFormProps) {
-  const { mutateAsync } = useCreatePost()
+export function EventPostForm({
+  onSuccess,
+  mode = "create",
+  postId,
+  defaultValues,
+}: EventPostFormProps) {
+  const { mutateAsync: createPost } = useCreatePost()
+  const { mutateAsync: updatePost } = useUpdatePost()
+
+  // Em modo edit usamos o schema "relaxado" (sem checagem de passado) para
+  // cobrir o caso (improvável mas possível) de um post com data passada
+  // chegar até o form por race condition ou reload.
+  const schema = mode === "edit" ? eventPostEditSchema : eventPostSchema
 
   const form = useForm({
     defaultValues: {
-      eventTitle: "",
-      eventDate: "",
-      eventTime: "",
-      eventEndTime: "",
-      eventLocation: "",
-      content: "",
-      imageUrl: "",
+      eventTitle: defaultValues?.eventTitle ?? "",
+      eventDate: defaultValues?.eventDate ?? "",
+      eventTime: defaultValues?.eventTime ?? "",
+      eventEndTime: defaultValues?.eventEndTime ?? "",
+      eventLocation: defaultValues?.eventLocation ?? "",
+      content: defaultValues?.content ?? "",
+      imageUrl: defaultValues?.imageUrl ?? "",
     } as EventPostValues,
-    validators: { onSubmit: eventPostSchema },
+    validators: { onSubmit: schema },
     onSubmit: async ({ value }) => {
       try {
-        const body: Record<string, unknown> = {
-          type: "event",
-          eventTitle: value.eventTitle.trim(),
-          eventDate: value.eventDate,
-          eventTime: value.eventTime,
-          eventEndTime: value.eventEndTime || null,
-          eventLocation: value.eventLocation.trim(),
+        if (mode === "edit" && postId) {
+          // Backend espera `null` para `eventEndTime` quando vazio.
+          const eventEndTime = value.eventEndTime || null
+          const body = buildEditBody(
+            {
+              eventTitle: value.eventTitle.trim(),
+              eventDate: value.eventDate,
+              eventTime: value.eventTime,
+              eventEndTime,
+              eventLocation: value.eventLocation.trim(),
+              content: value.content,
+              imageUrl: value.imageUrl,
+            },
+            {
+              eventTitle: defaultValues?.eventTitle ?? "",
+              eventDate: defaultValues?.eventDate ?? "",
+              eventTime: defaultValues?.eventTime ?? "",
+              eventEndTime: defaultValues?.eventEndTime || null,
+              eventLocation: defaultValues?.eventLocation ?? "",
+              content: defaultValues?.content ?? "",
+              imageUrl: defaultValues?.imageUrl ?? "",
+            },
+          )
+          if (Object.keys(body).length === 0) {
+            onSuccess()
+            return
+          }
+          await updatePost({ id: postId, body })
+          showSuccess("Evento atualizado com sucesso!")
+        } else {
+          const body: Record<string, unknown> = {
+            type: "event",
+            eventTitle: value.eventTitle.trim(),
+            eventDate: value.eventDate,
+            eventTime: value.eventTime,
+            eventEndTime: value.eventEndTime || null,
+            eventLocation: value.eventLocation.trim(),
+          }
+          const trimmed = value.content?.trim()
+          if (trimmed) body.content = trimmed
+          const imageUrl = value.imageUrl?.trim()
+          if (imageUrl) body.imageUrl = imageUrl
+          await createPost(body)
+          showSuccess("Evento publicado com sucesso!")
         }
-        const trimmed = value.content?.trim()
-        if (trimmed) body.content = trimmed
-        const imageUrl = value.imageUrl?.trim()
-        if (imageUrl) body.imageUrl = imageUrl
-        await mutateAsync(body)
-        showSuccess("Evento publicado com sucesso!")
         onSuccess()
       } catch (error) {
         showError(
           error instanceof Error
             ? error.message
-            : "Erro ao publicar.",
+            : mode === "edit"
+              ? "Erro ao atualizar."
+              : "Erro ao publicar.",
         )
       }
     },

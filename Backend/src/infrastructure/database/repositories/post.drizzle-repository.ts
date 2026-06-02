@@ -10,6 +10,7 @@ import type {
   Post,
   PostWithAuthor,
   CreatePostInput,
+  UpdatePostInput,
 } from "../../../domain/entities/post.js";
 
 export class PostDrizzleRepository implements IPostRepository {
@@ -92,6 +93,41 @@ export class PostDrizzleRepository implements IPostRepository {
 
   async delete(id: string): Promise<void> {
     await db.delete(post).where(eq(post.id, id));
+  }
+
+  /**
+   * Atualiza apenas os campos presentes em `input` (partial update). O schema
+   * Drizzle já cuida de atualizar `updatedAt` automaticamente via
+   * `$onUpdate(() => new Date())`.
+   *
+   * Convenção de "ausente" vs "explícito":
+   *  - Campo `undefined` em `input` → NÃO incluir no UPDATE (preserva valor).
+   *  - Campo `null` em `input` → gravar `null` explicitamente (limpar).
+   *  - Campo com string → gravar o valor.
+   *
+   * Usamos `!== undefined` em vez de `"X" in input` porque em TypeScript
+   * objetos sempre têm todas as chaves opcionais declaradas — a distinção
+   * semântica entre "ausente" e "presente com undefined" só é capturável
+   * pelo valor, não pela presença da chave.
+   */
+  async update(id: string, input: UpdatePostInput): Promise<Post> {
+    const updates: Partial<typeof post.$inferInsert> = {};
+    if (input.content !== undefined) updates.content = input.content ?? null;
+    if (input.imageUrl !== undefined) updates.imageUrl = input.imageUrl ?? null;
+    if (input.eventTitle !== undefined) updates.eventTitle = input.eventTitle ?? null;
+    if (input.eventDate !== undefined) updates.eventDate = input.eventDate ?? null;
+    if (input.eventTime !== undefined) updates.eventTime = input.eventTime ?? null;
+    if (input.eventEndTime !== undefined) updates.eventEndTime = input.eventEndTime ?? null;
+    if (input.eventLocation !== undefined) updates.eventLocation = input.eventLocation ?? null;
+    if (input.newsTitle !== undefined) updates.newsTitle = input.newsTitle ?? null;
+
+    const [updated] = await db
+      .update(post)
+      .set(updates)
+      .where(eq(post.id, id))
+      .returning();
+
+    return updated as Post;
   }
 
   async findRsvp(

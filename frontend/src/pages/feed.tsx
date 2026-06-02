@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
 import { usePosts } from "@/features/feed/hooks/use-posts";
 import { PostComposer } from "@/features/feed/components/PostComposer";
 import { PostCard } from "@/features/feed/components/PostCard";
+import type { Post } from "@/features/feed/types";
 
 function PostSkeleton() {
   return (
@@ -23,10 +25,14 @@ function PostSkeleton() {
 const FeedPage = () => {
   const { data: session } = useSession();
   const { data: posts = [], isLoading } = usePosts();
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
 
   return (
     <div className="max-w-2xl mx-auto w-full px-4 py-6 flex flex-col gap-5">
-      <PostComposer />
+      <PostComposer
+        editingPost={editingPost}
+        onEditClose={() => setEditingPost(null)}
+      />
 
       {isLoading ? (
         <>
@@ -44,6 +50,7 @@ const FeedPage = () => {
             key={post.id}
             post={post}
             currentUserId={session?.user?.id}
+            onEdit={setEditingPost}
           />
         ))
       )}

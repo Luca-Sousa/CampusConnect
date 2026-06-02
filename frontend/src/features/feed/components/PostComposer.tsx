@@ -27,6 +27,13 @@ import {
 import { useSession } from "@/lib/auth-client"
 import { OFFICIAL_CARGOS } from "@/features/auth/constants"
 import type { CargoValue } from "@/features/auth/types"
+import type {
+  EventPost,
+  ImagePost,
+  NewsPost,
+  Post,
+  TextPost,
+} from "../types"
 import {
   EventPostForm,
   EVENT_POST_FORM_ID,
@@ -60,10 +67,72 @@ const SUBMIT_LABEL_BY_TAB: Record<PostTab, string> = {
   news: "Publicar comunicado",
 }
 
-export function PostComposer() {
+const SUBMIT_LABEL_EDIT_BY_TAB: Record<PostTab, string> = {
+  text: "Salvar alterações",
+  image: "Salvar alterações",
+  event: "Salvar alterações",
+  news: "Salvar alterações",
+}
+
+interface PostComposerProps {
+  /**
+   * Quando definido, o composer abre em modo **edit** pré-preenchendo o
+   * formulário com os dados do post. Quando volta a `null` (após fechar),
+   * o composer volta ao modo de criação.
+   */
+  editingPost?: Post | null
+  /** Callback quando o usuário fecha o composer em modo edit. */
+  onEditClose?: () => void
+}
+
+// ---------------------------------------------------------------------------
+// Helpers de extração de defaults por tipo
+// ---------------------------------------------------------------------------
+
+function textDefaults(post: TextPost) {
+  return { content: post.content ?? "" }
+}
+
+function imageDefaults(post: ImagePost) {
+  return { imageUrl: post.imageUrl, content: post.content ?? "" }
+}
+
+function eventDefaults(post: EventPost) {
+  return {
+    eventTitle: post.eventTitle,
+    eventDate: post.eventDate,
+    eventTime: post.eventTime,
+    eventEndTime: post.eventEndTime ?? "",
+    eventLocation: post.eventLocation,
+    content: post.content ?? "",
+    imageUrl: post.imageUrl ?? "",
+  }
+}
+
+function newsDefaults(post: NewsPost) {
+  return {
+    newsTitle: post.newsTitle,
+    content: post.content ?? "",
+    imageUrl: post.imageUrl ?? "",
+  }
+}
+
+export function PostComposer({
+  editingPost = null,
+  onEditClose,
+}: PostComposerProps = {}) {
   const { data: session } = useSession()
-  const [open, setOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<PostTab>("text")
+
+  // Estado controlado pelo usuário (apenas no fluxo de criação).
+  // No modo edit, `open` e `activeTab` são DERIVADOS de `editingPost`
+  // para evitar `setState` em `useEffect` (cascading renders) — vide
+  // https://react.dev/learn/you-might-not-need-an-effect
+  const [createOpen, setCreateOpen] = useState(false)
+  const [createTab, setCreateTab] = useState<PostTab>("text")
+
+  const isEdit = editingPost != null
+  const open = isEdit || createOpen
+  const activeTab: PostTab = isEdit ? editingPost.type : createTab
 
   const authorName = session?.user?.name ?? "Você"
   const userCargo =
@@ -81,13 +150,98 @@ export function PostComposer() {
     .join("")
     .toUpperCase()
 
-  const handleSuccess = () => {
-    setOpen(false)
-    setActiveTab("text")
+  const handleOpenChange = (next: boolean) => {
+    setCreateOpen(next)
+    if (!next && isEdit) {
+      onEditClose?.()
+    }
   }
 
+  const handleSuccess = () => {
+    setCreateOpen(false)
+    if (isEdit) {
+      onEditClose?.()
+    } else {
+      setCreateTab("text")
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Form rendering
+  // ---------------------------------------------------------------------------
+
+  const renderEditForm = () => {
+    if (!editingPost) return null
+    switch (editingPost.type) {
+      case "text":
+        return (
+          <TextPostForm
+            mode="edit"
+            postId={editingPost.id}
+            defaultValues={textDefaults(editingPost)}
+            onSuccess={handleSuccess}
+          />
+        )
+      case "image":
+        return (
+          <ImagePostForm
+            mode="edit"
+            postId={editingPost.id}
+            defaultValues={imageDefaults(editingPost)}
+            onSuccess={handleSuccess}
+          />
+        )
+      case "event":
+        return (
+          <EventPostForm
+            mode="edit"
+            postId={editingPost.id}
+            defaultValues={eventDefaults(editingPost)}
+            onSuccess={handleSuccess}
+          />
+        )
+      case "news":
+        return (
+          <NewsPostForm
+            mode="edit"
+            postId={editingPost.id}
+            defaultValues={newsDefaults(editingPost)}
+            onSuccess={handleSuccess}
+          />
+        )
+    }
+  }
+
+  const renderCreateForms = () => (
+    <>
+      <TabsContent value="text" className="pt-4">
+        <TextPostForm onSuccess={handleSuccess} />
+      </TabsContent>
+      <TabsContent value="image" className="pt-4">
+        <ImagePostForm onSuccess={handleSuccess} />
+      </TabsContent>
+      <TabsContent value="event" className="pt-4">
+        <EventPostForm onSuccess={handleSuccess} />
+      </TabsContent>
+      {canPostNews && (
+        <TabsContent value="news" className="pt-4">
+          <NewsPostForm onSuccess={handleSuccess} />
+        </TabsContent>
+      )}
+    </>
+  )
+
+  const submitLabel = isEdit
+    ? SUBMIT_LABEL_EDIT_BY_TAB[activeTab]
+    : SUBMIT_LABEL_BY_TAB[activeTab]
+
+  const headerTitle = isEdit ? "Editar publicação" : "Criar publicação"
+  const headerDescription = isEdit
+    ? "Atualize as informações da sua publicação."
+    : "Escolha o tipo de publicação e preencha os campos."
+
   return (
-    <AppDialog open={open} onOpenChange={setOpen}>
+    <AppDialog open={open} onOpenChange={handleOpenChange}>
       <Card className="shadow-sm">
         <CardContent className="p-4 flex flex-col gap-3">
           <div className="flex items-center gap-3">
@@ -100,107 +254,101 @@ export function PostComposer() {
               <Button
                 variant="ghost"
                 className="flex-1 h-auto justify-start rounded-full bg-muted/50 px-4 py-2.5 font-normal text-sm text-muted-foreground hover:bg-muted"
+                onClick={() => {
+                  if (isEdit) onEditClose?.()
+                  setCreateTab("text")
+                }}
               >
                 O que você está pensando?
               </Button>
             </DialogTrigger>
           </div>
 
-          <div className="flex flex-wrap gap-1 pt-1 border-t">
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex-1 gap-2 text-muted-foreground min-w-0"
-                onClick={() => setActiveTab("image")}
-              >
-                <ImageIcon className="h-4 w-4 shrink-0" />
-                <span className="truncate">Foto</span>
-              </Button>
-            </DialogTrigger>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex-1 gap-2 text-muted-foreground min-w-0"
-                onClick={() => setActiveTab("event")}
-              >
-                <CalendarIcon className="h-4 w-4 shrink-0" />
-                <span className="truncate">Evento</span>
-              </Button>
-            </DialogTrigger>
-            {canPostNews && (
+          {!isEdit && (
+            <div className="flex flex-wrap gap-1 pt-1 border-t">
               <DialogTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex-1 gap-2 text-orange-600 min-w-0"
-                  onClick={() => setActiveTab("news")}
+                  className="flex-1 gap-2 text-muted-foreground min-w-0"
+                  onClick={() => setCreateTab("image")}
                 >
-                  <NewspaperIcon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">Notícia</span>
+                  <ImageIcon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">Foto</span>
                 </Button>
               </DialogTrigger>
-            )}
-          </div>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1 gap-2 text-muted-foreground min-w-0"
+                  onClick={() => setCreateTab("event")}
+                >
+                  <CalendarIcon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">Evento</span>
+                </Button>
+              </DialogTrigger>
+              {canPostNews && (
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1 gap-2 text-orange-600 min-w-0"
+                    onClick={() => setCreateTab("news")}
+                  >
+                    <NewspaperIcon className="h-4 w-4 shrink-0" />
+                    <span className="truncate">Notícia</span>
+                  </Button>
+                </DialogTrigger>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
       <AppDialogContent maxWidth="2xl">
         <AppDialogHeader
           icon={PencilLineIcon}
-          title="Criar publicação"
-          description="Escolha o tipo de publicação e preencha os campos."
+          title={headerTitle}
+          description={headerDescription}
         />
 
         <AppDialogBody>
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => setActiveTab(v as PostTab)}
-          >
-            <TabsList
-              className={`grid w-full ${
-                canPostNews ? "grid-cols-4" : "grid-cols-3"
-              }`}
+          {isEdit ? (
+            // Em modo edit a tab é fixa no tipo do post; sem TabsList visível.
+            renderEditForm()
+          ) : (
+            <Tabs
+              value={activeTab}
+              onValueChange={(v) => setCreateTab(v as PostTab)}
             >
-              <TabsTrigger value="text" className="gap-1.5">
-                <TextIcon className="h-3.5 w-3.5" />
-                Texto
-              </TabsTrigger>
-              <TabsTrigger value="image" className="gap-1.5">
-                <ImageIcon className="h-3.5 w-3.5" />
-                Foto
-              </TabsTrigger>
-              <TabsTrigger value="event" className="gap-1.5">
-                <CalendarIcon className="h-3.5 w-3.5" />
-                Evento
-              </TabsTrigger>
-              {canPostNews && (
-                <TabsTrigger value="news" className="gap-1.5">
-                  <NewspaperIcon className="h-3.5 w-3.5" />
-                  Notícia
+              <TabsList
+                className={`grid w-full ${
+                  canPostNews ? "grid-cols-4" : "grid-cols-3"
+                }`}
+              >
+                <TabsTrigger value="text" className="gap-1.5">
+                  <TextIcon className="h-3.5 w-3.5" />
+                  Texto
                 </TabsTrigger>
-              )}
-            </TabsList>
-
-            <TabsContent value="text" className="pt-4">
-              <TextPostForm onSuccess={handleSuccess} />
-            </TabsContent>
-
-            <TabsContent value="image" className="pt-4">
-              <ImagePostForm onSuccess={handleSuccess} />
-            </TabsContent>
-
-            <TabsContent value="event" className="pt-4">
-              <EventPostForm onSuccess={handleSuccess} />
-            </TabsContent>
-
-            {canPostNews && (
-              <TabsContent value="news" className="pt-4">
-                <NewsPostForm onSuccess={handleSuccess} />
-              </TabsContent>
-            )}
-          </Tabs>
+                <TabsTrigger value="image" className="gap-1.5">
+                  <ImageIcon className="h-3.5 w-3.5" />
+                  Foto
+                </TabsTrigger>
+                <TabsTrigger value="event" className="gap-1.5">
+                  <CalendarIcon className="h-3.5 w-3.5" />
+                  Evento
+                </TabsTrigger>
+                {canPostNews && (
+                  <TabsTrigger value="news" className="gap-1.5">
+                    <NewspaperIcon className="h-3.5 w-3.5" />
+                    Notícia
+                  </TabsTrigger>
+                )}
+              </TabsList>
+              {renderCreateForms()}
+            </Tabs>
+          )}
         </AppDialogBody>
 
         <AppDialogFooter>
@@ -209,7 +357,7 @@ export function PostComposer() {
             form={FORM_ID_BY_TAB[activeTab]}
             className="w-full! sm:w-auto"
           >
-            {SUBMIT_LABEL_BY_TAB[activeTab]}
+            {submitLabel}
           </Button>
         </AppDialogFooter>
       </AppDialogContent>
