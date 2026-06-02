@@ -2,13 +2,14 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "ES2024",
-    "module": "commonjs",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "lib": ["ES2024"],
     "strict": true,
     "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
-  "exclude": ["node_modules", "dist", "api", "drizzle.config.ts", "index.ts"]
-}
+  "exclude": ["node_modules", "dist", "api", "drizzle.config.ts"]
+  }

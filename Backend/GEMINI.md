@@ -39,6 +39,8 @@ Este projeto implementa o backend do CampusConnect seguindo os princípios da **
 - **Validação**: [Zod](https://zod.dev/)
 - **E-mail**: [Nodemailer](https://nodemailer.com/)
 - **Banco de Dados**: PostgreSQL
+- **Módulo**: ESM (ECMAScript Modules)
+- **Deployment**: Vercel (Configurado em `vercel.json` e `api/index.ts`)
 
 ## 🚀 Como Executar
 
