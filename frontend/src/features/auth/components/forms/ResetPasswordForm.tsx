@@ -1,7 +1,13 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   InputOTP,
   InputOTPGroup,
@@ -80,20 +86,19 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
   };
 
   return (
-    <Card className="overflow-hidden p-0">
-      <CardContent className="grid p-0 md:grid-cols-2">
-        <form onSubmit={handleSubmit} className="p-6 md:p-8">
-          <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">Nova senha</h1>
-            <p className="text-balance text-muted-foreground">
-              Insira o código enviado para{" "}
-              <span className="font-medium text-foreground">{email}</span> e
-              escolha sua nova senha.
-            </p>
-          </div>
-
+    <Card className="w-full max-w-sm lg:max-w-md">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">Nova senha</CardTitle>
+        <CardDescription>
+          Insira o código enviado para{" "}
+          <span className="font-medium text-foreground">{email}</span> e escolha
+          sua nova senha.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* OTP */}
-          <div className="flex flex-col items-center gap-2 mt-6">
+          <div className="flex flex-col items-center gap-2">
             <Label>Código de verificação</Label>
             <InputOTP
               maxLength={6}
@@ -119,7 +124,7 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
           </div>
 
           {/* Nova senha */}
-          <div className="flex flex-col gap-1.5 mt-6">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="password">Nova senha</Label>
             <Input
               id="password"
@@ -136,7 +141,7 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
           </div>
 
           {/* Confirmar senha */}
-          <div className="flex flex-col gap-1.5 mt-4">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="confirmPassword">Confirmar senha</Label>
             <Input
               id="confirmPassword"
@@ -154,11 +159,11 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
             )}
           </div>
 
-          <Button type="submit" className="w-full mt-6" disabled={isSubmitting}>
+          <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
             {isSubmitting ? "Salvando..." : "Redefinir senha"}
           </Button>
 
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground justify-center mt-4">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground justify-center">
             <span>Não recebeu?</span>
             <Button
               type="button"
@@ -174,13 +179,6 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
             </Button>
           </div>
         </form>
-        <div className="relative hidden bg-muted md:block">
-          <img
-            src="/banner-logo.svg"
-            alt="CampusConnect"
-            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          />
-        </div>
       </CardContent>
     </Card>
   );

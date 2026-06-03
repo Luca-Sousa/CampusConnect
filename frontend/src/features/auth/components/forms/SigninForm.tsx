@@ -31,8 +31,8 @@ export function SigninForm() {
   });
 
   return (
-    <Card className="overflow-hidden p-0">
-      <CardContent className="grid p-0 md:grid-cols-2">
+    <Card className="w-full max-w-md md:max-w-full lg:max-w-4xl xl:max-w-5xl overflow-hidden p-0">
+      <CardContent className="grid p-0 md:grid-cols-[1fr_1.2fr]">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -78,17 +78,9 @@ export function SigninForm() {
               )}
             </form.Field>
 
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-              {(isSubmitting) => (
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Entrando..." : "Entrar"}
-                </Button>
-              )}
-            </form.Subscribe>
+            <Button type="submit" className="w-full">
+              Entrar
+            </Button>
 
             <div className="relative flex items-center gap-3">
               <Separator className="flex-1" />
@@ -114,7 +106,7 @@ export function SigninForm() {
           <img
             src="/banner-logo.svg"
             alt="CampusConnect"
-            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+            className="absolute inset-0 h-full w-full object-cover opacity-75"
           />
         </div>
       </CardContent>

@@ -169,8 +169,8 @@ export function SignupForm() {
     navigate(`/verify-email?email=${encodeURIComponent(email)}`);
 
   return (
-    <Card className="overflow-hidden p-0">
-      <CardContent className="grid p-0 md:grid-cols-2">
+    <Card className="w-full max-w-md md:max-w-full lg:max-w-4xl xl:max-w-5xl overflow-hidden p-0">
+      <CardContent className="grid p-0 md:grid-cols-[1fr_1.2fr]">
         <div className="p-6 md:p-8">
           <div className="flex flex-col items-center gap-2 text-center mb-6">
             <h1 className="text-2xl font-bold">Criar Conta</h1>
@@ -207,7 +207,7 @@ export function SignupForm() {
           <img
             src="/banner-logo.svg"
             alt="CampusConnect"
-            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+            className="absolute inset-0 h-full w-full object-cover opacity-75"
           />
         </div>
       </CardContent>

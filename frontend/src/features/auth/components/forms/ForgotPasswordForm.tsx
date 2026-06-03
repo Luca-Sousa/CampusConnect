@@ -1,7 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 import { emailOtp } from "@/lib/auth-client";
 import { showError, showInfo } from "@/lib/toast";
@@ -26,24 +32,23 @@ export function ForgotPasswordForm() {
   });
 
   return (
-    <Card className="overflow-hidden p-0">
-      <CardContent className="grid p-0 md:grid-cols-2">
+    <Card className="w-full max-w-sm lg:max-w-md">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">Esqueceu a senha?</CardTitle>
+        <CardDescription>
+          Informe seu e-mail institucional e enviaremos um código para redefinir
+          sua senha.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
           }}
-          className="p-6 md:p-8"
+          className="flex flex-col gap-4"
         >
           <FieldGroup>
-            <div className="flex flex-col items-center gap-2 text-center">
-              <h1 className="text-2xl font-bold">Esqueceu a senha?</h1>
-              <p className="text-balance text-muted-foreground">
-                Informe seu e-mail institucional e enviaremos um código para
-                redefinir sua senha.
-              </p>
-            </div>
-
             <form.Field name="email">
               {(field) => (
                 <FormInput
@@ -54,33 +59,26 @@ export function ForgotPasswordForm() {
                 />
               )}
             </form.Field>
-
-            <form.Subscribe selector={(s) => s.isSubmitting}>
-              {(isSubmitting) => (
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Enviando..." : "Enviar código"}
-                </Button>
-              )}
-            </form.Subscribe>
-
-            <div className="flex justify-center">
-              <Button variant="link" size="sm" className="h-auto p-0 text-sm" asChild>
-                <Link to="/signin">Voltar para o login</Link>
-              </Button>
-            </div>
           </FieldGroup>
+
+          <form.Subscribe selector={(s) => s.isSubmitting}>
+            {(isSubmitting) => (
+              <Button
+                type="submit"
+                className="w-full mt-2"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Enviando..." : "Enviar código"}
+              </Button>
+            )}
+          </form.Subscribe>
+
+          <div className="flex justify-center">
+            <Button variant="link" size="sm" className="h-auto p-0 text-sm" asChild>
+              <Link to="/signin">Voltar para o login</Link>
+            </Button>
+          </div>
         </form>
-        <div className="relative hidden bg-muted md:block">
-          <img
-            src="/banner-logo.svg"
-            alt="CampusConnect"
-            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-          />
-        </div>
       </CardContent>
     </Card>
   );
