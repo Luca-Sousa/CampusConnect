@@ -16,6 +16,9 @@ export function useCreateGroup() {
         ...old,
       ]);
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: groupKeys.all });
+    },
     onError: (error: Error) => {
       showError(error.message || "Erro ao criar grupo.");
     },

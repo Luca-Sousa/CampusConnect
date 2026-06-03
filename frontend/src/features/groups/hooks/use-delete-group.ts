@@ -14,6 +14,9 @@ export function useDeleteGroup() {
         old.filter((g) => g.id !== id),
       );
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: groupKeys.all });
+    },
     onError: () => {
       showError("Erro ao remover grupo.");
     },

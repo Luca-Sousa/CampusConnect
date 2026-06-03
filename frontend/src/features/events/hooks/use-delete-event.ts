@@ -14,6 +14,9 @@ export function useDeleteEvent() {
         old.filter((p) => p.id !== id),
       );
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: feedKeys.all });
+    },
     onError: () => {
       showError("Erro ao remover evento.");
     },

@@ -37,7 +37,7 @@ export function useUpdateGroup() {
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: groupKeys.list() });
+      queryClient.invalidateQueries({ queryKey: groupKeys.all });
     },
   });
 }

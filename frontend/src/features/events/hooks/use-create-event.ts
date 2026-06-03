@@ -16,6 +16,9 @@ export function useCreateEvent() {
         ...old,
       ]);
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: feedKeys.all });
+    },
     onError: (error: Error) => {
       showError(error.message || "Erro ao publicar evento.");
     },
