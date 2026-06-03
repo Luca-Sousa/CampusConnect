@@ -12,6 +12,7 @@ export class CreateGroupUseCase {
     return this.groupRepository.create({
       name: command.name,
       description: command.description,
+      icon: command.icon,
       authorId: command.authorId,
     });
   }
