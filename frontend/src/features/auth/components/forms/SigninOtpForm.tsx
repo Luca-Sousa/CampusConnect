@@ -83,7 +83,6 @@ export function SigninOtpForm() {
 
       showSuccess("Login realizado com sucesso!");
 
-      // Notificação de novo acesso — fire-and-forget
       fetch(`${env.API_URL}/api/notifications/login`, {
         method: "POST",
         credentials: "include",

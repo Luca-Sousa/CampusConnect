@@ -1,13 +1,7 @@
 ﻿import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { signUp } from "@/lib/auth-client";
@@ -71,6 +65,7 @@ function AlunoForm({ onSuccess }: { onSuccess: (email: string) => void }) {
               label="Senha"
               type="password"
               placeholder="••••••••"
+              showPasswordToggle
             />
           )}
         </form.Field>
@@ -141,6 +136,7 @@ function ColaboradorForm({ onSuccess }: { onSuccess: (email: string) => void }) 
               label="Senha"
               type="password"
               placeholder="••••••••"
+              showPasswordToggle
             />
           )}
         </form.Field>
@@ -175,38 +171,46 @@ export function SignupForm() {
     navigate(`/verify-email?email=${encodeURIComponent(email)}`);
 
   return (
-    <Card className="w-full max-w-sm lg:max-w-md shadow-2xl border">
-      <CardHeader>
-        <CardTitle className="text-2xl text-center">Criar Conta</CardTitle>
-        <CardDescription className="text-center">
-          Cadastre-se com seu e-mail institucional do IFCE
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="aluno" className="w-full">
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="aluno" className="flex-1">
-              Aluno
-            </TabsTrigger>
-            <TabsTrigger value="colaborador" className="flex-1">
-              Colaborador
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="aluno">
-            <AlunoForm onSuccess={handleSuccess} />
-          </TabsContent>
-          <TabsContent value="colaborador">
-            <ColaboradorForm onSuccess={handleSuccess} />
-          </TabsContent>
-        </Tabs>
-
-        <div className="flex items-center justify-center mt-2">
-          <p className="text-sm text-center text-muted-foreground">
-            Já possui conta?
-          </p>
-          <Link to="/signin">
-            <Button variant="link">Fazer login</Button>
-          </Link>
+    <Card className="w-full max-w-md md:max-w-full lg:max-w-4xl xl:max-w-5xl overflow-hidden p-0">
+      <CardContent className="grid p-0 md:grid-cols-[1fr_1.2fr]">
+        <div className="p-6 md:p-8">
+          <div className="flex flex-col items-center gap-2 text-center mb-6">
+            <h1 className="text-2xl font-bold">Criar Conta</h1>
+            <p className="text-balance text-muted-foreground">
+              Cadastre-se com seu e-mail institucional do IFCE
+            </p>
+          </div>
+          <Tabs defaultValue="aluno" className="w-full">
+            <TabsList className="w-full mb-4">
+              <TabsTrigger value="aluno" className="flex-1">
+                Aluno
+              </TabsTrigger>
+              <TabsTrigger value="colaborador" className="flex-1">
+                Colaborador
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="aluno">
+              <AlunoForm onSuccess={handleSuccess} />
+            </TabsContent>
+            <TabsContent value="colaborador">
+              <ColaboradorForm onSuccess={handleSuccess} />
+            </TabsContent>
+          </Tabs>
+          <div className="flex items-center justify-center mt-2">
+            <p className="text-sm text-center text-muted-foreground">
+              Já possui conta?
+            </p>
+            <Link to="/signin">
+              <Button variant="link">Fazer login</Button>
+            </Link>
+          </div>
+        </div>
+        <div className="relative hidden bg-muted md:block">
+          <img
+            src="/banner-logo.svg"
+            alt="CampusConnect"
+            className="absolute inset-0 h-full w-full object-cover opacity-75"
+          />
         </div>
       </CardContent>
     </Card>

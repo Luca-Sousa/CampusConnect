@@ -10,10 +10,8 @@ const VerifyEmailPage = () => {
 
   if (isPending) return null;
 
-  // Se já verificado, vai direto para o feed
   if (session?.user.emailVerified) return <Navigate to="/feed" replace />;
 
-  // Sem e-mail para verificar, volta ao login
   if (!email) return <Navigate to="/signin" replace />;
 
   return (

@@ -44,7 +44,6 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
       }
 
       showSuccess("E-mail verificado com sucesso!");
-      // Reload completo para garantir que a sessão reflita emailVerified: true
       window.location.replace("/feed");
     },
     [email, isSubmitting],
