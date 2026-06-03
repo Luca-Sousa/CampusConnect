@@ -6,7 +6,7 @@ import type { Group } from "../types";
 
 interface UpdateGroupVariables {
   id: string;
-  body: { name?: string; description?: string | null };
+  body: { name?: string; description?: string | null; icon?: string | null };
 }
 
 export function useUpdateGroup() {

@@ -8,6 +8,7 @@ export interface Group {
   id: string;
   name: string;
   description: string | null;
+  icon: string | null;
   authorId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -22,12 +23,14 @@ export interface GroupWithAuthor extends Group {
 export interface CreateGroupInput {
   name: string;
   description?: string | null;
+  icon?: string | null;
   authorId: string;
 }
 
 export interface UpdateGroupInput {
   name?: string;
   description?: string | null;
+  icon?: string | null;
 }
 
 export interface GroupMessage {

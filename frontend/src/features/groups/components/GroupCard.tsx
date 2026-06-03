@@ -1,4 +1,9 @@
-import { UsersIcon, MessageCircleIcon, LogOutIcon } from "lucide-react";
+import {
+  UsersIcon,
+  MessageCircleIcon,
+  LogOutIcon,
+  LogInIcon,
+} from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { formatRelativeTime, getInitials } from "@/features/feed/utils/format";
@@ -28,30 +33,34 @@ export function GroupCard({
   const isAdmin = userRole === "admin";
 
   return (
-    <article
-      className="group relative rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-700"
-    >
-      {/* Top gradient bar */}
-      <div className="h-1.5 w-full bg-linear-to-r from-indigo-500 via-violet-500 to-purple-500" />
-
+    <article className="group relative rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-700">
       {/* Content */}
       <div className="p-4 space-y-3">
-        {/* Title and actions */}
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-bold text-lg leading-snug text-foreground line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-            {group.name}
-          </h3>
-          {(isAuthor || isAdmin) && (
-            <GroupActionsMenu group={group} onEdit={onEdit} />
-          )}
-        </div>
+        {/* Icon + Title + Actions */}
+        <div className="flex items-start gap-3">
+          {/* Emoji icon circle (WhatsApp style) */}
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-2xl">
+            {group.icon ?? "👥"}
+          </div>
 
-        {/* Description */}
-        {group.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-            {group.description}
-          </p>
-        )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-bold text-lg leading-snug text-foreground line-clamp-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                {group.name}
+              </h3>
+              {(isAuthor || isAdmin) && (
+                <GroupActionsMenu group={group} onEdit={onEdit} />
+              )}
+            </div>
+
+            {/* Description */}
+            {group.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mt-1">
+                {group.description}
+              </p>
+            )}
+          </div>
+        </div>
 
         {/* Member count + author */}
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -105,7 +114,10 @@ export function GroupCard({
                   <span className="hidden sm:inline">Sair</span>
                 </>
               ) : (
-                <span className="hidden sm:inline">Entrar</span>
+                <>
+                  <LogInIcon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Entrar</span>
+                </>
               )}
             </Button>
           </div>

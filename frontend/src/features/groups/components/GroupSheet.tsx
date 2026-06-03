@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { SendIcon, UsersIcon } from "lucide-react";
+import { SendIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +58,7 @@ export function GroupSheet({
       <SheetContent side="right" className="flex flex-col p-0">
         <SheetHeader className="border-b border-border px-4 py-3">
           <SheetTitle className="flex items-center gap-2">
-            <UsersIcon className="h-4 w-4 text-indigo-500" />
+            <span className="text-lg">{group?.icon ?? "👥"}</span>
             {group?.name}
           </SheetTitle>
           <p className="text-xs text-muted-foreground">

@@ -8,7 +8,7 @@ export function useCreateGroup() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: { name: string; description?: string }) =>
+    mutationFn: (body: { name: string; description?: string; icon?: string | null }) =>
       createGroup(body),
     onSuccess: (newGroup) => {
       queryClient.setQueryData<Group[]>(groupKeys.list(), (old = []) => [

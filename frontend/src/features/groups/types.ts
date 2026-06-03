@@ -8,6 +8,7 @@ export interface Group {
   id: string;
   name: string;
   description: string | null;
+  icon: string | null;
   authorId: string;
   createdAt: string;
   updatedAt: string;

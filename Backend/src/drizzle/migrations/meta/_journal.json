@@ -64,6 +64,13 @@
       "when": 1780500670445,
       "tag": "0008_safe_mentor",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1780503911081,
+      "tag": "0009_cultured_psynapse",
+      "breakpoints": true
     }
   ]
 }

@@ -4,7 +4,6 @@ import {
   AppDialog,
   AppDialogAction,
   AppDialogBody,
-  AppDialogCancel,
   AppDialogContent,
   AppDialogFooter,
   AppDialogHeader,
@@ -13,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateGroup } from "../hooks/use-create-group";
 import { useUpdateGroup } from "../hooks/use-update-group";
+import { EmojiPickerPopover } from "./EmojiPickerPopover";
 import type { Group } from "../types";
 
 interface GroupFormProps {
@@ -30,6 +30,7 @@ function GroupFormContent({
 }) {
   const [name, setName] = useState(editingGroup?.name ?? "");
   const [description, setDescription] = useState(editingGroup?.description ?? "");
+  const [icon, setIcon] = useState<string | null>(editingGroup?.icon ?? null);
 
   const { mutate: createGroup, isPending: isCreating } = useCreateGroup();
   const { mutate: updateGroup, isPending: isUpdating } = useUpdateGroup();
@@ -42,12 +43,15 @@ function GroupFormContent({
 
     if (isEditing && editingGroup) {
       updateGroup(
-        { id: editingGroup.id, body: { name, description: description || null } },
+        {
+          id: editingGroup.id,
+          body: { name, description: description || null, icon },
+        },
         { onSuccess: () => onOpenChange(false) },
       );
     } else {
       createGroup(
-        { name, description: description || undefined },
+        { name, description: description || undefined, icon },
         { onSuccess: () => onOpenChange(false) },
       );
     }
@@ -66,8 +70,22 @@ function GroupFormContent({
       />
       <AppDialogBody>
         <form id="group-form" onSubmit={handleSubmit} className="space-y-4">
+          {/* Emoji picker */}
           <div className="space-y-2">
-            <label htmlFor="group-name" className="text-sm font-medium text-foreground">
+            <label className="text-sm font-medium text-foreground">
+              Ícone do grupo
+            </label>
+            <EmojiPickerPopover
+              value={icon}
+              onChange={setIcon}
+              disabled={isPending}
+            />
+          </div>
+          <div className="space-y-2">
+            <label
+              htmlFor="group-name"
+              className="text-sm font-medium text-foreground"
+            >
               Nome *
             </label>
             <Input
@@ -80,7 +98,10 @@ function GroupFormContent({
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="group-desc" className="text-sm font-medium text-foreground">
+            <label
+              htmlFor="group-desc"
+              className="text-sm font-medium text-foreground"
+            >
               Descrição
             </label>
             <Textarea
@@ -95,12 +116,11 @@ function GroupFormContent({
         </form>
       </AppDialogBody>
       <AppDialogFooter>
-        <AppDialogCancel disabled={isPending} />
         <AppDialogAction
           type="submit"
           form="group-form"
           disabled={isPending || !name.trim()}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white w-full"
         >
           {isEditing ? "Salvar" : "Criar Grupo"}
         </AppDialogAction>
@@ -109,7 +129,11 @@ function GroupFormContent({
   );
 }
 
-export function GroupForm({ open, onOpenChange, editingGroup }: GroupFormProps) {
+export function GroupForm({
+  open,
+  onOpenChange,
+  editingGroup,
+}: GroupFormProps) {
   return (
     <AppDialog open={open} onOpenChange={onOpenChange}>
       <AppDialogContent maxWidth="md">

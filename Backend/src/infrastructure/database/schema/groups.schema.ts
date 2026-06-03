@@ -15,6 +15,7 @@ export const group = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
     description: text("description"),
+    icon: text("icon"),
     authorId: uuid("author_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),

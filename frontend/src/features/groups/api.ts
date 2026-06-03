@@ -32,6 +32,7 @@ export async function fetchGroups(
 export async function createGroup(body: {
   name: string;
   description?: string;
+  icon?: string | null;
 }): Promise<Group> {
   return request("/api/groups", {
     method: "POST",
@@ -42,7 +43,7 @@ export async function createGroup(body: {
 
 export async function updateGroup(
   id: string,
-  body: { name?: string; description?: string | null },
+  body: { name?: string; description?: string | null; icon?: string | null },
 ): Promise<Group> {
   return request(`/api/groups/${id}`, {
     method: "PUT",

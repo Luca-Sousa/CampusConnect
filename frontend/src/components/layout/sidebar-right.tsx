@@ -62,6 +62,7 @@ interface SidebarItemProps {
   initials: string;
   color: string;
   isNew?: boolean;
+  emoji?: string | null;
   onClick?: () => void;
 }
 
@@ -71,17 +72,24 @@ function SidebarItem({
   initials,
   color,
   isNew,
+  emoji,
   onClick,
 }: SidebarItemProps) {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton className="h-auto py-1.5 gap-3" onClick={onClick}>
         <div className="relative shrink-0">
-          <Avatar className="h-7 w-7">
-            <AvatarFallback className={`text-xs font-semibold ${color}`}>
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          {emoji ? (
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-sm">
+              {emoji}
+            </div>
+          ) : (
+            <Avatar className="h-7 w-7">
+              <AvatarFallback className={`text-xs font-semibold ${color}`}>
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+          )}
           {isNew && (
             <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-emerald-500 border-2 border-sidebar" />
           )}
@@ -183,6 +191,7 @@ const SidebarRight = () => {
     subtitle: `${g.memberCount} ${g.memberCount === 1 ? "membro" : "membros"}`,
     initials: getInitials(g.name),
     color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400",
+    emoji: g.icon,
     isNew: i === 0,
     onClick: () => navigate("/groups"),
   }));

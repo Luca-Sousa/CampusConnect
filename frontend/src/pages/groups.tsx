@@ -38,7 +38,7 @@ const GroupsPage = () => {
     <div className="p-8">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between gap-4 mb-6">
+         <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
               <UsersIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />

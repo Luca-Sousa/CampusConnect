@@ -22,6 +22,7 @@ export class GroupDrizzleRepository implements IGroupRepository {
       .values({
         name: input.name,
         description: input.description ?? null,
+        icon: input.icon ?? null,
         authorId: input.authorId,
       })
       .returning();
@@ -97,6 +98,7 @@ export class GroupDrizzleRepository implements IGroupRepository {
     const updates: Partial<typeof group.$inferInsert> = {};
     if (input.name !== undefined) updates.name = input.name;
     if (input.description !== undefined) updates.description = input.description ?? null;
+    if (input.icon !== undefined) updates.icon = input.icon ?? null;
 
     const [updated] = await db
       .update(group)

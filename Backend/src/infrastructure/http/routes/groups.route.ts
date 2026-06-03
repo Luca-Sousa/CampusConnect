@@ -33,11 +33,13 @@ async function getSession(request: { headers: { cookie?: string } }) {
 const createGroupSchema = z.object({
   name: z.string().min(1, "Nome obrigatório.").max(200),
   description: z.string().max(2000).optional(),
+  icon: z.string().max(10).nullable().optional(),
 });
 
 const updateGroupSchema = z.object({
   name: z.string().min(1, "Nome obrigatório.").max(200).optional(),
   description: z.string().max(2000).nullable().optional(),
+  icon: z.string().max(10).nullable().optional(),
 });
 
 const sendMessageSchema = z.object({
