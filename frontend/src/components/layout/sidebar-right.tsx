@@ -9,6 +9,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sidebar,
   SidebarContent,
@@ -25,6 +26,33 @@ import { mockGroups } from "@/features/groups/data";
 import { getInitials } from "@/features/feed/utils/format";
 
 const MAX_ITEMS = 4;
+
+// ---- Skeleton -------------------------------------------------------------
+
+function SectionSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>
+        <Skeleton className="h-3.5 w-20" />
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {Array.from({ length: count }).map((_, i) => (
+            <SidebarMenuItem key={i}>
+              <SidebarMenuButton className="h-auto py-1.5 gap-3" disabled>
+                <Skeleton className="h-7 w-7 rounded-full shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-3.5 w-3/4" />
+                  <Skeleton className="h-2.5 w-1/2" />
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+}
 
 // ---- Sub-components -------------------------------------------------------
 
@@ -47,10 +75,7 @@ function SidebarItem({
 }: SidebarItemProps) {
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton
-        className="h-auto py-1.5 gap-3"
-        onClick={onClick}
-      >
+      <SidebarMenuButton className="h-auto py-1.5 gap-3" onClick={onClick}>
         <div className="relative shrink-0">
           <Avatar className="h-7 w-7">
             <AvatarFallback className={`text-xs font-semibold ${color}`}>
@@ -131,8 +156,8 @@ function SidebarSection({
 
 const SidebarRight = () => {
   const navigate = useNavigate();
-  const { data: events = [] } = useEvents();
-  const { data: news = [] } = useNews();
+  const { data: events = [], isLoading: eventsLoading } = useEvents();
+  const { data: news = [], isLoading: newsLoading } = useNews();
 
   const recentEvents = events.slice(0, MAX_ITEMS).map((e, i) => ({
     name: e.eventTitle,
@@ -175,21 +200,29 @@ const SidebarRight = () => {
       style={{ "--sidebar-width": "19.5rem" } as React.CSSProperties}
     >
       <SidebarContent>
-        <SidebarSection
-          title="Eventos"
-          icon={<CalendarDaysIcon className="h-3.5 w-3.5" />}
-          items={recentEvents}
-          onNavigate={() => navigate("/events")}
-          navigateLabel="Ver todos os eventos"
-        />
+        {eventsLoading ? (
+          <SectionSkeleton count={3} />
+        ) : (
+          <SidebarSection
+            title="Eventos"
+            icon={<CalendarDaysIcon className="h-3.5 w-3.5" />}
+            items={recentEvents}
+            onNavigate={() => navigate("/events")}
+            navigateLabel="Ver todos os eventos"
+          />
+        )}
 
-        <SidebarSection
-          title="Notícias"
-          icon={<NewspaperIcon className="h-3.5 w-3.5" />}
-          items={recentNews}
-          onNavigate={() => navigate("/news")}
-          navigateLabel="Ver todas as notícias"
-        />
+        {newsLoading ? (
+          <SectionSkeleton count={3} />
+        ) : (
+          <SidebarSection
+            title="Notícias"
+            icon={<NewspaperIcon className="h-3.5 w-3.5" />}
+            items={recentNews}
+            onNavigate={() => navigate("/news")}
+            navigateLabel="Ver todas as notícias"
+          />
+        )}
 
         <SidebarSection
           title="Grupos"
