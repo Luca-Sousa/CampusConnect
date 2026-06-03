@@ -53,7 +53,7 @@ export function EventComposer({
         className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
       >
         <CalendarPlusIcon className="h-4 w-4" />
-        Novo Evento
+        <span className="hidden sm:inline">Novo Evento</span>
       </Button>
 
       <AppDialog open={open} onOpenChange={handleOpenChange}>

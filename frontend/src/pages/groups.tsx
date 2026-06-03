@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PlusIcon, SearchIcon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/page-header";
 import { useSession } from "@/lib/auth-client";
 import { GroupCard } from "@/features/groups/components/GroupCard";
 import { GroupForm } from "@/features/groups/components/GroupForm";
@@ -35,30 +36,24 @@ const GroupsPage = () => {
   }
 
   return (
-    <div className="p-8">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-         <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-              <UsersIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Grupos</h1>
-              <p className="text-sm text-muted-foreground">
-                Encontre e entre em grupos da comunidade
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen">
+      <PageHeader
+        icon={UsersIcon}
+        iconClassName="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
+        title="Grupos"
+        subtitle={`${groups?.length ?? 0} ${ (groups?.length ?? 0) === 1 ? "grupo" : "grupos"} na comunidade`}
+        action={
           <Button
             onClick={handleOpenCreate}
             className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2"
           >
             <PlusIcon className="h-4 w-4" />
-            Novo Grupo
+            <span className="hidden sm:inline">Novo Grupo</span>
           </Button>
-        </div>
+        }
+      />
 
+      <div className="max-w-5xl mx-auto px-4 py-6">
         {/* Search */}
         <div className="relative mb-6">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

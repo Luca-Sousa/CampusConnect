@@ -5,6 +5,7 @@ import {
   CalendarXIcon,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { PageHeader } from "@/components/page-header";
 import { useEvents } from "@/features/events/hooks/use-events";
 import { EventComposer } from "@/features/events/components/EventComposer";
 import { EventCard } from "@/features/events/components/EventCard";
@@ -25,26 +26,18 @@ const EventsPage = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-emerald-100 dark:bg-emerald-900/30 p-2.5">
-              <CalendarDaysIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Eventos</h1>
-              <p className="text-xs text-muted-foreground">
-                {events.length} evento{events.length !== 1 ? "s" : ""} no campus
-              </p>
-            </div>
-          </div>
+      <PageHeader
+        icon={CalendarDaysIcon}
+        iconClassName="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+        title="Eventos"
+        subtitle={`${events.length} evento${events.length !== 1 ? "s" : ""} no campus`}
+        action={
           <EventComposer
             editingEvent={editingEvent}
             onEditClose={() => setEditingEvent(null)}
           />
-        </div>
-      </div>
+        }
+      />
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 py-6">

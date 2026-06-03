@@ -57,7 +57,7 @@ export function NewsComposer({
         className="gap-2 bg-amber-600 hover:bg-amber-700 text-white"
       >
         <NewspaperIcon className="h-4 w-4" />
-        Novo Comunicado
+        <span className="hidden sm:inline">Novo Comunicado</span>
       </Button>
 
       <AppDialog open={open} onOpenChange={handleOpenChange}>

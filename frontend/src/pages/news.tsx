@@ -5,6 +5,7 @@ import {
   ShieldAlertIcon,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { PageHeader } from "@/components/page-header";
 import { useNews } from "@/features/news/hooks/use-news";
 import { NewsComposer } from "@/features/news/components/NewsComposer";
 import { NewsCard } from "@/features/news/components/NewsCard";
@@ -30,29 +31,19 @@ const NewsPage = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Header — estilo jornal */}
-      <div className="border-b-2 border-foreground/10 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-amber-100 dark:bg-amber-900/30 p-2.5">
-              <NewspaperIcon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-foreground tracking-tight">
-                Notícias
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Comunicados oficiais do campus
-              </p>
-            </div>
-          </div>
+      <PageHeader
+        icon={NewspaperIcon}
+        iconClassName="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+        title="Notícias"
+        subtitle="Comunicados oficiais do campus"
+        action={
           <NewsComposer
             editingNews={editingNews}
             onEditClose={() => setEditingNews(null)}
             canPublish={canPublish}
           />
-        </div>
-      </div>
+        }
+      />
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-6">
