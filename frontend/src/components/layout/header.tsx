@@ -1,5 +1,4 @@
-import { BellIcon, SearchIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { BellIcon } from "lucide-react";
 import { todayDate } from "@/lib/utils";
 import NavUser from "../nav-user";
 import { Button } from "../ui/button";
@@ -59,15 +58,6 @@ const Header = () => {
             {todayDate}
           </p>
         </div>
-      </div>
-
-      {/* Search */}
-      <div className="flex-1 max-w-sm hidden md:block relative">
-        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-        <Input
-          className="pl-9 bg-muted/60 border-transparent focus-visible:border-input rounded-full"
-          placeholder="Pesquisar..."
-        />
       </div>
 
       {/* Actions */}
