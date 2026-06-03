@@ -38,13 +38,15 @@ export function NewsCard({
     return (
       <article className="group relative rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-amber-300 dark:hover:border-amber-700">
         {news.imageUrl && (
-          <div className="relative aspect-[21/9] overflow-hidden">
+          <div className="relative aspect-21/9 overflow-hidden">
             <img
               src={news.imageUrl}
               alt={news.newsTitle}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            {/* Overlay escuro para legibilidade em imagens claras */}
+            <div className="absolute inset-0 bg-black/30" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
           </div>
         )}
 
