@@ -5,7 +5,7 @@ import {
   MapPinIcon,
   UsersIcon,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   formatEventTimeRange,
@@ -105,6 +105,7 @@ export function EventCard({ event, currentUserId, onEdit }: EventCardProps) {
           {/* Author */}
           <div className="flex items-center gap-2">
             <Avatar className="h-7 w-7">
+              <AvatarImage src={event.author?.image ?? undefined} />
               <AvatarFallback className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
                 {initials}
               </AvatarFallback>

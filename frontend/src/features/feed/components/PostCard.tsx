@@ -9,7 +9,7 @@ import {
   ThumbsUpIcon,
   UsersIcon,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CARGO_CONFIG } from "@/features/auth/constants";
@@ -48,6 +48,7 @@ function PostHeader({ post, currentUserId, onEdit }: PostHeaderProps) {
     <div className="flex items-center justify-between px-4 pt-4 pb-2">
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10 shrink-0">
+          <AvatarImage src={post.author?.image ?? undefined} />
           <AvatarFallback className="bg-linear-to-br from-orange-400 to-rose-400 text-white font-semibold text-sm">
             {getInitials(authorName)}
           </AvatarFallback>
@@ -93,6 +94,7 @@ function BannerAuthorRow({ post, currentUserId, onEdit }: BannerAuthorRowProps) 
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2.5">
         <Avatar className="h-9 w-9 shrink-0 ring-2 ring-white/25">
+          <AvatarImage src={post.author?.image ?? undefined} />
           <AvatarFallback className="bg-white/20 text-white font-semibold text-sm">
             {getInitials(authorName)}
           </AvatarFallback>

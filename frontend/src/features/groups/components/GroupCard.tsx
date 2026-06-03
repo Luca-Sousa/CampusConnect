@@ -4,7 +4,7 @@ import {
   LogOutIcon,
   LogInIcon,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { formatRelativeTime, getInitials } from "@/features/feed/utils/format";
 import { useToggleJoinGroup } from "../hooks/use-toggle-join-group";
@@ -76,6 +76,7 @@ export function GroupCard({
         <div className="flex items-center justify-between pt-2 border-t border-border">
           <div className="flex items-center gap-2">
             <Avatar className="h-7 w-7">
+              <AvatarImage src={group.author?.image ?? undefined} />
               <AvatarFallback className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-semibold">
                 {getInitials(authorName)}
               </AvatarFallback>

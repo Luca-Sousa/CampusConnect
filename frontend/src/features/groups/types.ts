@@ -1,6 +1,7 @@
 export interface GroupAuthor {
   id: string;
   name: string;
+  image: string | null;
   cargo: string;
 }
 

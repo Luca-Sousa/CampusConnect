@@ -60,6 +60,7 @@ export class GroupDrizzleRepository implements IGroupRepository {
         author: {
           id: user.id,
           name: user.name,
+          image: user.image,
           cargo: user.cargo,
         },
         memberCount: count(groupMember.id),
@@ -155,6 +156,7 @@ export class GroupDrizzleRepository implements IGroupRepository {
         author: {
           id: user.id,
           name: user.name,
+          image: user.image,
           cargo: user.cargo,
         },
       })
@@ -183,7 +185,7 @@ export class GroupDrizzleRepository implements IGroupRepository {
 
     // Busca dados do autor
     const [authorData] = await db
-      .select({ id: user.id, name: user.name, cargo: user.cargo })
+      .select({ id: user.id, name: user.name, image: user.image, cargo: user.cargo })
       .from(user)
       .where(eq(user.id, authorId))
       .limit(1);

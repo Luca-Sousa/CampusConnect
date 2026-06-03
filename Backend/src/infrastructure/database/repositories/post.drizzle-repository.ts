@@ -53,6 +53,7 @@ export class PostDrizzleRepository implements IPostRepository {
         author: {
           id: user.id,
           name: user.name,
+          image: user.image,
           cargo: user.cargo,
         },
         rsvpCount: count(rsvp.id),

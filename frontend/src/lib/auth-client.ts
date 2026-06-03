@@ -12,6 +12,8 @@ export const authClient = createAuthClient({
       user: {
         role: { type: "string", required: true },
         cargo: { type: "string", required: false },
+        course: { type: "string", required: false },
+        bio: { type: "string", required: false },
       },
     }),
     emailOTPClient(),

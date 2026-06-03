@@ -1,5 +1,5 @@
 import { NewspaperIcon, ClockIcon } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CARGO_CONFIG } from "@/features/auth/constants";
 import { formatRelativeTime, getInitials } from "@/features/feed/utils/format";
 import type { NewsPost } from "../types";
@@ -77,6 +77,7 @@ export function NewsCard({
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center gap-2">
               <Avatar className="size-10">
+                <AvatarImage src={news.author?.image ?? undefined} />
                 <AvatarFallback className="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-semibold">
                   {initials}
                 </AvatarFallback>
@@ -141,6 +142,7 @@ export function NewsCard({
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
+              <AvatarImage src={news.author?.image ?? undefined} />
               <AvatarFallback className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[10px] font-semibold">
                 {initials}
               </AvatarFallback>

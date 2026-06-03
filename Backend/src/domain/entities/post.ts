@@ -19,6 +19,7 @@ export interface Post {
 export interface PostAuthorInfo {
   id: string;
   name: string;
+  image: string | null;
   cargo: string;
 }
 

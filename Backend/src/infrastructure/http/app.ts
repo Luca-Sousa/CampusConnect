@@ -15,9 +15,10 @@ import { authHandler } from "./middlewares/auth.handler.js";
 import { notificationsRoute } from "./routes/notifications.route.js";
 import { postsRoute } from "./routes/posts.route.js";
 import { groupsRoute } from "./routes/groups.route.js";
+import { usersRoute } from "./routes/users.route.js";
 
 export function buildApp() {
-  const app = fastify().withTypeProvider<ZodTypeProvider>();
+  const app = fastify({ bodyLimit: 10 * 1024 * 1024 }).withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
@@ -61,6 +62,7 @@ export function buildApp() {
   app.register(notificationsRoute);
   app.register(postsRoute);
   app.register(groupsRoute);
+  app.register(usersRoute);
   app.all("/api/auth/*", authHandler);
 
   return app;

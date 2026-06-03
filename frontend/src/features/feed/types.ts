@@ -1,6 +1,7 @@
 export interface PostAuthor {
   id: string;
   name: string;
+  image: string | null;
   cargo: string | null;
 }
 

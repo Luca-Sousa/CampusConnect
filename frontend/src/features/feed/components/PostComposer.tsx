@@ -7,7 +7,7 @@ import {
   TextIcon,
 } from "lucide-react"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -246,6 +246,7 @@ export function PostComposer({
         <CardContent className="px-4 flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10 shrink-0 ring-2 ring-orange-100">
+              <AvatarImage src={(session?.user as { image?: string } | undefined)?.image ?? undefined} />
               <AvatarFallback className="bg-linear-to-br from-orange-400 to-rose-400 text-white font-semibold text-sm">
                 {initials}
               </AvatarFallback>

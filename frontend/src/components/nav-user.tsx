@@ -68,6 +68,8 @@ const NavUser = () => {
     email: session.user.email,
     avatar: session.user.image ?? "https://github.com/shadcn.png",
     cargo: session.user.cargo ?? "aluno",
+    course: session.user.course ?? undefined,
+    bio: session.user.bio ?? undefined,
   };
 
   const cargoConfig = CARGO_CONFIG[user.cargo] ?? DEFAULT_CARGO_CONFIG;

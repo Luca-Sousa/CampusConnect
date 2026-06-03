@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { SendIcon } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -88,6 +88,7 @@ export function GroupSheet({
                   className={`flex gap-2 ${isOwn ? "flex-row-reverse" : ""}`}
                 >
                   <Avatar className="h-7 w-7 shrink-0">
+                    <AvatarImage src={msg.author?.image ?? undefined} />
                     <AvatarFallback className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-semibold">
                       {getInitials(authorName)}
                     </AvatarFallback>
