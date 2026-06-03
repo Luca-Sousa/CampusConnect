@@ -71,7 +71,7 @@ function GroupFormContent({
       <AppDialogBody>
         <form id="group-form" onSubmit={handleSubmit} className="space-y-4">
           {/* Emoji picker */}
-          <div className="space-y-2">
+          <div className="space-y-3 space-x-4">
             <label className="text-sm font-medium text-foreground">
               Ícone do grupo
             </label>
@@ -81,7 +81,7 @@ function GroupFormContent({
               disabled={isPending}
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label
               htmlFor="group-name"
               className="text-sm font-medium text-foreground"
@@ -97,7 +97,7 @@ function GroupFormContent({
               maxLength={200}
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label
               htmlFor="group-desc"
               className="text-sm font-medium text-foreground"
@@ -115,7 +115,7 @@ function GroupFormContent({
           </div>
         </form>
       </AppDialogBody>
-      <AppDialogFooter>
+      <AppDialogFooter className="p-2">
         <AppDialogAction
           type="submit"
           form="group-form"
