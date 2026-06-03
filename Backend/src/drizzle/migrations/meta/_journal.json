@@ -57,6 +57,13 @@
       "when": 1780425312513,
       "tag": "0007_bitter_skrulls",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1780500670445,
+      "tag": "0008_safe_mentor",
+      "breakpoints": true
     }
   ]
 }

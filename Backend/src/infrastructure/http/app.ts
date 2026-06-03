@@ -14,6 +14,7 @@ import { authOpenApiPaths } from "./openapi/auth.openapi.js";
 import { authHandler } from "./middlewares/auth.handler.js";
 import { notificationsRoute } from "./routes/notifications.route.js";
 import { postsRoute } from "./routes/posts.route.js";
+import { groupsRoute } from "./routes/groups.route.js";
 
 export function buildApp() {
   const app = fastify().withTypeProvider<ZodTypeProvider>();
@@ -59,6 +60,7 @@ export function buildApp() {
 
   app.register(notificationsRoute);
   app.register(postsRoute);
+  app.register(groupsRoute);
   app.all("/api/auth/*", authHandler);
 
   return app;

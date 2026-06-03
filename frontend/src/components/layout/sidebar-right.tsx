@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useEvents } from "@/features/events/hooks/use-events";
 import { useNews } from "@/features/news/hooks/use-news";
-import { mockGroups } from "@/features/groups/data";
+import { useGroups } from "@/features/groups/hooks/use-groups";
 import { getInitials } from "@/features/feed/utils/format";
 
 const MAX_ITEMS = 4;
@@ -158,6 +158,7 @@ const SidebarRight = () => {
   const navigate = useNavigate();
   const { data: events = [], isLoading: eventsLoading } = useEvents();
   const { data: news = [], isLoading: newsLoading } = useNews();
+  const { data: groups = [], isLoading: groupsLoading } = useGroups();
 
   const recentEvents = events.slice(0, MAX_ITEMS).map((e, i) => ({
     name: e.eventTitle,
@@ -177,16 +178,10 @@ const SidebarRight = () => {
     onClick: () => navigate("/news"),
   }));
 
-  const recentGroups = mockGroups.slice(0, MAX_ITEMS).map((g, i) => ({
+  const recentGroups = groups.slice(0, MAX_ITEMS).map((g, i) => ({
     name: g.name,
-    subtitle: `${g.members} membros`,
-    initials: g.name
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase(),
+    subtitle: `${g.memberCount} ${g.memberCount === 1 ? "membro" : "membros"}`,
+    initials: getInitials(g.name),
     color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400",
     isNew: i === 0,
     onClick: () => navigate("/groups"),
@@ -224,13 +219,17 @@ const SidebarRight = () => {
           />
         )}
 
-        <SidebarSection
-          title="Grupos"
-          icon={<UsersIcon className="h-3.5 w-3.5" />}
-          items={recentGroups}
-          onNavigate={() => navigate("/groups")}
-          navigateLabel="Ver todos os grupos"
-        />
+        {groupsLoading ? (
+          <SectionSkeleton count={3} />
+        ) : (
+          <SidebarSection
+            title="Grupos"
+            icon={<UsersIcon className="h-3.5 w-3.5" />}
+            items={recentGroups}
+            onNavigate={() => navigate("/groups")}
+            navigateLabel="Ver todos os grupos"
+          />
+        )}
       </SidebarContent>
     </Sidebar>
   );
