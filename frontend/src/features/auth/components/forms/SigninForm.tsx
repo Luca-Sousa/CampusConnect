@@ -66,6 +66,7 @@ export function SigninForm() {
                   label="Senha"
                   type="password"
                   placeholder="••••••••"
+                  showPasswordToggle
                   subLabel={
                     <Link
                       to="/forgot-password"

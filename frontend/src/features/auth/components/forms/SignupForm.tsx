@@ -65,6 +65,7 @@ function AlunoForm({ onSuccess }: { onSuccess: (email: string) => void }) {
               label="Senha"
               type="password"
               placeholder="••••••••"
+              showPasswordToggle
             />
           )}
         </form.Field>
@@ -135,6 +136,7 @@ function ColaboradorForm({ onSuccess }: { onSuccess: (email: string) => void }) 
               label="Senha"
               type="password"
               placeholder="••••••••"
+              showPasswordToggle
             />
           )}
         </form.Field>
