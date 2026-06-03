@@ -67,6 +67,14 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
+      course: {
+        type: "string",
+        required: false,
+      },
+      bio: {
+        type: "string",
+        required: false,
+      },
     },
   },
   databaseHooks: authDatabaseHooks,

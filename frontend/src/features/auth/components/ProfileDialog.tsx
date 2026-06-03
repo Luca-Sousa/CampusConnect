@@ -9,7 +9,6 @@ import {
   AppDialog,
   AppDialogAction,
   AppDialogBody,
-  AppDialogCancel,
   AppDialogContent,
   AppDialogFooter,
   AppDialogHeader,
@@ -172,17 +171,15 @@ export function ProfileDialog({ user, children }: ProfileDialogProps) {
               />
             </div>
 
-            <div className="text-sm text-muted-foreground">
-              {user.email}
-            </div>
+            <div className="text-sm text-muted-foreground">{user.email}</div>
           </div>
         </AppDialogBody>
 
         <AppDialogFooter>
-          <AppDialogCancel>Cancelar</AppDialogCancel>
           <AppDialogAction
             onClick={handleSave}
             disabled={updateProfile.isPending || !name.trim()}
+            className="w-full"
           >
             {updateProfile.isPending ? "Salvando..." : "Salvar alterações"}
           </AppDialogAction>

@@ -193,11 +193,12 @@ interface AppDialogCancelProps
 function AppDialogCancel({
   children = "Cancelar",
   variant = "outline",
+  className,
   ...props
 }: AppDialogCancelProps) {
   return (
     <DialogPrimitiveClose asChild>
-      <Button variant={variant} {...props}>
+      <Button variant={variant} {...props} className={className}>
         {children}
       </Button>
     </DialogPrimitiveClose>
