@@ -39,6 +39,12 @@ const FeedPage = () => {
           <PostSkeleton />
           <PostSkeleton />
           <PostSkeleton />
+          <PostSkeleton />
+          <PostSkeleton />
+          <PostSkeleton />
+          <PostSkeleton />
+          <PostSkeleton />
+          <PostSkeleton />
         </>
       ) : posts.length === 0 ? (
         <p className="text-center text-muted-foreground py-12 text-sm">
