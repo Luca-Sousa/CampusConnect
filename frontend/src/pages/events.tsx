@@ -76,7 +76,7 @@ const EventsPage = () => {
                     ({upcomingEvents.length})
                   </span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {upcomingEvents.map((event) => (
                     <EventCard
                       key={event.id}
@@ -100,7 +100,7 @@ const EventsPage = () => {
                     ({pastEvents.length})
                   </span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-75">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 opacity-75">
                   {pastEvents.map((event) => (
                     <EventCard
                       key={event.id}
