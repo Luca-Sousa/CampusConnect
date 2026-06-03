@@ -38,7 +38,7 @@ export function NewsCard({
     return (
       <article className="group relative rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-amber-300 dark:hover:border-amber-700">
         {news.imageUrl && (
-          <div className="relative aspect-21/9 overflow-hidden">
+          <div className="relative aspect-square sm:aspect-video md:aspect-square lg:aspect-21/9 overflow-hidden">
             <img
               src={news.imageUrl}
               alt={news.newsTitle}
@@ -50,7 +50,9 @@ export function NewsCard({
           </div>
         )}
 
-        <div className={`p-5 space-y-3 ${news.imageUrl ? "absolute bottom-0 left-0 right-0" : ""}`}>
+        <div
+          className={`p-5 space-y-3 ${news.imageUrl ? "absolute bottom-0 left-0 right-0" : ""}`}
+        >
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 rounded-full px-2.5 py-0.5 border border-amber-200/60 dark:border-amber-800/40">
               <NewspaperIcon className="h-3 w-3" />
@@ -58,37 +60,43 @@ export function NewsCard({
             </span>
           </div>
 
-          <h2 className={`font-extrabold leading-tight text-foreground group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors ${news.imageUrl ? "text-xl text-white group-hover:text-amber-300" : "text-2xl"}`}>
+          <h2
+            className={`font-extrabold leading-tight text-foreground group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors ${news.imageUrl ? "text-xl text-white group-hover:text-amber-300" : "text-2xl"}`}
+          >
             {news.newsTitle}
           </h2>
 
           {news.content && (
-            <p className={`text-sm leading-relaxed line-clamp-2 ${news.imageUrl ? "text-white/80" : "text-muted-foreground"}`}>
+            <p
+              className={`text-sm leading-relaxed line-clamp-2 ${news.imageUrl ? "text-white/80" : "text-muted-foreground"}`}
+            >
               {news.content}
             </p>
           )}
 
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center gap-2">
-              <Avatar className="h-7 w-7">
-                <AvatarFallback className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-semibold">
+              <Avatar className="size-10">
+                <AvatarFallback className="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-semibold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className={`text-xs font-medium leading-tight ${news.imageUrl ? "text-white" : "text-foreground"}`}>
+                <span
+                  className={`text-xs font-medium leading-tight ${news.imageUrl ? "text-white" : "text-foreground"}`}
+                >
                   {authorName}
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${cargoConfig.className}`}>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${cargoConfig.className}`}
+                  >
                     {cargoConfig.label}
                   </span>
                 </div>
               </div>
             </div>
-            {canManage && (
-              <NewsActionsMenu news={news} onEdit={onEdit} />
-            )}
+            {canManage && <NewsActionsMenu news={news} onEdit={onEdit} />}
           </div>
         </div>
       </article>
@@ -140,13 +148,13 @@ export function NewsCard({
             <span className="text-xs font-medium text-foreground">
               {authorName}
             </span>
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${cargoConfig.className}`}>
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${cargoConfig.className}`}
+            >
               {cargoConfig.label}
             </span>
           </div>
-          {canManage && (
-            <NewsActionsMenu news={news} onEdit={onEdit} />
-          )}
+          {canManage && <NewsActionsMenu news={news} onEdit={onEdit} />}
         </div>
       </div>
     </article>
