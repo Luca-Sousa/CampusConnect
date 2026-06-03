@@ -3,14 +3,14 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsXl } from "@/hooks/use-is-xl";
 import SidebarLeft from "@/components/layout/sidebar-left";
 import SidebarRight from "@/components/layout/sidebar-right";
 import Header from "@/components/layout/header";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Layout = () => {
-  const isMobile = useIsMobile();
+  const isXl = useIsXl();
 
   return (
     <SidebarProvider className="h-svh overflow-hidden">
@@ -23,7 +23,7 @@ const Layout = () => {
               <Outlet />
             </main>
           </ScrollArea>
-          {!isMobile && <SidebarRight />}
+          {isXl && <SidebarRight />}
         </div>
       </SidebarInset>
     </SidebarProvider>

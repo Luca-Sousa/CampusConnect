@@ -1,5 +1,14 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  CalendarDaysIcon,
+  NewspaperIcon,
+  UsersIcon,
+  ArrowRightIcon,
+} from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -10,103 +19,154 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useEvents } from "@/features/events/hooks/use-events";
+import { useNews } from "@/features/news/hooks/use-news";
+import { mockGroups } from "@/features/groups/data";
+import { getInitials } from "@/features/feed/utils/format";
 
-// ---- Data ----------------------------------------------------------------
-const pages = [
-  {
-    id: 1,
-    name: "Dev Campus",
-    initials: "DC",
-    color: "bg-blue-100 text-blue-600",
-  },
-  {
-    id: 2,
-    name: "Rifiu Team",
-    initials: "RT",
-    color: "bg-purple-100 text-purple-600",
-  },
-];
-
-const contacts = [
-  {
-    id: 1,
-    name: "Ana Paula",
-    initials: "AP",
-    color: "bg-pink-100 text-pink-600",
-    online: true,
-  },
-  {
-    id: 2,
-    name: "João Pedro",
-    initials: "JP",
-    color: "bg-green-100 text-green-600",
-    online: true,
-  },
-  {
-    id: 3,
-    name: "Maria Silva",
-    initials: "MS",
-    color: "bg-amber-100 text-amber-600",
-    online: true,
-  },
-  {
-    id: 4,
-    name: "Carlos Lima",
-    initials: "CL",
-    color: "bg-teal-100 text-teal-600",
-    online: false,
-  },
-];
-
-const groups = [
-  {
-    id: 1,
-    name: "Eng. de Software",
-    initials: "ES",
-    color: "bg-indigo-100 text-indigo-600",
-    online: true,
-  },
-  {
-    id: 2,
-    name: "Dev Web",
-    initials: "DW",
-    color: "bg-rose-100 text-rose-600",
-    online: true,
-  },
-];
+const MAX_ITEMS = 4;
 
 // ---- Sub-components -------------------------------------------------------
-interface ContactItemProps {
+
+interface SidebarItemProps {
   name: string;
+  subtitle?: string;
   initials: string;
   color: string;
-  online?: boolean;
+  isNew?: boolean;
+  onClick?: () => void;
 }
 
-const ContactItem = ({ name, initials, color, online }: ContactItemProps) => (
-  <SidebarMenuItem>
-    <SidebarMenuButton className="h-auto py-1.5 gap-3">
-      <div className="relative shrink-0">
-        <Avatar className="h-7 w-7">
-          <AvatarFallback className={`text-xs font-semibold ${color}`}>
-            {initials}
-          </AvatarFallback>
-        </Avatar>
-        {online !== undefined && (
-          <span
-            className={`absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-sidebar ${
-              online ? "bg-green-500" : "bg-muted-foreground/30"
-            }`}
-          />
+function SidebarItem({
+  name,
+  subtitle,
+  initials,
+  color,
+  isNew,
+  onClick,
+}: SidebarItemProps) {
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        className="h-auto py-1.5 gap-3"
+        onClick={onClick}
+      >
+        <div className="relative shrink-0">
+          <Avatar className="h-7 w-7">
+            <AvatarFallback className={`text-xs font-semibold ${color}`}>
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          {isNew && (
+            <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-emerald-500 border-2 border-sidebar" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <span className="text-sm font-medium truncate block">{name}</span>
+          {subtitle && (
+            <span className="text-[10px] text-muted-foreground truncate block">
+              {subtitle}
+            </span>
+          )}
+        </div>
+        {isNew && (
+          <Badge
+            variant="secondary"
+            className="text-[9px] px-1.5 py-0 h-4 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0 shrink-0"
+          >
+            Novo
+          </Badge>
         )}
-      </div>
-      <span className="text-sm font-medium">{name}</span>
-    </SidebarMenuButton>
-  </SidebarMenuItem>
-);
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
+
+interface SectionProps {
+  title: string;
+  icon: React.ReactNode;
+  items: SidebarItemProps[];
+  onNavigate: () => void;
+  navigateLabel: string;
+}
+
+function SidebarSection({
+  title,
+  icon,
+  items,
+  onNavigate,
+  navigateLabel,
+}: SectionProps) {
+  if (items.length === 0) return null;
+
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel className="gap-1.5">
+        {icon}
+        {title}
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item, i) => (
+            <SidebarItem key={i} {...item} />
+          ))}
+          <SidebarMenuItem>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-between text-xs text-muted-foreground hover:text-foreground"
+              onClick={onNavigate}
+            >
+              {navigateLabel}
+              <ArrowRightIcon className="h-3 w-3" />
+            </Button>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+}
 
 // ---- Main component -------------------------------------------------------
+
 const SidebarRight = () => {
+  const navigate = useNavigate();
+  const { data: events = [] } = useEvents();
+  const { data: news = [] } = useNews();
+
+  const recentEvents = events.slice(0, MAX_ITEMS).map((e, i) => ({
+    name: e.eventTitle,
+    subtitle: e.eventLocation,
+    initials: getInitials(e.eventTitle),
+    color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
+    isNew: i === 0,
+    onClick: () => navigate("/events"),
+  }));
+
+  const recentNews = news.slice(0, MAX_ITEMS).map((n, i) => ({
+    name: n.newsTitle,
+    subtitle: n.author?.name ?? "Oficial",
+    initials: getInitials(n.newsTitle),
+    color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
+    isNew: i === 0,
+    onClick: () => navigate("/news"),
+  }));
+
+  const recentGroups = mockGroups.slice(0, MAX_ITEMS).map((g, i) => ({
+    name: g.name,
+    subtitle: `${g.members} membros`,
+    initials: g.name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase(),
+    color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400",
+    isNew: i === 0,
+    onClick: () => navigate("/groups"),
+  }));
+
   return (
     <Sidebar
       collapsible="none"
@@ -115,38 +175,29 @@ const SidebarRight = () => {
       style={{ "--sidebar-width": "19.5rem" } as React.CSSProperties}
     >
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Suas Páginas</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {pages.map((p) => (
-                <ContactItem key={p.id} {...p} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <SidebarSection
+          title="Eventos"
+          icon={<CalendarDaysIcon className="h-3.5 w-3.5" />}
+          items={recentEvents}
+          onNavigate={() => navigate("/events")}
+          navigateLabel="Ver todos os eventos"
+        />
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Contatos</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {contacts.map((c) => (
-                <ContactItem key={c.id} {...c} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <SidebarSection
+          title="Notícias"
+          icon={<NewspaperIcon className="h-3.5 w-3.5" />}
+          items={recentNews}
+          onNavigate={() => navigate("/news")}
+          navigateLabel="Ver todas as notícias"
+        />
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Grupos</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {groups.map((g) => (
-                <ContactItem key={g.id} {...g} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <SidebarSection
+          title="Grupos"
+          icon={<UsersIcon className="h-3.5 w-3.5" />}
+          items={recentGroups}
+          onNavigate={() => navigate("/groups")}
+          navigateLabel="Ver todos os grupos"
+        />
       </SidebarContent>
     </Sidebar>
   );
