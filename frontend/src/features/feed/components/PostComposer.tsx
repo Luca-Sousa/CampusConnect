@@ -243,7 +243,7 @@ export function PostComposer({
   return (
     <AppDialog open={open} onOpenChange={handleOpenChange}>
       <Card className="shadow-sm">
-        <CardContent className="p-4 flex flex-col gap-3">
+        <CardContent className="px-4 flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10 shrink-0 ring-2 ring-orange-100">
               <AvatarFallback className="bg-linear-to-br from-orange-400 to-rose-400 text-white font-semibold text-sm">

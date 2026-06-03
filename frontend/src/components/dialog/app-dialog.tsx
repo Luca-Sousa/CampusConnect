@@ -154,7 +154,7 @@ function AppDialogBody({ children, className }: AppDialogBodyProps) {
   return (
     <div className={cn("min-h-0 overflow-hidden", className)}>
       <ScrollArea className="h-full">
-        <div className="p-6 pt-4">{children}</div>
+        <div className=" p-4 lg:p-6 pt-4">{children}</div>
       </ScrollArea>
     </div>
   )

@@ -162,7 +162,7 @@ function TextPostCard({
   onEdit: (post: Post) => void;
 }) {
   return (
-    <Card className="shadow-sm overflow-hidden">
+    <Card className="shadow-sm overflow-hidden p-0">
       <CardContent className="p-0">
         <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
         <p className="px-4 pb-3 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
@@ -184,7 +184,7 @@ function ImagePostCard({
   onEdit: (post: Post) => void;
 }) {
   return (
-    <Card className="shadow-sm overflow-hidden">
+    <Card className="shadow-sm overflow-hidden p-0">
       <CardContent className="p-0">
         <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
         {post.content && (
@@ -310,7 +310,7 @@ function NewsPostCard({
   return (
     <article className="rounded-xl border border-orange-200/60 dark:border-orange-800/40 bg-card shadow-sm overflow-hidden">
       {/* Gradient banner com rótulo oficial e título */}
-      <div className="bg-linear-to-br from-orange-500 to-amber-500 px-4 pt-4 pb-5">
+      <div className="bg-linear-to-br from-orange-500 to-amber-500 p-3">
         <div className="flex items-center gap-2 text-orange-100 text-xs font-semibold uppercase tracking-wider mb-3">
           <NewspaperIcon className="h-3.5 w-3.5 shrink-0" />
           Comunicado Oficial
@@ -334,7 +334,7 @@ function NewsPostCard({
 
       {/* Conteúdo */}
       {post.content && (
-        <p className="px-4 pb-4 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
+        <p className="p-4 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
           {post.content}
         </p>
       )}
