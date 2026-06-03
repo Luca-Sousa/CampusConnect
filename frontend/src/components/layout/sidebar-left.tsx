@@ -44,10 +44,8 @@ const SidebarLeft = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
       {/* Logo */}
       <SidebarHeader className="h-16 border-b border-sidebar-border flex justify-center px-4">
         <div className="flex items-center gap-3 py-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-orange-400 to-rose-500 shadow-sm shrink-0">
-            <span className="text-white font-bold text-sm tracking-tight">
-              CC
-            </span>
+          <div className=" shadow-sm shrink-0">
+            <img src="/icone-logo.svg" alt="CampusConnect" className="size-9" />
           </div>
           <span className="font-semibold text-foreground text-base tracking-tight">
             CampusConnect

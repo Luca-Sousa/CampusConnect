@@ -1,6 +1,5 @@
 import { Navigate, useSearchParams } from "react-router-dom";
 import { useSession } from "@/lib/auth-client";
-import { AuthLogo } from "@/components/auth-logo";
 import { VerifyEmailForm } from "@/features/auth/components/forms/VerifyEmailForm";
 
 const VerifyEmailPage = () => {
@@ -11,18 +10,13 @@ const VerifyEmailPage = () => {
 
   if (isPending) return null;
 
-  // Se já verificado, vai direto para o feed
   if (session?.user.emailVerified) return <Navigate to="/feed" replace />;
 
-  // Sem e-mail para verificar, volta ao login
   if (!email) return <Navigate to="/signin" replace />;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-6 w-full max-w-sm lg:max-w-md">
-        <AuthLogo />
-        <VerifyEmailForm email={email} />
-      </div>
+      <VerifyEmailForm email={email} />
     </div>
   );
 };

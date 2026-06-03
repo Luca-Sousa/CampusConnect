@@ -1,13 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "@tanstack/react-form";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { signIn } from "@/lib/auth-client";
@@ -28,7 +22,6 @@ export function SigninForm() {
         showError(error.message ?? "Erro ao fazer login.");
         return;
       }
-      // Notificação de novo acesso — fire-and-forget
       fetch(`${env.API_URL}/api/notifications/login`, {
         method: "POST",
         credentials: "include",
@@ -38,22 +31,23 @@ export function SigninForm() {
   });
 
   return (
-    <Card className="w-full max-w-sm lg:max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl text-center">Login</CardTitle>
-        <CardDescription className="text-center">
-          Entre com sua conta institucional
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Card className="overflow-hidden p-0">
+      <CardContent className="grid p-0 md:grid-cols-2">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
           }}
-          className="flex flex-col gap-4"
+          className="p-6 md:p-8"
         >
           <FieldGroup>
+            <div className="flex flex-col items-center gap-2 text-center">
+              <h1 className="text-2xl font-bold">Login</h1>
+              <p className="text-balance text-muted-foreground">
+                Entre com sua conta institucional
+              </p>
+            </div>
+
             <form.Field name="email">
               {(field) => (
                 <FormInput
@@ -83,39 +77,46 @@ export function SigninForm() {
                 />
               )}
             </form.Field>
+
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Entrando..." : "Entrar"}
+                </Button>
+              )}
+            </form.Subscribe>
+
+            <div className="relative flex items-center gap-3">
+              <Separator className="flex-1" />
+              <span className="text-xs text-muted-foreground">ou</span>
+              <Separator className="flex-1" />
+            </div>
+
+            <Button variant="outline" className="w-full" asChild>
+              <Link to="/signin-otp">Entrar com código de acesso</Link>
+            </Button>
+
+            <div className="flex items-center justify-center">
+              <p className="text-sm text-center text-muted-foreground">
+                Não possui conta?
+              </p>
+              <Link to="/signup">
+                <Button variant="link">Criar conta</Button>
+              </Link>
+            </div>
           </FieldGroup>
-
-          <form.Subscribe selector={(state) => state.isSubmitting}>
-            {(isSubmitting) => (
-              <Button
-                type="submit"
-                className="w-full mt-2"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Entrando..." : "Entrar"}
-              </Button>
-            )}
-          </form.Subscribe>
-
-          <div className="relative flex items-center gap-3 my-1">
-            <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">ou</span>
-            <Separator className="flex-1" />
-          </div>
-
-          <Button variant="outline" className="w-full" asChild>
-            <Link to="/signin-otp">Entrar com código de acesso</Link>
-          </Button>
-
-          <div className="flex items-center justify-center">
-            <p className="text-sm text-center text-muted-foreground">
-              Não possui conta?
-            </p>
-            <Link to="/signup">
-              <Button variant="link">Criar conta</Button>
-            </Link>
-          </div>
         </form>
+        <div className="relative hidden bg-muted md:block">
+          <img
+            src="/banner-logo.svg"
+            alt="CampusConnect"
+            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          />
+        </div>
       </CardContent>
     </Card>
   );

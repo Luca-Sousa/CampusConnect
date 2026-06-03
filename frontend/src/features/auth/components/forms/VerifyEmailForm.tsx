@@ -1,12 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   InputOTP,
@@ -44,7 +38,6 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
       }
 
       showSuccess("E-mail verificado com sucesso!");
-      // Reload completo para garantir que a sessão reflita emailVerified: true
       window.location.replace("/feed");
     },
     [email, isSubmitting],
@@ -75,70 +68,80 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-sm lg:max-w-md">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Verificar e-mail</CardTitle>
-        <CardDescription>
-          Digite o código de 6 dígitos enviado para{" "}
-          <span className="font-medium text-foreground">{email}</span>
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col items-center gap-6">
-        <InputOTP
-          maxLength={6}
-          value={otp}
-          onChange={handleOtpChange}
-          disabled={isSubmitting}
-        >
-          <InputOTPGroup>
-            <InputOTPSlot index={0} />
-            <InputOTPSlot index={1} />
-            <InputOTPSlot index={2} />
-          </InputOTPGroup>
-          <InputOTPSeparator />
-          <InputOTPGroup>
-            <InputOTPSlot index={3} />
-            <InputOTPSlot index={4} />
-            <InputOTPSlot index={5} />
-          </InputOTPGroup>
-        </InputOTP>
-
-        <Button
-          type="button"
-          className="w-full"
-          onClick={() => handleVerify(otp)}
-          disabled={otp.length !== 6 || isSubmitting}
-        >
-          {isSubmitting ? "Verificando..." : "Verificar e-mail"}
-        </Button>
-
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <span>Não recebeu?</span>
-          <Button
-            variant="link"
-            size="sm"
-            className="h-auto p-0 text-sm"
-            disabled={resendCooldown > 0 || isResending}
-            onClick={handleResend}
+    <Card className="overflow-hidden p-0">
+      <CardContent className="grid p-0 md:grid-cols-2">
+        <div className="p-6 md:p-8 flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <h1 className="text-2xl font-bold">Verificar e-mail</h1>
+            <p className="text-balance text-muted-foreground">
+              Digite o código de 6 dígitos enviado para{" "}
+              <span className="font-medium text-foreground">{email}</span>
+            </p>
+          </div>
+          <InputOTP
+            maxLength={6}
+            value={otp}
+            onChange={handleOtpChange}
+            disabled={isSubmitting}
+            className="mt-6"
           >
-            {resendCooldown > 0
-              ? `Reenviar em ${resendCooldown}s`
-              : "Reenviar código"}
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+            </InputOTPGroup>
+            <InputOTPSeparator />
+            <InputOTPGroup>
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+
+          <Button
+            type="button"
+            className="w-full mt-6"
+            onClick={() => handleVerify(otp)}
+            disabled={otp.length !== 6 || isSubmitting}
+          >
+            {isSubmitting ? "Verificando..." : "Verificar e-mail"}
           </Button>
+
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-6">
+            <span>Não recebeu?</span>
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-sm"
+              disabled={resendCooldown > 0 || isResending}
+              onClick={handleResend}
+            >
+              {resendCooldown > 0
+                ? `Reenviar em ${resendCooldown}s`
+                : "Reenviar código"}
+            </Button>
+          </div>
+
+          <div className="flex justify-center mt-2">
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-sm"
+              onClick={async () => {
+                await signOut();
+                navigate("/signup");
+              }}
+            >
+              Voltar para o cadastro
+            </Button>
+          </div>
         </div>
-
-        <div className="flex justify-center">
-          <Button
-            variant="link"
-            size="sm"
-            className="h-auto p-0 text-sm"
-            onClick={async () => {
-              await signOut();
-              navigate("/signup");
-            }}
-          >
-            Voltar para o cadastro
-          </Button>
+        <div className="relative hidden bg-muted md:block">
+          <img
+            src="/banner-logo.svg"
+            alt="CampusConnect"
+            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          />
         </div>
       </CardContent>
     </Card>
