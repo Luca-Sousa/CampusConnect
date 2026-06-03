@@ -1,4 +1,5 @@
 import { Navigate, useSearchParams } from "react-router-dom";
+import { AuthLogo } from "@/components/auth-logo";
 import { ResetPasswordForm } from "@/features/auth/components/forms/ResetPasswordForm";
 
 const ResetPasswordPage = () => {
@@ -9,7 +10,10 @@ const ResetPasswordPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <ResetPasswordForm email={email} />
+      <div className="flex flex-col items-center gap-6">
+        <AuthLogo />
+        <ResetPasswordForm email={email} />
+      </div>
     </div>
   );
 };

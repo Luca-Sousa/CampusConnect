@@ -1,5 +1,6 @@
 import { Navigate, useSearchParams } from "react-router-dom";
 import { useSession } from "@/lib/auth-client";
+import { AuthLogo } from "@/components/auth-logo";
 import { VerifyEmailForm } from "@/features/auth/components/forms/VerifyEmailForm";
 
 const VerifyEmailPage = () => {
@@ -18,7 +19,10 @@ const VerifyEmailPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <VerifyEmailForm email={email} />
+      <div className="flex flex-col items-center gap-6">
+        <AuthLogo />
+        <VerifyEmailForm email={email} />
+      </div>
     </div>
   );
 };

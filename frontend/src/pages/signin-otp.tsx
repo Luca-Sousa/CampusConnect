@@ -1,8 +1,12 @@
+import { AuthLogo } from "@/components/auth-logo";
 import { SigninOtpForm } from "@/features/auth/components/forms/SigninOtpForm";
 
 const SigninOtpPage = () => (
   <div className="min-h-screen bg-background flex items-center justify-center p-4">
-    <SigninOtpForm />
+    <div className="flex flex-col items-center gap-6">
+      <AuthLogo />
+      <SigninOtpForm />
+    </div>
   </div>
 );
 
