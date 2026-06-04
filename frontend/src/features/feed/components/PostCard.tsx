@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   CalendarIcon,
   CheckCircle2Icon,
@@ -13,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CARGO_CONFIG } from "@/features/auth/constants";
-import { useToggleRsvp } from "../hooks/use-toggle-rsvp";
+import { useToggleRsvp } from "../hooks/use-toggle-rsvp"; // Esse já existia, mantivemos
 import type { EventPost, ImagePost, NewsPost, Post, TextPost } from "../types";
 import {
   formatEventDate,
@@ -21,12 +22,14 @@ import {
   formatRelativeTime,
   getInitials,
 } from "../utils/format";
+
 import { PostActionsMenu } from "./PostActionsMenu";
 
 interface PostCardProps {
   post: Post;
   currentUserId?: string;
   onEdit: (post: Post) => void;
+  onCommentClick?: (postId: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -38,7 +41,7 @@ interface PostHeaderProps {
   currentUserId?: string;
   onEdit: (post: Post) => void;
 }
-console.log("PostCard carregado");
+
 function PostHeader({ post, currentUserId, onEdit }: PostHeaderProps) {
   const authorName = post.author?.name ?? "Usuário";
   const cargo = post.author?.cargo ?? "aluno";
@@ -49,7 +52,7 @@ function PostHeader({ post, currentUserId, onEdit }: PostHeaderProps) {
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10 shrink-0">
           <AvatarImage src={post.author?.image ?? undefined} />
-          <AvatarFallback className="bg-linear-to-br from-orange-400 to-rose-400 text-white font-semibold text-sm">
+          <AvatarFallback className="bg-gradient-to-br from-orange-400 to-rose-400 text-white font-semibold text-sm">
             {getInitials(authorName)}
           </AvatarFallback>
         </Avatar>
@@ -116,54 +119,86 @@ function BannerAuthorRow({ post, currentUserId, onEdit }: BannerAuthorRowProps) 
 }
 
 // ---------------------------------------------------------------------------
-// ActionBar
+// ActionBar — Gerenciando o estado visual de forma segura
 // ---------------------------------------------------------------------------
 
+interface ActionBarProps {
+  postId: string;
+  initialLikes: number;
+  initialComments: number;
+  initialShares: number;
+  initialHasLiked?: boolean;
+  onCommentClick?: () => void;
+}
+
 function ActionBar({
-  likes,
-  comments,
-  shares,
-  setLikes,
-  setComments,
-  setShares,
-}: {
-  likes: number;
-  comments: number;
-  shares: number;
-  setLikes: React.Dispatch<React.SetStateAction<number>>;
-  setComments: React.Dispatch<React.SetStateAction<number>>;
-  setShares: React.Dispatch<React.SetStateAction<number>>;
-}) {
+  postId,
+  initialLikes,
+  initialComments,
+  initialShares,
+  initialHasLiked = false,
+  onCommentClick,
+}: ActionBarProps) {
+  // Criamos estados locais baseados no que vem do post para o botão funcionar na hora
+  const [likes, setLikes] = useState(initialLikes);
+  const [hasLiked, setHasLiked] = useState(initialHasLiked);
+  const [shares, setShares] = useState(initialShares);
+
+  const handleLike = () => {
+    if (hasLiked) {
+      setLikes((prev) => prev - 1);
+      setHasLiked(false);
+    } else {
+      setLikes((prev) => prev + 1);
+      setHasLiked(true);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      const shareUrl = `${window.location.origin}/posts/${postId}`; 
+      await navigator.clipboard.writeText(shareUrl);
+      setShares((prev) => prev + 1);
+      alert("Link do post copiado!");
+    } catch (err) {
+      console.error("Erro ao copiar link: ", err);
+    }
+  };
+
   return (
     <div className="flex px-2 py-1.5 border-t">
+      {/* Botão Curtir */}
       <Button
         variant="ghost"
         size="sm"
-        className="flex-1 gap-2 text-muted-foreground text-xs h-9"
-        onClick={() => setLikes((prev) => prev + 1)}
+        className={`flex-1 gap-2 text-xs h-9 transition-colors ${
+          hasLiked 
+            ? "text-blue-600 hover:text-blue-700 font-semibold" 
+            : "text-muted-foreground"
+        }`}
+        onClick={handleLike}
       >
-        <ThumbsUpIcon className="h-4 w-4" />
+        <ThumbsUpIcon className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`} />
         Curtir ({likes})
       </Button>
 
+      {/* Botão Comentar */}
       <Button
         variant="ghost"
         size="sm"
         className="flex-1 gap-2 text-muted-foreground text-xs h-9"
-        onClick={() => setComments((prev) => prev + 1)}
+        onClick={onCommentClick}
       >
         <MessageCircleIcon className="h-4 w-4" />
-        Comentar ({comments})
+        Comentar ({initialComments})
       </Button>
 
+      {/* Botão Compartilhar */}
       <Button
         variant="ghost"
         size="sm"
         className="flex-1 gap-2 text-muted-foreground text-xs h-9"
-        onClick={() => {
-          navigator.clipboard.writeText(window.location.href);
-          setShares((prev) => prev + 1);
-        }}
+        onClick={handleShare}
       >
         <Share2Icon className="h-4 w-4" />
         Compartilhar ({shares})
@@ -171,19 +206,19 @@ function ActionBar({
     </div>
   );
 }
+
 // ---------------------------------------------------------------------------
 // Post type variants
 // ---------------------------------------------------------------------------
 
-function TextPostCard({
-  post,
-  currentUserId,
-  onEdit,
-}: {
-  post: TextPost;
+interface PostCardComponentProps<T> {
+  post: T;
   currentUserId?: string;
   onEdit: (post: Post) => void;
-}) {
+  onCommentClick?: (postId: string) => void;
+}
+
+function TextPostCard({ post, currentUserId, onEdit, onCommentClick }: PostCardComponentProps<TextPost>) {
   return (
     <Card className="shadow-sm overflow-hidden p-0">
       <CardContent className="p-0">
@@ -191,21 +226,20 @@ function TextPostCard({
         <p className="px-4 pb-3 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
           {post.content}
         </p>
-        <ActionBar />
+        <ActionBar 
+          postId={post.id}
+          initialLikes={post.likesCount ?? 0}
+          initialComments={post.commentsCount ?? 0}
+          initialShares={post.sharesCount ?? 0}
+          initialHasLiked={post.hasLiked}
+          onCommentClick={() => onCommentClick?.(post.id)}
+        />
       </CardContent>
     </Card>
   );
 }
 
-function ImagePostCard({
-  post,
-  currentUserId,
-  onEdit,
-}: {
-  post: ImagePost;
-  currentUserId?: string;
-  onEdit: (post: Post) => void;
-}) {
+function ImagePostCard({ post, currentUserId, onEdit, onCommentClick }: PostCardComponentProps<ImagePost>) {
   return (
     <Card className="shadow-sm overflow-hidden p-0">
       <CardContent className="p-0">
@@ -220,27 +254,25 @@ function ImagePostCard({
           alt="Imagem da publicação"
           className="w-full max-h-125 object-cover"
         />
-        <ActionBar />
+        <ActionBar 
+          postId={post.id}
+          initialLikes={post.likesCount ?? 0}
+          initialComments={post.commentsCount ?? 0}
+          initialShares={post.sharesCount ?? 0}
+          initialHasLiked={post.hasLiked}
+          onCommentClick={() => onCommentClick?.(post.id)}
+        />
       </CardContent>
     </Card>
   );
 }
 
-function EventPostCard({
-  post,
-  currentUserId,
-  onEdit,
-}: {
-  post: EventPost;
-  currentUserId?: string;
-  onEdit: (post: Post) => void;
-}) {
+function EventPostCard({ post, currentUserId, onEdit, onCommentClick }: PostCardComponentProps<EventPost>) {
   const { mutate: toggleRsvp, isPending } = useToggleRsvp();
 
   return (
     <article className="rounded-xl border border-violet-200/60 dark:border-violet-800/40 bg-card shadow-sm overflow-hidden">
-      {/* Gradient banner com autor e título do evento */}
-      <div className="bg-linear-to-br from-violet-600 to-indigo-700 px-4 pt-4 pb-5">
+      <div className="bg-gradient-to-br from-violet-600 to-indigo-700 px-4 pt-4 pb-5">
         <BannerAuthorRow
           post={post}
           currentUserId={currentUserId}
@@ -256,7 +288,6 @@ function EventPostCard({
         </div>
       </div>
 
-      {/* Chips de metadados do evento */}
       <div className="bg-violet-50/60 dark:bg-violet-950/30 px-4 py-3 flex flex-wrap gap-2 border-b border-violet-100 dark:border-violet-900/30">
         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-700 dark:text-violet-300 bg-white dark:bg-violet-900/30 rounded-full px-3 py-1 border border-violet-200/60 dark:border-violet-700/40">
           <CalendarIcon className="h-3.5 w-3.5 shrink-0" />
@@ -272,7 +303,6 @@ function EventPostCard({
         </span>
       </div>
 
-      {/* Imagem opcional do evento */}
       {post.imageUrl && (
         <img
           src={post.imageUrl}
@@ -281,14 +311,12 @@ function EventPostCard({
         />
       )}
 
-      {/* Descrição opcional */}
       {post.content && (
         <p className="px-4 pt-3 pb-1 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
           {post.content}
         </p>
       )}
 
-      {/* Rodapé de confirmação de presença */}
       <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
         <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <UsersIcon className="h-4 w-4 shrink-0" />
@@ -316,24 +344,22 @@ function EventPostCard({
         </Button>
       </div>
 
-      <ActionBar />
+      <ActionBar 
+        postId={post.id}
+        initialLikes={post.likesCount ?? 0}
+        initialComments={post.commentsCount ?? 0}
+        initialShares={post.sharesCount ?? 0}
+        initialHasLiked={post.hasLiked}
+        onCommentClick={() => onCommentClick?.(post.id)}
+      />
     </article>
   );
 }
 
-function NewsPostCard({
-  post,
-  currentUserId,
-  onEdit,
-}: {
-  post: NewsPost;
-  currentUserId?: string;
-  onEdit: (post: Post) => void;
-}) {
+function NewsPostCard({ post, currentUserId, onEdit, onCommentClick }: PostCardComponentProps<NewsPost>) {
   return (
     <article className="rounded-xl border border-orange-200/60 dark:border-orange-800/40 bg-card shadow-sm overflow-hidden">
-      {/* Gradient banner com rótulo oficial e título */}
-      <div className="bg-linear-to-br from-orange-500 to-amber-500 p-3">
+      <div className="bg-gradient-to-br from-orange-500 to-amber-500 p-3">
         <div className="flex items-center gap-2 text-orange-100 text-xs font-semibold uppercase tracking-wider mb-3">
           <NewspaperIcon className="h-3.5 w-3.5 shrink-0" />
           Comunicado Oficial
@@ -343,10 +369,8 @@ function NewsPostCard({
         </h2>
       </div>
 
-      {/* Autor abaixo do banner */}
       <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
 
-      {/* Imagem opcional do comunicado */}
       {post.imageUrl && (
         <img
           src={post.imageUrl}
@@ -355,14 +379,20 @@ function NewsPostCard({
         />
       )}
 
-      {/* Conteúdo */}
       {post.content && (
         <p className="p-4 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
           {post.content}
         </p>
       )}
 
-      <ActionBar />
+      <ActionBar 
+        postId={post.id}
+        initialLikes={post.likesCount ?? 0}
+        initialComments={post.commentsCount ?? 0}
+        initialShares={post.sharesCount ?? 0}
+        initialHasLiked={post.hasLiked}
+        onCommentClick={() => onCommentClick?.(post.id)}
+      />
     </article>
   );
 }
@@ -371,7 +401,7 @@ function NewsPostCard({
 // Public API
 // ---------------------------------------------------------------------------
 
-export function PostCard({ post, currentUserId, onEdit }: PostCardProps) {
+export function PostCard({ post, currentUserId, onEdit, onCommentClick }: PostCardProps) {
   switch (post.type) {
     case "text":
       return (
@@ -379,6 +409,7 @@ export function PostCard({ post, currentUserId, onEdit }: PostCardProps) {
           post={post}
           currentUserId={currentUserId}
           onEdit={onEdit}
+          onCommentClick={onCommentClick}
         />
       );
     case "image":
@@ -387,6 +418,7 @@ export function PostCard({ post, currentUserId, onEdit }: PostCardProps) {
           post={post}
           currentUserId={currentUserId}
           onEdit={onEdit}
+          onCommentClick={onCommentClick}
         />
       );
     case "event":
@@ -395,6 +427,7 @@ export function PostCard({ post, currentUserId, onEdit }: PostCardProps) {
           post={post}
           currentUserId={currentUserId}
           onEdit={onEdit}
+          onCommentClick={onCommentClick}
         />
       );
     case "news":
@@ -403,6 +436,7 @@ export function PostCard({ post, currentUserId, onEdit }: PostCardProps) {
           post={post}
           currentUserId={currentUserId}
           onEdit={onEdit}
+          onCommentClick={onCommentClick}
         />
       );
   }
