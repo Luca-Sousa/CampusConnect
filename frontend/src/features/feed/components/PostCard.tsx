@@ -38,7 +38,7 @@ interface PostHeaderProps {
   currentUserId?: string;
   onEdit: (post: Post) => void;
 }
-
+console.log("PostCard carregado");
 function PostHeader({ post, currentUserId, onEdit }: PostHeaderProps) {
   const authorName = post.author?.name ?? "Usuário";
   const cargo = post.author?.cargo ?? "aluno";
@@ -119,37 +119,58 @@ function BannerAuthorRow({ post, currentUserId, onEdit }: BannerAuthorRowProps) 
 // ActionBar
 // ---------------------------------------------------------------------------
 
-function ActionBar() {
+function ActionBar({
+  likes,
+  comments,
+  shares,
+  setLikes,
+  setComments,
+  setShares,
+}: {
+  likes: number;
+  comments: number;
+  shares: number;
+  setLikes: React.Dispatch<React.SetStateAction<number>>;
+  setComments: React.Dispatch<React.SetStateAction<number>>;
+  setShares: React.Dispatch<React.SetStateAction<number>>;
+}) {
   return (
     <div className="flex px-2 py-1.5 border-t">
       <Button
         variant="ghost"
         size="sm"
         className="flex-1 gap-2 text-muted-foreground text-xs h-9"
+        onClick={() => setLikes((prev) => prev + 1)}
       >
         <ThumbsUpIcon className="h-4 w-4" />
-        <span className="hidden sm:inline">Curtir</span>
+        Curtir ({likes})
       </Button>
+
       <Button
         variant="ghost"
         size="sm"
         className="flex-1 gap-2 text-muted-foreground text-xs h-9"
+        onClick={() => setComments((prev) => prev + 1)}
       >
         <MessageCircleIcon className="h-4 w-4" />
-        <span className="hidden sm:inline">Comentar</span>
+        Comentar ({comments})
       </Button>
+
       <Button
         variant="ghost"
         size="sm"
         className="flex-1 gap-2 text-muted-foreground text-xs h-9"
+        onClick={() => {
+          navigator.clipboard.writeText(window.location.href);
+          setShares((prev) => prev + 1);
+        }}
       >
         <Share2Icon className="h-4 w-4" />
-        <span className="hidden sm:inline">Compartilhar</span>
+        Compartilhar ({shares})
       </Button>
     </div>
   );
 }
-
 // ---------------------------------------------------------------------------
 // Post type variants
 // ---------------------------------------------------------------------------
