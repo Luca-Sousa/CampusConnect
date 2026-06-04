@@ -18,14 +18,14 @@ export function useMarkAsRead() {
 
       queryClient.setQueriesData(
         { queryKey: notificationKeys.all },
-        (old: Awaited<ReturnType<typeof import("../api").fetchNotifications>> | undefined) => {
-          if (!old) return old;
+        (old: any) => {
+          if (!old || !("notifications" in old)) return old;
           return {
             ...old,
-            notifications: old.notifications.map((n) =>
+            notifications: old.notifications.map((n: any) =>
               n.id === id ? { ...n, readAt: new Date().toISOString() } : n,
             ),
-            unreadCount: Math.max(0, old.unreadCount - 1),
+            unreadCount: Math.max(0, (old.unreadCount ?? 0) - 1),
           };
         },
       );

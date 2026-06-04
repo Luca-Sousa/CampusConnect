@@ -18,11 +18,11 @@ export function useMarkAllAsRead() {
 
       queryClient.setQueriesData(
         { queryKey: notificationKeys.all },
-        (old: Awaited<ReturnType<typeof import("../api").fetchNotifications>> | undefined) => {
-          if (!old) return old;
+        (old: any) => {
+          if (!old || !("notifications" in old)) return old;
           return {
             ...old,
-            notifications: old.notifications.map((n) => ({
+            notifications: old.notifications.map((n: any) => ({
               ...n,
               readAt: n.readAt ?? new Date().toISOString(),
             })),
