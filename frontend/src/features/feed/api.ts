@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import type { Post } from "./types";
+import type { Post, ToggleLikeResult, Comment } from "./types";
 
 export async function fetchPosts(offset = 0, limit = 20): Promise<Post[]> {
   const res = await fetch(
@@ -62,5 +62,55 @@ export async function toggleRsvp(
     credentials: "include",
   });
   if (!res.ok) throw new Error("Erro ao confirmar presença.");
+  return res.json();
+}
+
+// ——— Likes ———
+
+export async function fetchLikeStatus(
+  postId: string,
+): Promise<{ likesCount: number; hasLiked: boolean }> {
+  const res = await fetch(`${env.API_URL}/api/posts/${postId}/like`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Erro ao verificar curtida.");
+  return res.json();
+}
+
+export async function toggleLike(postId: string): Promise<ToggleLikeResult> {
+  const res = await fetch(`${env.API_URL}/api/posts/${postId}/like`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Erro ao curtir publicação.");
+  return res.json();
+}
+
+// ——— Comments ———
+
+export async function fetchComments(postId: string): Promise<Comment[]> {
+  const res = await fetch(`${env.API_URL}/api/posts/${postId}/comments`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Erro ao carregar comentários.");
+  return res.json();
+}
+
+export async function addComment(
+  postId: string,
+  data: { content: string; parentId?: string },
+): Promise<Comment> {
+  const res = await fetch(`${env.API_URL}/api/posts/${postId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(
+      (err as { error?: string }).error ?? "Erro ao comentar.",
+    );
+  }
   return res.json();
 }

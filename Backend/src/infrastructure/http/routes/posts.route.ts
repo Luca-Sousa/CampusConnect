@@ -2,19 +2,29 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { auth } from "../../auth/better-auth.js";
 import { PostDrizzleRepository } from "../../database/repositories/post.drizzle-repository.js";
+import { LikeDrizzleRepository } from "../../database/repositories/like.drizzle-repository.js";
+import { CommentDrizzleRepository } from "../../database/repositories/comment.drizzle-repository.js";
 import { CreatePostUseCase } from "../../../application/use-cases/posts/create-post.use-case.js";
 import { ListPostsUseCase } from "../../../application/use-cases/posts/list-posts.use-case.js";
 import { DeletePostUseCase } from "../../../application/use-cases/posts/delete-post.use-case.js";
 import { ToggleRsvpUseCase } from "../../../application/use-cases/posts/toggle-rsvp.use-case.js";
 import { UpdatePostUseCase } from "../../../application/use-cases/posts/update-post.use-case.js";
+import { ToggleLikeUseCase } from "../../../application/use-cases/toggle-like.use-case.js";
+import { ListCommentsUseCase } from "../../../application/use-cases/list-comments.use-case.js";
+import { AddCommentUseCase } from "../../../application/use-cases/add-comment.use-case.js";
 
 // ——— Singletons de repositório e casos de uso ———
 const postRepository = new PostDrizzleRepository();
+const likeRepository = new LikeDrizzleRepository();
+const commentRepository = new CommentDrizzleRepository();
 const createPostUseCase = new CreatePostUseCase(postRepository);
 const listPostsUseCase = new ListPostsUseCase(postRepository);
 const deletePostUseCase = new DeletePostUseCase(postRepository);
 const toggleRsvpUseCase = new ToggleRsvpUseCase(postRepository);
 const updatePostUseCase = new UpdatePostUseCase(postRepository);
+const toggleLikeUseCase = new ToggleLikeUseCase(likeRepository);
+const listCommentsUseCase = new ListCommentsUseCase(commentRepository);
+const addCommentUseCase = new AddCommentUseCase(commentRepository);
 
 // ——— Helper de sessão ———
 async function getSession(request: { headers: { cookie?: string } }) {
@@ -404,6 +414,107 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
             .send({
               error: "RSVP só é válido para publicações do tipo evento.",
             });
+        }
+      }
+      throw err;
+    }
+  });
+
+  /**
+   * GET /api/posts/:id/like
+   * Retorna contagem de likes e se o usuário atual curtiu.
+   */
+  app.get("/api/posts/:id/like", async (request, reply) => {
+    const { id: postId } = request.params as { id: string };
+    const session = await getSession(request);
+
+    const [likesCount, hasLiked] = await Promise.all([
+      likeRepository.countByPostId(postId),
+      session
+        ? likeRepository.hasUserLiked(postId, session.user.id)
+        : false,
+    ]);
+
+    return reply.send({ likesCount, hasLiked });
+  });
+
+  /**
+   * POST /api/posts/:id/like
+   * Alterna curtida (toggle) na publicação.
+   */
+  app.post("/api/posts/:id/like", async (request, reply) => {
+    const session = await getSession(request);
+    if (!session) {
+      return reply.status(401).send({ error: "Não autorizado." });
+    }
+
+    const { id: postId } = request.params as { id: string };
+
+    try {
+      const result = await toggleLikeUseCase.execute({
+        postId,
+        userId: session.user.id,
+      });
+
+      return reply.send(result);
+    } catch (err) {
+      if (err instanceof Error && err.message === "NOT_FOUND") {
+        return reply
+          .status(404)
+          .send({ error: "Publicação não encontrada." });
+      }
+      throw err;
+    }
+  });
+
+  /**
+   * GET /api/posts/:id/comments
+   * Lista comentários da publicação (com respostas aninhadas 1 nível).
+   */
+  app.get("/api/posts/:id/comments", async (request, reply) => {
+    const { id: postId } = request.params as { id: string };
+
+    const comments = await listCommentsUseCase.execute({ postId });
+    return reply.send(comments);
+  });
+
+  /**
+   * POST /api/posts/:id/comments
+   * Adiciona um comentário (ou resposta) à publicação.
+   */
+  app.post("/api/posts/:id/comments", async (request, reply) => {
+    const session = await getSession(request);
+    if (!session) {
+      return reply.status(401).send({ error: "Não autorizado." });
+    }
+
+    const { id: postId } = request.params as { id: string };
+    const body = request.body as { content?: string; parentId?: string };
+
+    if (!body.content?.trim()) {
+      return reply.status(400).send({ error: "Conteúdo obrigatório." });
+    }
+
+    try {
+      const comment = await addCommentUseCase.execute({
+        postId,
+        authorId: session.user.id,
+        parentId: body.parentId,
+        content: body.content.trim(),
+      });
+
+      return reply.status(201).send(comment);
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === "NOT_FOUND") {
+          return reply
+            .status(404)
+            .send({ error: "Publicação não encontrada." });
+        }
+        if (err.message.startsWith("INVALID:")) {
+          return reply
+            .status(400)
+            .send({ error: "Comentário pai não encontrado." });
         }
       }
       throw err;

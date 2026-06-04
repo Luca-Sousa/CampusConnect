@@ -7,4 +7,7 @@
 export const feedKeys = {
   all: ["feed"] as const,
   posts: () => [...feedKeys.all, "posts"] as const,
+  postDetail: (id: string) => [...feedKeys.all, "post", id] as const,
+  postLike: (id: string) => [...feedKeys.all, "like", id] as const,
+  postComments: (id: string) => [...feedKeys.all, "comments", id] as const,
 } as const;

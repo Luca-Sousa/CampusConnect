@@ -42,3 +42,31 @@ export interface NewsPost extends PostBase {
 }
 
 export type Post = TextPost | ImagePost | EventPost | NewsPost;
+
+// ——— Likes ———
+
+export interface ToggleLikeResult {
+  hasLiked: boolean;
+  likesCount: number;
+}
+
+// ——— Comments ———
+
+export interface CommentAuthor {
+  id: string;
+  name: string;
+  image: string | null;
+  cargo: string | null;
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  authorId: string;
+  parentId: string | null;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  author: CommentAuthor | null;
+  replies?: Comment[];
+}

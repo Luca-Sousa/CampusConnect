@@ -3,16 +3,14 @@ import {
   CheckCircle2Icon,
   ClockIcon,
   MapPinIcon,
-  MessageCircleIcon,
   NewspaperIcon,
-  Share2Icon,
-  ThumbsUpIcon,
   UsersIcon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CARGO_CONFIG } from "@/features/auth/constants";
+import { ActionBar } from "@/components/action-bar";
 import { useToggleRsvp } from "../hooks/use-toggle-rsvp";
 import type { EventPost, ImagePost, NewsPost, Post, TextPost } from "../types";
 import {
@@ -38,7 +36,7 @@ interface PostHeaderProps {
   currentUserId?: string;
   onEdit: (post: Post) => void;
 }
-console.log("PostCard carregado");
+
 function PostHeader({ post, currentUserId, onEdit }: PostHeaderProps) {
   const authorName = post.author?.name ?? "Usuário";
   const cargo = post.author?.cargo ?? "aluno";
@@ -116,62 +114,6 @@ function BannerAuthorRow({ post, currentUserId, onEdit }: BannerAuthorRowProps) 
 }
 
 // ---------------------------------------------------------------------------
-// ActionBar
-// ---------------------------------------------------------------------------
-
-function ActionBar({
-  likes,
-  comments,
-  shares,
-  setLikes,
-  setComments,
-  setShares,
-}: {
-  likes: number;
-  comments: number;
-  shares: number;
-  setLikes: React.Dispatch<React.SetStateAction<number>>;
-  setComments: React.Dispatch<React.SetStateAction<number>>;
-  setShares: React.Dispatch<React.SetStateAction<number>>;
-}) {
-  return (
-    <div className="flex px-2 py-1.5 border-t">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="flex-1 gap-2 text-muted-foreground text-xs h-9"
-        onClick={() => setLikes((prev) => prev + 1)}
-      >
-        <ThumbsUpIcon className="h-4 w-4" />
-        Curtir ({likes})
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        className="flex-1 gap-2 text-muted-foreground text-xs h-9"
-        onClick={() => setComments((prev) => prev + 1)}
-      >
-        <MessageCircleIcon className="h-4 w-4" />
-        Comentar ({comments})
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        className="flex-1 gap-2 text-muted-foreground text-xs h-9"
-        onClick={() => {
-          navigator.clipboard.writeText(window.location.href);
-          setShares((prev) => prev + 1);
-        }}
-      >
-        <Share2Icon className="h-4 w-4" />
-        Compartilhar ({shares})
-      </Button>
-    </div>
-  );
-}
-// ---------------------------------------------------------------------------
 // Post type variants
 // ---------------------------------------------------------------------------
 
@@ -191,7 +133,7 @@ function TextPostCard({
         <p className="px-4 pb-3 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
           {post.content}
         </p>
-        <ActionBar />
+        <ActionBar postId={post.id} commentsCount={0} />
       </CardContent>
     </Card>
   );
@@ -220,7 +162,7 @@ function ImagePostCard({
           alt="Imagem da publicação"
           className="w-full max-h-125 object-cover"
         />
-        <ActionBar />
+        <ActionBar postId={post.id} commentsCount={0} />
       </CardContent>
     </Card>
   );
@@ -316,7 +258,7 @@ function EventPostCard({
         </Button>
       </div>
 
-      <ActionBar />
+      <ActionBar postId={post.id} commentsCount={0} />
     </article>
   );
 }
@@ -362,7 +304,7 @@ function NewsPostCard({
         </p>
       )}
 
-      <ActionBar />
+      <ActionBar postId={post.id} commentsCount={0} />
     </article>
   );
 }
