@@ -29,8 +29,32 @@ export default function PostDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl mx-auto p-4 space-y-4">
-        <Skeleton className="h-[300px] rounded-xl" />
+      <div className="max-w-2xl mx-auto p-4">
+        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+          <div className="px-4 pt-4 pb-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            </div>
+          </div>
+          <div className="px-4 pb-4 space-y-2.5">
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-4 w-[280px] sm:w-[360px] md:w-[440px] lg:w-[520px] xl:w-[600px] 2xl:w-[680px]" />
+            <Skeleton className="h-4 w-[260px] sm:w-[340px] md:w-[420px] lg:w-[500px] xl:w-[580px] 2xl:w-[660px]" />
+            <Skeleton className="h-4 w-[240px] sm:w-[320px] md:w-[400px] lg:w-[480px] xl:w-[560px] 2xl:w-[640px]" />
+            <Skeleton className="h-4 w-[200px] sm:w-[260px] md:w-[320px] lg:w-[380px] xl:w-[440px] 2xl:w-[500px]" />
+            <Skeleton className="h-4 w-[160px] sm:w-[200px] md:w-[240px] lg:w-[280px] xl:w-[320px] 2xl:w-[360px]" />
+          </div>
+          <Skeleton className="h-64 w-[280px] sm:w-[360px] md:w-[440px] lg:w-[520px] xl:w-[600px] 2xl:w-[680px]" />
+          <div className="flex px-2 py-1.5 border-t gap-2">
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 flex-1" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -102,7 +126,7 @@ export default function PostDetailPage() {
             <img
               src={post.imageUrl}
               alt="Imagem da publicação"
-              className="w-full max-h-[500px] object-cover"
+              className="w-full max-h-125 object-cover"
             />
           )}
 

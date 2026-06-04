@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { PlusIcon, SearchIcon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +15,24 @@ import type { Group } from "@/features/groups/types";
 const GroupsPage = () => {
   const { data: session } = useSession();
   const { data: groups, isLoading, search, setSearch } = useGroups();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+
+  useEffect(() => {
+    const chatId = searchParams.get("chat");
+    if (chatId && groups) {
+      const group = groups.find((g) => g.id === chatId);
+      if (group) {
+        setSelectedGroup(group);
+        setSheetOpen(true);
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, groups, setSearchParams]);
 
   function handleEdit(group: Group) {
     setEditingGroup(group);

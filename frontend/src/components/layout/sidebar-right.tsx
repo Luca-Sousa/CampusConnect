@@ -4,11 +4,13 @@ import {
   CalendarDaysIcon,
   NewspaperIcon,
   UsersIcon,
+  UserPlusIcon,
   ArrowRightIcon,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sidebar,
@@ -26,6 +28,17 @@ import { useGroups } from "@/features/groups/hooks/use-groups";
 import { getInitials } from "@/features/feed/utils/format";
 
 const MAX_ITEMS = 4;
+const NEW_THRESHOLD_DAYS = 3;
+
+// ---- Helpers ---------------------------------------------------------------
+
+function isRecent(dateStr: string, days = NEW_THRESHOLD_DAYS): boolean {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  return diffDays >= 0 && diffDays <= days;
+}
 
 // ---- Skeleton -------------------------------------------------------------
 
@@ -95,7 +108,7 @@ function SidebarItem({
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <span className="text-sm font-medium truncate block">{name}</span>
+          <h2 className="text-sm font-medium truncate w-48">{name}</h2>
           {subtitle && (
             <span className="text-[10px] text-muted-foreground truncate block">
               {subtitle}
@@ -168,33 +181,51 @@ const SidebarRight = () => {
   const { data: news = [], isLoading: newsLoading } = useNews();
   const { data: groups = [], isLoading: groupsLoading } = useGroups();
 
-  const recentEvents = events.slice(0, MAX_ITEMS).map((e, i) => ({
+  const recentEvents = events.slice(0, MAX_ITEMS).map((e) => ({
     name: e.eventTitle,
     subtitle: e.eventLocation,
     initials: getInitials(e.eventTitle),
     color: "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
-    isNew: i === 0,
-    onClick: () => navigate("/events"),
+    isNew: isRecent(e.createdAt),
+    onClick: () => navigate(`/post/${e.id}`),
   }));
 
-  const recentNews = news.slice(0, MAX_ITEMS).map((n, i) => ({
+  const recentNews = news.slice(0, MAX_ITEMS).map((n) => ({
     name: n.newsTitle,
     subtitle: n.author?.name ?? "Oficial",
     initials: getInitials(n.newsTitle),
     color: "bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
-    isNew: i === 0,
-    onClick: () => navigate("/news"),
+    isNew: isRecent(n.createdAt),
+    onClick: () => navigate(`/post/${n.id}`),
   }));
 
-  const recentGroups = groups.slice(0, MAX_ITEMS).map((g, i) => ({
-    name: g.name,
-    subtitle: `${g.memberCount} ${g.memberCount === 1 ? "membro" : "membros"}`,
-    initials: getInitials(g.name),
-    color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400",
-    emoji: g.icon,
-    isNew: i === 0,
-    onClick: () => navigate("/groups"),
-  }));
+  const myGroups = groups
+    .filter((g) => g.isMember)
+    .slice(0, MAX_ITEMS)
+    .map((g) => ({
+      name: g.name,
+      subtitle: `${g.memberCount} ${g.memberCount === 1 ? "membro" : "membros"}`,
+      initials: getInitials(g.name),
+      color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400",
+      emoji: g.icon,
+      isNew: isRecent(g.createdAt),
+      onClick: () => navigate(`/groups?chat=${g.id}`),
+    }));
+
+  const suggestedGroups = groups
+    .filter((g) => !g.isMember)
+    .slice(0, MAX_ITEMS)
+    .map((g) => ({
+      name: g.name,
+      subtitle: `${g.memberCount} ${g.memberCount === 1 ? "membro" : "membros"}`,
+      initials: getInitials(g.name),
+      color: "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400",
+      emoji: g.icon,
+      isNew: isRecent(g.createdAt),
+      onClick: () => navigate("/groups"),
+    }));
+
+  const anyLoading = eventsLoading || newsLoading || groupsLoading;
 
   return (
     <Sidebar
@@ -204,41 +235,49 @@ const SidebarRight = () => {
       style={{ "--sidebar-width": "19.5rem" } as React.CSSProperties}
     >
       <SidebarContent>
-        {eventsLoading ? (
-          <SectionSkeleton count={3} />
-        ) : (
-          <SidebarSection
-            title="Eventos"
-            icon={<CalendarDaysIcon className="h-3.5 w-3.5" />}
-            items={recentEvents}
-            onNavigate={() => navigate("/events")}
-            navigateLabel="Ver todos os eventos"
-          />
-        )}
+        <ScrollArea className="h-full">
+          {anyLoading ? (
+            <>
+              <SectionSkeleton count={3} />
+              <SectionSkeleton count={3} />
+              <SectionSkeleton count={2} />
+            </>
+          ) : (
+            <>
+              <SidebarSection
+                title="Eventos"
+                icon={<CalendarDaysIcon className="h-3.5 w-3.5" />}
+                items={recentEvents}
+                onNavigate={() => navigate("/events")}
+                navigateLabel="Ver todos os eventos"
+              />
 
-        {newsLoading ? (
-          <SectionSkeleton count={3} />
-        ) : (
-          <SidebarSection
-            title="Notícias"
-            icon={<NewspaperIcon className="h-3.5 w-3.5" />}
-            items={recentNews}
-            onNavigate={() => navigate("/news")}
-            navigateLabel="Ver todas as notícias"
-          />
-        )}
+              <SidebarSection
+                title="Notícias"
+                icon={<NewspaperIcon className="h-3.5 w-3.5" />}
+                items={recentNews}
+                onNavigate={() => navigate("/news")}
+                navigateLabel="Ver todas as notícias"
+              />
 
-        {groupsLoading ? (
-          <SectionSkeleton count={3} />
-        ) : (
-          <SidebarSection
-            title="Grupos"
-            icon={<UsersIcon className="h-3.5 w-3.5" />}
-            items={recentGroups}
-            onNavigate={() => navigate("/groups")}
-            navigateLabel="Ver todos os grupos"
-          />
-        )}
+              <SidebarSection
+                title="Meus Grupos"
+                icon={<UsersIcon className="h-3.5 w-3.5" />}
+                items={myGroups}
+                onNavigate={() => navigate("/groups")}
+                navigateLabel="Ver todos os grupos"
+              />
+
+              <SidebarSection
+                title="Sugeridos"
+                icon={<UserPlusIcon className="h-3.5 w-3.5" />}
+                items={suggestedGroups}
+                onNavigate={() => navigate("/groups")}
+                navigateLabel="Ver todos os grupos"
+              />
+            </>
+          )}
+        </ScrollArea>
       </SidebarContent>
     </Sidebar>
   );
