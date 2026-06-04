@@ -20,6 +20,7 @@ import {
   getInitials,
 } from "../utils/format";
 import { PostActionsMenu } from "./PostActionsMenu";
+import { ExpandableText } from "@/components/expandable-text";
 
 interface PostCardProps {
   post: Post;
@@ -130,9 +131,7 @@ function TextPostCard({
     <Card className="shadow-sm overflow-hidden p-0">
       <CardContent className="p-0">
         <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
-        <p className="px-4 pb-3 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-          {post.content}
-        </p>
+        <ExpandableText text={post.content ?? ""} />
         <ActionBar postId={post.id} commentsCount={0} />
       </CardContent>
     </Card>
@@ -153,9 +152,7 @@ function ImagePostCard({
       <CardContent className="p-0">
         <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
         {post.content && (
-          <p className="px-4 pb-3 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-            {post.content}
-          </p>
+          <ExpandableText text={post.content} />
         )}
         <img
           src={post.imageUrl}
@@ -221,9 +218,7 @@ function EventPostCard({
       )}
 
       {post.content && (
-        <p className="px-4 pt-3 pb-1 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-          {post.content}
-        </p>
+        <ExpandableText text={post.content} className="px-4 pt-3 pb-1" />
       )}
 
       <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
@@ -290,9 +285,7 @@ function NewsPostCard({
       )}
 
       {post.content && (
-        <p className="p-4 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
-          {post.content}
-        </p>
+        <ExpandableText text={post.content} className="p-4" />
       )}
 
       <ActionBar postId={post.id} commentsCount={0} />
