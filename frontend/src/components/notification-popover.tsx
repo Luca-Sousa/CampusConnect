@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { BellIcon, CheckCheckIcon } from "lucide-react";
+import { BellIcon, CheckCheckIcon, RefreshCwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -40,8 +40,9 @@ function getEntityPath(notification: Notification): string {
 
 export function NotificationPopover() {
   const navigate = useNavigate();
-  const { data: unreadData } = useUnreadCount();
-  const { data: notificationsData } = useNotifications(false);
+  const { data: unreadData, refetch: refetchUnread } = useUnreadCount();
+  const { data: notificationsData, refetch: refetchNotifications } =
+    useNotifications(false);
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
 
@@ -49,6 +50,11 @@ export function NotificationPopover() {
   const notifications =
     notificationsData?.pages.flatMap((p) => p.notifications) ?? [];
   const recentNotifications = notifications.slice(0, 10);
+
+  function handleRefresh() {
+    refetchUnread();
+    refetchNotifications();
+  }
 
   function handleClick(notification: Notification) {
     if (!notification.readAt) {
@@ -74,18 +80,28 @@ export function NotificationPopover() {
       <PopoverContent className="w-80 p-0" align="end" sideOffset={8}>
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <h3 className="font-semibold text-sm">Notificações</h3>
-          {unreadCount > 0 && (
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="sm"
-              className="h-7 text-xs gap-1"
-              onClick={() => markAllAsRead.mutate()}
-              disabled={markAllAsRead.isPending}
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleRefresh}
             >
-              <CheckCheckIcon className="h-3.5 w-3.5" />
-              Marcar todas
+              <RefreshCwIcon className="h-3.5 w-3.5" />
             </Button>
-          )}
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => markAllAsRead.mutate()}
+                disabled={markAllAsRead.isPending}
+              >
+                <CheckCheckIcon className="h-3.5 w-3.5" />
+                Marcar todas
+              </Button>
+            )}
+          </div>
         </div>
 
         <ScrollArea className="h-80">

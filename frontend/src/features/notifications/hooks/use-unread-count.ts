@@ -7,5 +7,6 @@ export function useUnreadCount() {
     queryKey: notificationKeys.unreadCount(),
     queryFn: fetchUnreadCount,
     refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 }
