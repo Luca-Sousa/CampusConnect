@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   useComments,
   useAddComment,
@@ -23,6 +24,24 @@ interface CommentSheetProps {
   commentsCount: number;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+}
+
+function CommentSkeleton() {
+  return (
+    <div className="py-2">
+      <div className="flex gap-3">
+        <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+        <div className="flex-1 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-2.5 w-12" />
+          </div>
+          <Skeleton className="h-3.5 w-full" />
+          <Skeleton className="h-3.5 w-3/4" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function CommentSheet({
@@ -80,8 +99,10 @@ export function CommentSheet({
 
         <ScrollArea className="flex-1 px-4">
           {isLoading ? (
-            <div className="py-8 text-center text-muted-foreground text-sm">
-              Carregando...
+            <div className="py-2 space-y-1">
+              <CommentSkeleton />
+              <CommentSkeleton />
+              <CommentSkeleton />
             </div>
           ) : comments.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground text-sm">
