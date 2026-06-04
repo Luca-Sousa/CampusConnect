@@ -28,7 +28,7 @@ export function SigninOtpForm() {
   const [isSending, setIsSending] = useState(false);
   const [otp, setOtp] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isResending, setIsResending] = useState(false);
+  const [isResending] = useState(false);
   const { cooldown: resendCooldown, startCooldown } = useResendCooldown(0);
 
   const validateEmail = (value: string): string => {
