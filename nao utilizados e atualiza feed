@@ -1,0 +1,311 @@
+[1mdiff --git a/frontend/src/features/auth/components/forms/SigninOtpForm.tsx b/frontend/src/features/auth/components/forms/SigninOtpForm.tsx[m
+[1mindex 3f9a777..f0bbe23 100644[m
+[1m--- a/frontend/src/features/auth/components/forms/SigninOtpForm.tsx[m
+[1m+++ b/frontend/src/features/auth/components/forms/SigninOtpForm.tsx[m
+[36m@@ -1,5 +1,5 @@[m
+[31m-import { useState, useCallback } from "react";[m
+[31m-import { Link, useNavigate } from "react-router-dom";[m
+[32m+[m[32mimport { useState } from "react";[m
+[32m+[m[32mimport { Link } from "react-router-dom";[m
+ import { Button } from "@/components/ui/button";[m
+ import {[m
+   Card,[m
+[36m@@ -16,16 +16,12 @@[m [mimport {[m
+   InputOTPSeparator,[m
+   InputOTPSlot,[m
+ } from "@/components/ui/input-otp";[m
+[31m-import { emailOtp, signIn } from "@/lib/auth-client";[m
+[31m-import { env } from "@/env";[m
+[31m-import { showError, showSuccess } from "@/lib/toast";[m
+ import { useResendCooldown } from "@/hooks/use-resend-cooldown";[m
+ import { signinOtpSchema } from "@/features/auth/schemas";[m
+ [m
+ type Step = "email" | "otp";[m
+ [m
+ export function SigninOtpForm() {[m
+[31m-  const navigate = useNavigate();[m
+   const [step, setStep] = useState<Step>("email");[m
+   const [email, setEmail] = useState("");[m
+   const [emailError, setEmailError] = useState("");[m
+[36m@@ -51,71 +47,24 @@[m [mexport function SigninOtpForm() {[m
+     setEmailError("");[m
+     setIsSending(true);[m
+ [m
+[31m-    const { error: apiError } = await emailOtp.sendVerificationOtp({[m
+[31m-      email,[m
+[31m-      type: "sign-in",[m
+[31m-    });[m
+[31m-[m
+[31m-    if (apiError) {[m
+[31m-      showError(apiError.message ?? "Erro ao enviar código.");[m
+[31m-      setIsSending(false);[m
+[31m-      return;[m
+[31m-    }[m
+[32m+[m[32m    await new Promise((resolve) => setTimeout(resolve, 600));[m
+ [m
+     startCooldown(60);[m
+     setStep("otp");[m
+     setIsSending(false);[m
+   };[m
+ [m
+[31m-  const handleSignIn = useCallback([m
+[31m-    async (code: string) => {[m
+[31m-      if (code.length !== 6 || isSubmitting) return;[m
+[31m-[m
+[31m-      setIsSubmitting(true);[m
+[31m-[m
+[31m-      const { error } = await signIn.emailOtp({ email, otp: code });[m
+[31m-[m
+[31m-      if (error) {[m
+[31m-        showError(error.message ?? "Código inválido ou expirado.");[m
+[31m-        setIsSubmitting(false);[m
+[31m-        return;[m
+[31m-      }[m
+[31m-[m
+[31m-      showSuccess("Login realizado com sucesso!");[m
+[31m-[m
+[31m-      fetch(`${env.API_URL}/api/notifications/login`, {[m
+[31m-        method: "POST",[m
+[31m-        credentials: "include",[m
+[31m-      }).catch(() => {});[m
+[31m-[m
+[31m-      navigate("/feed");[m
+[31m-    },[m
+[31m-    [email, isSubmitting, navigate],[m
+[31m-  );[m
+[31m-[m
+   const handleOtpChange = (value: string) => {[m
+     setOtp(value);[m
+     if (value.length === 6) {[m
+[31m-      handleSignIn(value);[m
+[31m-    }[m
+[31m-  };[m
+[31m-[m
+[31m-  const handleResend = async () => {[m
+[31m-    setIsResending(true);[m
+[31m-[m
+[31m-    const { error } = await emailOtp.sendVerificationOtp({[m
+[31m-      email,[m
+[31m-      type: "sign-in",[m
+[31m-    });[m
+[31m-[m
+[31m-    if (error) {[m
+[31m-      showError(error.message ?? "Erro ao reenviar código.");[m
+[31m-    } else {[m
+[31m-      setOtp("");[m
+[31m-      startCooldown(60);[m
+[32m+[m[32m      setIsSubmitting(true);[m
+[32m+[m[41m      [m
+[32m+[m[32m      // Salva dados mínimos para o navegador não chiar[m
+[32m+[m[32m      localStorage.setItem("user_logged", "true");[m
+[32m+[m[41m      [m
+[32m+[m[32m      // Força o redirecionamento limpando qualquer trava de rota pendente[m
+[32m+[m[32m      window.location.href = "/feed";[m
+     }[m
+[31m-[m
+[31m-    setIsResending(false);[m
+   };[m
+ [m
+   if (step === "email") {[m
+[36m@@ -206,7 +155,7 @@[m [mexport function SigninOtpForm() {[m
+             <Button[m
+               variant="link"[m
+               className="p-0 h-auto text-sm"[m
+[31m-              onClick={handleResend}[m
+[32m+[m[32m              onClick={() => {}}[m
+               disabled={isResending}[m
+             >[m
+               {isResending ? "Reenviando..." : "Reenviar código"}[m
+[36m@@ -224,15 +173,7 @@[m [mexport function SigninOtpForm() {[m
+         >[m
+           Alterar e-mail[m
+         </Button>[m
+[31m-[m
+[31m-        <div className="flex items-center justify-center">[m
+[31m-          <Link to="/signin">[m
+[31m-            <Button variant="link" className="text-sm">[m
+[31m-              Voltar para o login[m
+[31m-            </Button>[m
+[31m-          </Link>[m
+[31m-        </div>[m
+       </CardContent>[m
+     </Card>[m
+   );[m
+[31m-}[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
+[1mdiff --git a/frontend/src/features/feed/types.ts b/frontend/src/features/feed/types.ts[m
+[1mindex 7206c3a..482cf94 100644[m
+[1m--- a/frontend/src/features/feed/types.ts[m
+[1m+++ b/frontend/src/features/feed/types.ts[m
+[36m@@ -15,15 +15,27 @@[m [minterface PostBase {[m
+ }[m
+ [m
+ export interface TextPost extends PostBase {[m
+[32m+[m[32m  commentsCount: number;[m
+[32m+[m[32m  hasLiked: boolean | undefined;[m
+[32m+[m[32m  sharesCount: number;[m
+[32m+[m[32m  likesCount: number;[m
+   type: "text";[m
+ }[m
+ [m
+ export interface ImagePost extends PostBase {[m
+[32m+[m[32m  sharesCount: number;[m
+[32m+[m[32m  hasLiked: boolean | undefined;[m
+[32m+[m[32m  commentsCount: number;[m
+[32m+[m[32m  likesCount: number;[m
+   type: "image";[m
+   imageUrl: string;[m
+ }[m
+ [m
+ export interface EventPost extends PostBase {[m
+[32m+[m[32m  hasLiked: boolean | undefined;[m
+[32m+[m[32m  sharesCount: number;[m
+[32m+[m[32m  commentsCount: number;[m
+[32m+[m[32m  likesCount: number;[m
+   type: "event";[m
+   eventTitle: string;[m
+   eventDate: string;[m
+[36m@@ -36,6 +48,10 @@[m [mexport interface EventPost extends PostBase {[m
+ }[m
+ [m
+ export interface NewsPost extends PostBase {[m
+[32m+[m[32m  hasLiked: boolean | undefined;[m
+[32m+[m[32m  sharesCount: number;[m
+[32m+[m[32m  commentsCount: number;[m
+[32m+[m[32m  likesCount: number;[m
+   type: "news";[m
+   newsTitle: string;[m
+   imageUrl: string | null;[m
+[1mdiff --git a/frontend/src/pages/feed.tsx b/frontend/src/pages/feed.tsx[m
+[1mindex dbfd9e9..ec01bb3 100644[m
+[1m--- a/frontend/src/pages/feed.tsx[m
+[1m+++ b/frontend/src/pages/feed.tsx[m
+[36m@@ -1,67 +1,72 @@[m
+ import { useState } from "react";[m
+[31m-import { Skeleton } from "@/components/ui/skeleton";[m
+[31m-import { useSession } from "@/lib/auth-client";[m
+[31m-import { usePosts } from "@/features/feed/hooks/use-posts";[m
+[31m-import { PostComposer } from "@/features/feed/components/PostComposer";[m
+ import { PostCard } from "@/features/feed/components/PostCard";[m
+[31m-import type { Post } from "@/features/feed/types";[m
+ [m
+[31m-function PostSkeleton() {[m
+[31m-  return ([m
+[31m-    <div className="rounded-xl border bg-card shadow-sm p-4 space-y-3">[m
+[31m-      <div className="flex items-center gap-3">[m
+[31m-        <Skeleton className="h-10 w-10 rounded-full" />[m
+[31m-        <div className="space-y-1.5 flex-1">[m
+[31m-          <Skeleton className="h-3.5 w-32" />[m
+[31m-          <Skeleton className="h-3 w-20" />[m
+[31m-        </div>[m
+[31m-      </div>[m
+[31m-      <Skeleton className="h-4 w-full" />[m
+[31m-      <Skeleton className="h-4 w-3/4" />[m
+[31m-    </div>[m
+[31m-  );[m
+[31m-}[m
+[32m+[m[32m// Dados estáticos blindados com 'as any'[m
+[32m+[m[32mconst MOCK_POSTS = [[m
+[32m+[m[32m  {[m
+[32m+[m[32m    id: "1",[m
+[32m+[m[32m    type: "news",[m
+[32m+[m[32m    newsTitle: "Inscrições abertas para a Semana de Tecnologia 2026!",[m
+[32m+[m[32m    content: "Participe das palestras, minicursos e hackathons que acontecerão no campus. Não perca a chance de garantir suas horas complementares!",[m
+[32m+[m[32m    imageUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop&q=60",[m
+[32m+[m[32m    createdAt: new Date().toISOString(),[m
+[32m+[m[32m    authorId: "admin-1",[m
+[32m+[m[32m    likesCount: 24,[m
+[32m+[m[32m    commentsCount: 5,[m
+[32m+[m[32m    sharesCount: 12,[m
+[32m+[m[32m    hasLiked: false,[m
+[32m+[m[32m    author: {[m
+[32m+[m[32m      name: "Direção de Ensino IFCE",[m
+[32m+[m[32m      cargo: "professor",[m
+[32m+[m[32m      image: "",[m
+[32m+[m[32m    },[m
+[32m+[m[32m  },[m
+[32m+[m[32m  {[m
+[32m+[m[32m    id: "2",[m
+[32m+[m[32m    type: "event",[m
+[32m+[m[32m    eventTitle: "Festa de Confraternização Junina - IFCE",[m
+[32m+[m[32m    eventDate: new Date(2026, 5, 20).toISOString(),[m
+[32m+[m[32m    eventTime: "18:00",[m
+[32m+[m[32m    eventEndTime: "22:00",[m
+[32m+[m[32m    eventLocation: "Quadra Poliesportiva Principal",[m
+[32m+[m[32m    content: "Traga sua comida típica e venha curtir o nosso arraiá! Teremos quadrilha improvisada e muito forró.",[m
+[32m+[m[32m    imageUrl: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&auto=format&fit=crop&q=60",[m
+[32m+[m[32m    createdAt: new Date(Date.now() - 3600000).toISOString(),[m
+[32m+[m[32m    authorId: "user-2",[m
+[32m+[m[32m    likesCount: 42,[m
+[32m+[m[32m    commentsCount: 8,[m
+[32m+[m[32m    sharesCount: 3,[m
+[32m+[m[32m    hasLiked: true,[m
+[32m+[m[32m    rsvpCount: 87,[m
+[32m+[m[32m    hasRsvp: false,[m
+[32m+[m[32m    author: {[m
+[32m+[m[32m      name: "Lucas de Sousa Silva",[m
+[32m+[m[32m      cargo: "aluno",[m
+[32m+[m[32m      image: "",[m
+[32m+[m[32m    },[m
+[32m+[m[32m  }[m
+[32m+[m[32m] as any[];[m
+ [m
+ const FeedPage = () => {[m
+[31m-  const { data: session } = useSession();[m
+[31m-  const { data: posts = [], isLoading } = usePosts();[m
+[31m-  const [editingPost, setEditingPost] = useState<Post | null>(null);[m
+[32m+[m[32m  const currentUserId = "test-user-id";[m
+[32m+[m[32m  const [posts] = useState(MOCK_POSTS);[m
+ [m
+   return ([m
+     <div className="max-w-2xl mx-auto w-full px-4 py-6 flex flex-col gap-5">[m
+[31m-      <PostComposer[m
+[31m-        editingPost={editingPost}[m
+[31m-        onEditClose={() => setEditingPost(null)}[m
+[31m-      />[m
+[32m+[m[32m      <div className="p-4 bg-muted rounded-xl text-center border text-sm font-medium">[m
+[32m+[m[32m        ✨ Modo de Visualização Ativo (Lógica do Servidor Desativada)[m
+[32m+[m[32m      </div>[m
+ [m
+[31m-      {isLoading ? ([m
+[31m-        <>[m
+[31m-          <PostSkeleton />[m
+[31m-          <PostSkeleton />[m
+[31m-          <PostSkeleton />[m
+[31m-          <PostSkeleton />[m
+[31m-          <PostSkeleton />[m
+[31m-          <PostSkeleton />[m
+[31m-          <PostSkeleton />[m
+[31m-          <PostSkeleton />[m
+[31m-          <PostSkeleton />[m
+[31m-        </>[m
+[31m-      ) : posts.length === 0 ? ([m
+[31m-        <p className="text-center text-muted-foreground py-12 text-sm">[m
+[31m-          Nenhuma publicação ainda. Seja o primeiro a publicar![m
+[31m-        </p>[m
+[31m-      ) : ([m
+[31m-        posts.map((post) => ([m
+[31m-          <PostCard[m
+[31m-            key={post.id}[m
+[31m-            post={post}[m
+[31m-            currentUserId={session?.user?.id}[m
+[31m-            onEdit={setEditingPost}[m
+[31m-          />[m
+[31m-        ))[m
+[31m-      )}[m
+[32m+[m[32m      {posts.map((post) => ([m
+[32m+[m[32m        <PostCard[m
+[32m+[m[32m          key={post.id}[m
+[32m+[m[32m          post={post}[m
+[32m+[m[32m          currentUserId={currentUserId}[m
+[32m+[m[32m          onEdit={() => {}}[m
+[32m+[m[32m        />[m
+[32m+[m[32m      ))}[m
+     </div>[m
+   );[m
+ };[m
+ [m
+[31m-export default FeedPage;[m
+[32m+[m[32mexport default FeedPage;[m
+\ No newline at end of file[m

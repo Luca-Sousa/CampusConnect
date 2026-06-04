@@ -15,15 +15,27 @@ interface PostBase {
 }
 
 export interface TextPost extends PostBase {
+  commentsCount: number;
+  hasLiked: boolean | undefined;
+  sharesCount: number;
+  likesCount: number;
   type: "text";
 }
 
 export interface ImagePost extends PostBase {
+  sharesCount: number;
+  hasLiked: boolean | undefined;
+  commentsCount: number;
+  likesCount: number;
   type: "image";
   imageUrl: string;
 }
 
 export interface EventPost extends PostBase {
+  hasLiked: boolean | undefined;
+  sharesCount: number;
+  commentsCount: number;
+  likesCount: number;
   type: "event";
   eventTitle: string;
   eventDate: string;
@@ -36,6 +48,10 @@ export interface EventPost extends PostBase {
 }
 
 export interface NewsPost extends PostBase {
+  hasLiked: boolean | undefined;
+  sharesCount: number;
+  commentsCount: number;
+  likesCount: number;
   type: "news";
   newsTitle: string;
   imageUrl: string | null;
