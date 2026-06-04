@@ -181,7 +181,6 @@ function EventPostCard({
 
   return (
     <article className="rounded-xl border border-violet-200/60 dark:border-violet-800/40 bg-card shadow-sm overflow-hidden">
-      {/* Gradient banner com autor e título do evento */}
       <div className="bg-linear-to-br from-violet-600 to-indigo-700 px-4 pt-4 pb-5">
         <BannerAuthorRow
           post={post}
@@ -198,7 +197,6 @@ function EventPostCard({
         </div>
       </div>
 
-      {/* Chips de metadados do evento */}
       <div className="bg-violet-50/60 dark:bg-violet-950/30 px-4 py-3 flex flex-wrap gap-2 border-b border-violet-100 dark:border-violet-900/30">
         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-700 dark:text-violet-300 bg-white dark:bg-violet-900/30 rounded-full px-3 py-1 border border-violet-200/60 dark:border-violet-700/40">
           <CalendarIcon className="h-3.5 w-3.5 shrink-0" />
@@ -214,7 +212,6 @@ function EventPostCard({
         </span>
       </div>
 
-      {/* Imagem opcional do evento */}
       {post.imageUrl && (
         <img
           src={post.imageUrl}
@@ -223,14 +220,12 @@ function EventPostCard({
         />
       )}
 
-      {/* Descrição opcional */}
       {post.content && (
         <p className="px-4 pt-3 pb-1 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
           {post.content}
         </p>
       )}
 
-      {/* Rodapé de confirmação de presença */}
       <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
         <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <UsersIcon className="h-4 w-4 shrink-0" />
@@ -274,7 +269,6 @@ function NewsPostCard({
 }) {
   return (
     <article className="rounded-xl border border-orange-200/60 dark:border-orange-800/40 bg-card shadow-sm overflow-hidden">
-      {/* Gradient banner com rótulo oficial e título */}
       <div className="bg-linear-to-br from-orange-500 to-amber-500 p-3">
         <div className="flex items-center gap-2 text-orange-100 text-xs font-semibold uppercase tracking-wider mb-3">
           <NewspaperIcon className="h-3.5 w-3.5 shrink-0" />
@@ -285,10 +279,8 @@ function NewsPostCard({
         </h2>
       </div>
 
-      {/* Autor abaixo do banner */}
       <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
 
-      {/* Imagem opcional do comunicado */}
       {post.imageUrl && (
         <img
           src={post.imageUrl}
@@ -297,7 +289,6 @@ function NewsPostCard({
         />
       )}
 
-      {/* Conteúdo */}
       {post.content && (
         <p className="p-4 text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
           {post.content}
