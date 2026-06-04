@@ -1,7 +1,6 @@
-import { BellIcon } from "lucide-react";
 import { todayDate } from "@/lib/utils";
 import NavUser from "../nav-user";
-import { Button } from "../ui/button";
+import { NotificationPopover } from "../notification-popover";
 import { SidebarTrigger, useSidebar } from "../ui/sidebar";
 import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -62,9 +61,7 @@ const Header = () => {
 
       {/* Actions */}
       <div className="flex items-center gap-2 shrink-0">
-        <Button variant="secondary" size="icon">
-          <BellIcon className="size-5 text-muted-foreground" />
-        </Button>
+        <NotificationPopover />
 
         {!isMobile && <NavUser />}
       </div>

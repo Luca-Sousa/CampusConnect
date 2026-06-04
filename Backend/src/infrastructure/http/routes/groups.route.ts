@@ -10,6 +10,8 @@ import { JoinGroupUseCase } from "../../../application/use-cases/groups/join-gro
 import { LeaveGroupUseCase } from "../../../application/use-cases/groups/leave-group.use-case.js";
 import { ListGroupMessagesUseCase } from "../../../application/use-cases/groups/list-group-messages.use-case.js";
 import { SendGroupMessageUseCase } from "../../../application/use-cases/groups/send-group-message.use-case.js";
+import { notificationEventBus } from "../../events/index.js";
+import { getAllUserIds, getGroupMemberIds } from "../../helpers/user-ids.js";
 
 // ——— Singletons de repositório e casos de uso ———
 const groupRepository = new GroupDrizzleRepository();
@@ -88,6 +90,21 @@ export async function groupsRoute(app: FastifyInstance): Promise<void> {
       authorId: session.user.id,
       userRole: ((session.user as Record<string, unknown>).role as string) ?? "aluno",
     });
+
+    // Notificar todos os usuários (exceto o criador)
+    const allUserIds = await getAllUserIds();
+    const recipientIds = allUserIds.filter((id) => id !== session.user.id);
+
+    if (recipientIds.length > 0) {
+      notificationEventBus.emit({
+        type: "group_created",
+        actorId: session.user.id,
+        entityType: "group",
+        entityId: group.id,
+        recipientIds,
+        message: `${session.user.name} criou o grupo "${group.name}".`,
+      });
+    }
 
     return reply.status(201).send(group);
   });
@@ -277,6 +294,23 @@ export async function groupsRoute(app: FastifyInstance): Promise<void> {
         authorId: session.user.id,
         content: parsed.data.content,
       });
+
+      // Notificar outros membros do grupo (exceto o autor)
+      const memberIds = await getGroupMemberIds(id, session.user.id);
+
+      if (memberIds.length > 0) {
+        const group = await groupRepository.findById(id);
+        const truncated = parsed.data.content.slice(0, 50);
+        const suffix = parsed.data.content.length > 50 ? "..." : "";
+        notificationEventBus.emit({
+          type: "group_message",
+          actorId: session.user.id,
+          entityType: "group_message",
+          entityId: message.id,
+          recipientIds: memberIds,
+          message: `${session.user.name} enviou uma mensagem em "${group?.name ?? "grupo"}": "${truncated}${suffix}"`,
+        });
+      }
 
       return reply.status(201).send(message);
     } catch (err) {

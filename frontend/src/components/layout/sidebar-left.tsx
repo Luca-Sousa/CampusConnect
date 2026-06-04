@@ -10,6 +10,7 @@ import {
   UserRoundIcon,
   HelpCircleIcon,
   LogOutIcon,
+  BellIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,6 +27,7 @@ const navItems = [
   { title: "Eventos", url: "/events", icon: CalendarDaysIcon },
   { title: "Notícias", url: "/news", icon: NewspaperIcon },
   { title: "Grupos", url: "/groups", icon: UserRoundIcon },
+  { title: "Notificações", url: "/notifications", icon: BellIcon },
 ];
 
 const navBottom = [{ title: "Ajuda", url: "/help", icon: HelpCircleIcon }];

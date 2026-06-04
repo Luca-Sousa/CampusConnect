@@ -17,6 +17,7 @@ import ResetPasswordPage from "@/pages/reset-password";
 import SigninOtpPage from "@/pages/signin-otp";
 import HelpPage from "@/pages/help";
 import PostDetailPage from "@/pages/post-detail";
+import NotificationsPage from "@/pages/notifications";
 
 const routes: RouteObject[] = [
   { index: true, element: <Navigate to="/feed" replace /> },
@@ -48,6 +49,7 @@ const routes: RouteObject[] = [
           { path: "news", element: <NewsPage /> },
           { path: "groups", element: <GroupsPage /> },
           { path: "help", element: <HelpPage /> },
+          { path: "notifications", element: <NotificationsPage /> },
           { path: "post/:id", element: <PostDetailPage /> },
         ],
       },

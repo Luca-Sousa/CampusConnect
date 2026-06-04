@@ -12,6 +12,8 @@ import { UpdatePostUseCase } from "../../../application/use-cases/posts/update-p
 import { ToggleLikeUseCase } from "../../../application/use-cases/toggle-like.use-case.js";
 import { ListCommentsUseCase } from "../../../application/use-cases/list-comments.use-case.js";
 import { AddCommentUseCase } from "../../../application/use-cases/add-comment.use-case.js";
+import { notificationEventBus } from "../../events/index.js";
+import { getAllUserIds } from "../../helpers/user-ids.js";
 
 // ——— Singletons de repositório e casos de uso ———
 const postRepository = new PostDrizzleRepository();
@@ -276,6 +278,27 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
           "aluno",
       });
 
+      // Emitir notificação para todos os usuários (exceto o autor)
+      const allUserIds = await getAllUserIds();
+      const recipientIds = allUserIds.filter((id) => id !== session.user.id);
+
+      if (recipientIds.length > 0) {
+        const typeLabel =
+          body.type === "event"
+            ? "evento"
+            : body.type === "news"
+              ? "notícia"
+              : "publicação";
+        notificationEventBus.emit({
+          type: "post_created",
+          actorId: session.user.id,
+          entityType: "post",
+          entityId: created.id,
+          recipientIds,
+          message: `${session.user.name} publicou um novo ${typeLabel}.`,
+        });
+      }
+
       return reply.status(201).send(created);
     } catch (err) {
       if (err instanceof Error && err.message === "FORBIDDEN") {
@@ -456,6 +479,21 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
         userId: session.user.id,
       });
 
+      // Notificar o autor do post quando alguém curte (e não é o próprio)
+      if (result.hasLiked) {
+        const post = await postRepository.findById(postId);
+        if (post && post.authorId !== session.user.id) {
+          notificationEventBus.emit({
+            type: "like",
+            actorId: session.user.id,
+            entityType: "post",
+            entityId: postId,
+            recipientIds: [post.authorId],
+            message: `${session.user.name} curtiu sua publicação.`,
+          });
+        }
+      }
+
       return reply.send(result);
     } catch (err) {
       if (err instanceof Error && err.message === "NOT_FOUND") {
@@ -502,6 +540,34 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
         parentId: body.parentId,
         content: body.content.trim(),
       });
+
+      // Notificar autor do post (se não é o comentarista)
+      const post = await postRepository.findById(postId);
+      const recipientIds = new Set<string>();
+      if (post && post.authorId !== session.user.id) {
+        recipientIds.add(post.authorId);
+      }
+
+      // Se é resposta, notificar autor do comentário pai
+      if (body.parentId) {
+        const parentComment = await commentRepository.findById(body.parentId);
+        if (parentComment && parentComment.authorId !== session.user.id) {
+          recipientIds.add(parentComment.authorId);
+        }
+      }
+
+      if (recipientIds.size > 0) {
+        const truncated = body.content.trim().slice(0, 50);
+        const suffix = body.content.trim().length > 50 ? "..." : "";
+        notificationEventBus.emit({
+          type: "comment",
+          actorId: session.user.id,
+          entityType: "post",
+          entityId: postId,
+          recipientIds: Array.from(recipientIds),
+          message: `${session.user.name} comentou: "${truncated}${suffix}"`,
+        });
+      }
 
       return reply.status(201).send(comment);
     } catch (err) {

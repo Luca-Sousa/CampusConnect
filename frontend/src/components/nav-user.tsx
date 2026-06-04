@@ -132,7 +132,7 @@ const NavUser = () => {
                   Meu Perfil
                 </DropdownMenuItem>
               </ProfileDialog>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/notifications")}>
                 <BellIcon />
                 Notificações
               </DropdownMenuItem>

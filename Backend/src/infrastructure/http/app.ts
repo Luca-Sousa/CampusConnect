@@ -13,9 +13,17 @@ import { env } from "../../shared/env.js";
 import { authOpenApiPaths } from "./openapi/auth.openapi.js";
 import { authHandler } from "./middlewares/auth.handler.js";
 import { notificationsRoute } from "./routes/notifications.route.js";
+import { notificationInAppRoutes } from "./routes/notification-in-app.route.js";
 import { postsRoute } from "./routes/posts.route.js";
 import { groupsRoute } from "./routes/groups.route.js";
 import { usersRoute } from "./routes/users.route.js";
+import { notificationEventBus } from "../events/index.js";
+import { NotificationDrizzleRepository } from "../database/repositories/notification.drizzle-repository.js";
+import { NotificationEventHandler } from "../../application/event-handlers/notification-event.handler.js";
+
+// Registrar handler de notificações (escuta eventos e cria notificações)
+const notificationRepository = new NotificationDrizzleRepository();
+new NotificationEventHandler(notificationEventBus, notificationRepository);
 
 export function buildApp() {
   const app = fastify({ bodyLimit: 10 * 1024 * 1024 }).withTypeProvider<ZodTypeProvider>();
@@ -60,6 +68,7 @@ export function buildApp() {
   app.register(fastifySwaggerUi, { routePrefix: "/docs" });
 
   app.register(notificationsRoute);
+  app.register(notificationInAppRoutes);
   app.register(postsRoute);
   app.register(groupsRoute);
   app.register(usersRoute);
