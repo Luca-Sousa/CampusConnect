@@ -10,6 +10,7 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
       (body as { error?: string }).error ?? `Erro ${res.status}`,
     );
   }
+  if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
 
