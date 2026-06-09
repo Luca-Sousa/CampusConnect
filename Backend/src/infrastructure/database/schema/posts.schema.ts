@@ -33,6 +33,9 @@ export const post = pgTable(
     eventEndTime: text("event_end_time"),
     eventLocation: text("event_location"),
     newsTitle: text("news_title"),
+    tags: text("tags"),
+    moderated: boolean("moderated").default(false).notNull(),
+    moderationReasons: text("moderation_reasons"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

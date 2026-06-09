@@ -14,6 +14,9 @@ export interface Post {
   newsTitle: string | null;
   createdAt: Date;
   updatedAt: Date;
+  tags?: string[] | null;
+  moderated?: boolean;
+  moderationReasons?: string[] | null;
 }
 
 export interface PostAuthorInfo {
@@ -40,6 +43,9 @@ export interface CreatePostInput {
   eventEndTime?: string | null;
   eventLocation?: string | null;
   newsTitle?: string | null;
+  tags?: string[] | null;
+  moderated?: boolean;
+  moderationReasons?: string[] | null;
 }
 
 /**

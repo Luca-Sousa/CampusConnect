@@ -22,6 +22,9 @@ export class PostDrizzleRepository implements IPostRepository {
         type: input.type,
         content: input.content ?? null,
         imageUrl: input.imageUrl ?? null,
+        tags: input.tags ? JSON.stringify(input.tags) : null,
+        moderated: input.moderated ?? false,
+        moderationReasons: input.moderationReasons ? JSON.stringify(input.moderationReasons) : null,
         eventTitle: input.eventTitle ?? null,
         eventDate: input.eventDate ?? null,
         eventTime: input.eventTime ?? null,
@@ -31,7 +34,22 @@ export class PostDrizzleRepository implements IPostRepository {
       })
       .returning();
 
-    return created as Post;
+    // parse JSON fields
+    const parsed = { ...created } as any;
+    try {
+      parsed.tags = created.tags ? JSON.parse(created.tags) : null;
+    } catch (e) {
+      parsed.tags = null;
+    }
+    try {
+      parsed.moderationReasons = created.moderationReasons
+        ? JSON.parse(created.moderationReasons)
+        : null;
+    } catch (e) {
+      parsed.moderationReasons = null;
+    }
+
+    return parsed as Post;
   }
 
   async findById(
@@ -68,9 +86,23 @@ export class PostDrizzleRepository implements IPostRepository {
 
     return Promise.all(
       rows.map(async (row) => {
+        // parse JSON fields from DB
+        const parsedPost: any = { ...row.post };
+        try {
+          parsedPost.tags = row.post.tags ? JSON.parse(row.post.tags) : null;
+        } catch (e) {
+          parsedPost.tags = null;
+        }
+        try {
+          parsedPost.moderationReasons = row.post.moderationReasons
+            ? JSON.parse(row.post.moderationReasons)
+            : null;
+        } catch (e) {
+          parsedPost.moderationReasons = null;
+        }
         if (row.post.type !== "event" || !options.currentUserId) {
           return {
-            ...row.post,
+            ...parsedPost,
             author: row.author,
             rsvpCount: Number(row.rsvpCount),
             hasRsvp: false,
@@ -83,7 +115,7 @@ export class PostDrizzleRepository implements IPostRepository {
         );
 
         return {
-          ...row.post,
+          ...parsedPost,
           author: row.author,
           rsvpCount: Number(row.rsvpCount),
           hasRsvp: !!existingRsvp,

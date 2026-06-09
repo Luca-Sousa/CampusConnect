@@ -12,6 +12,9 @@ interface PostBase {
   createdAt: string;
   updatedAt: string;
   author: PostAuthor | null;
+  tags?: string[] | null;
+  moderated?: boolean;
+  moderationReasons?: string[] | null;
 }
 
 export interface TextPost extends PostBase {
@@ -42,6 +45,7 @@ export interface NewsPost extends PostBase {
 }
 
 export type Post = TextPost | ImagePost | EventPost | NewsPost;
+
 
 // ——— Likes ———
 
