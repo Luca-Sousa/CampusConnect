@@ -80,6 +80,8 @@ export async function fetchLikeStatus(
 export async function toggleLike(postId: string): Promise<ToggleLikeResult> {
   const res = await fetch(`${env.API_URL}/api/posts/${postId}/like`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}",
     credentials: "include",
   });
   if (!res.ok) throw new Error("Erro ao curtir publicação.");
