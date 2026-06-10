@@ -134,7 +134,7 @@ export function PostActionsMenu({
             <MoreHorizontalIcon />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-44">
+        <DropdownMenuContent align="end" className="min-w-52">
           {showModerationActions && (
             <>
               <DropdownMenuItem
@@ -162,10 +162,7 @@ export function PostActionsMenu({
           {showOwnerActions && (
             <>
               <Tooltip>
-                <TooltipTrigger
-                  asChild
-                  disabled={!editingDisabled}
-                >
+                <TooltipTrigger asChild disabled={!editingDisabled}>
                   <DropdownMenuItem
                     disabled={editingDisabled}
                     onSelect={(e) => {
@@ -219,13 +216,17 @@ export function PostActionsMenu({
           <PostPreview post={post} />
 
           <AlertDialogFooter>
-            <AlertDialogCancel variant="outline" disabled={isApproving} size="lg">
+            <AlertDialogCancel
+              variant="outline"
+              disabled={isApproving}
+              size="lg"
+            >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmApprove}
               disabled={isApproving}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-green-600! hover:bg-green-700! text-white"
               size="lg"
             >
               <CheckCircleIcon className="size-4" />
@@ -251,7 +252,11 @@ export function PostActionsMenu({
           <PostPreview post={post} />
 
           <AlertDialogFooter>
-            <AlertDialogCancel variant="outline" disabled={isRejecting} size="lg">
+            <AlertDialogCancel
+              variant="outline"
+              disabled={isRejecting}
+              size="lg"
+            >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction

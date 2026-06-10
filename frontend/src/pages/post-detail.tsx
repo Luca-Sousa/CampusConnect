@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { ShieldAlertIcon } from "lucide-react";
 import { feedKeys } from "@/features/feed/query-keys";
 import { fetchPosts } from "@/features/feed/api";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,11 +17,22 @@ import {
 } from "@/features/feed/utils/format";
 import { getInitials } from "@/lib/utils";
 import { CARGO_CONFIG } from "@/features/auth/constants";
+import { useSession } from "@/lib/auth-client";
+import { PostActionsMenu } from "@/features/feed/components/PostActionsMenu";
+import { PostComposer } from "@/features/feed/components/PostComposer";
+import { canModeratePost } from "@/lib/permissions";
+import { cn } from "@/lib/utils";
+import type { Post } from "@/features/feed/types";
 
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const openComments = searchParams.get("comments") === "true";
+  const { data: session } = useSession();
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+
+  const currentUserRole = (session?.user as { role?: string } | undefined)?.role;
+  const currentUserCargo = (session?.user as { cargo?: string } | undefined)?.cargo;
 
   const { data: posts, isLoading, error } = useQuery({
     queryKey: feedKeys.postDetail(id!),
@@ -72,6 +85,12 @@ export default function PostDetailPage() {
   const cargo = post.author?.cargo ?? "aluno";
   const cargoConfig = CARGO_CONFIG[cargo] ?? CARGO_CONFIG["aluno"];
 
+  const isModerated = post.moderated === true;
+  const currentUserId = session?.user?.id;
+  const isAuthor = currentUserId === post.authorId;
+  const canManage = canModeratePost(currentUserRole, currentUserCargo);
+  const hideActions = isModerated && !canManage && !isAuthor;
+
   const handleCommentsOpenChange = (open: boolean) => {
     if (open) {
       setSearchParams({ comments: "true" });
@@ -82,7 +101,16 @@ export default function PostDetailPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <Card className="shadow-sm overflow-hidden p-0">
+      <PostComposer
+        editingPost={editingPost}
+        onEditClose={() => setEditingPost(null)}
+      />
+
+      <Card className={cn(
+        "shadow-sm overflow-hidden p-0",
+        isModerated && !canManage && "bg-muted/50 opacity-80",
+        isModerated && canManage && "bg-yellow-50/50 dark:bg-yellow-950/20",
+      )}>
         <CardContent className="p-0">
           <div className="flex items-center gap-3 px-4 pt-4 pb-2">
             <Avatar className="h-10 w-10 shrink-0">
@@ -91,7 +119,7 @@ export default function PostDetailPage() {
                 {getInitials(authorName)}
               </AvatarFallback>
             </Avatar>
-            <div>
+            <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm text-foreground leading-tight">
                 {authorName}
               </p>
@@ -105,6 +133,29 @@ export default function PostDetailPage() {
                   · {formatRelativeTime(post.createdAt)}
                 </span>
               </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {isModerated && (
+                <span className={cn(
+                  "inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full",
+                  canManage
+                    ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400"
+                    : "bg-orange-500/20 text-orange-600 dark:text-orange-400",
+                )}>
+                  <ShieldAlertIcon className="h-3 w-3" />
+                  {canManage ? "Moderação Pendente" : "Aguardando moderação"}
+                </span>
+              )}
+              {(isAuthor || (canManage && isModerated)) && (
+                <PostActionsMenu
+                  post={post}
+                  onEdit={setEditingPost}
+                  currentUserId={currentUserId}
+                  currentUserRole={currentUserRole}
+                  currentUserCargo={currentUserCargo}
+                />
+              )}
             </div>
           </div>
 
@@ -126,16 +177,22 @@ export default function PostDetailPage() {
             <img
               src={post.imageUrl}
               alt="Imagem da publicação"
-              className="w-full max-h-125 object-cover"
+              className={cn(
+                "w-full max-h-125 object-cover",
+                isModerated && !canManage && "grayscale",
+                isModerated && canManage && "brightness-95",
+              )}
             />
           )}
 
-          <ActionBar
-            postId={post.id}
-            commentsCount={0}
-            defaultOpenComments={openComments}
-            onCommentsOpenChange={handleCommentsOpenChange}
-          />
+          {!hideActions && (
+            <ActionBar
+              postId={post.id}
+              commentsCount={0}
+              defaultOpenComments={openComments}
+              onCommentsOpenChange={handleCommentsOpenChange}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
