@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ShieldAlertIcon } from "lucide-react";
@@ -19,17 +18,14 @@ import { getInitials } from "@/lib/utils";
 import { CARGO_CONFIG } from "@/features/auth/constants";
 import { useSession } from "@/lib/auth-client";
 import { PostActionsMenu } from "@/features/feed/components/PostActionsMenu";
-import { PostComposer } from "@/features/feed/components/PostComposer";
 import { canModeratePost } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import type { Post } from "@/features/feed/types";
 
 export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const openComments = searchParams.get("comments") === "true";
   const { data: session } = useSession();
-  const [editingPost, setEditingPost] = useState<Post | null>(null);
 
   const currentUserRole = (session?.user as { role?: string } | undefined)?.role;
   const currentUserCargo = (session?.user as { cargo?: string } | undefined)?.cargo;
@@ -101,11 +97,6 @@ export default function PostDetailPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <PostComposer
-        editingPost={editingPost}
-        onEditClose={() => setEditingPost(null)}
-      />
-
       <Card className={cn(
         "shadow-sm overflow-hidden p-0",
         isModerated && !canManage && "bg-muted/50 opacity-80",
@@ -150,7 +141,7 @@ export default function PostDetailPage() {
               {(isAuthor || (canManage && isModerated)) && (
                 <PostActionsMenu
                   post={post}
-                  onEdit={setEditingPost}
+                  onEdit={() => {}}
                   currentUserId={currentUserId}
                   currentUserRole={currentUserRole}
                   currentUserCargo={currentUserCargo}
