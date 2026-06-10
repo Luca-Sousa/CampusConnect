@@ -8,7 +8,7 @@ import type { Post } from "../types";
  * Rejeita uma publicação retida pela moderação (deleta o post).
  * Usa optimistic update para remover do feed imediatamente.
  */
-export function useRejectPost() {
+export function useRejectPost(options?: { onSuccess?: () => void }) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -31,10 +31,11 @@ export function useRejectPost() {
       showError("Erro ao rejeitar publicação.");
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: feedKeys.posts() });
+      queryClient.invalidateQueries({ queryKey: feedKeys.all });
     },
     onSuccess: () => {
       showSuccess("Publicação rejeitada.");
+      options?.onSuccess?.();
     },
   });
 }

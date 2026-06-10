@@ -66,6 +66,7 @@ interface PostActionsMenuProps {
   currentUserId?: string;
   currentUserRole?: string;
   currentUserCargo?: string;
+  onRejectSuccess?: () => void;
 }
 
 /**
@@ -82,13 +83,14 @@ export function PostActionsMenu({
   currentUserId,
   currentUserRole,
   currentUserCargo,
+  onRejectSuccess,
 }: PostActionsMenuProps) {
   const [alertOpen, setAlertOpen] = useState(false);
   const [approveAlertOpen, setApproveAlertOpen] = useState(false);
   const [rejectAlertOpen, setRejectAlertOpen] = useState(false);
   const { mutate: deletePost, isPending } = useDeletePost();
   const { mutate: approvePost, isPending: isApproving } = useApprovePost();
-  const { mutate: rejectPost, isPending: isRejecting } = useRejectPost();
+  const { mutate: rejectPost, isPending: isRejecting } = useRejectPost({ onSuccess: onRejectSuccess });
 
   const isModerated = post.moderated === true;
   const isAuthor = currentUserId === post.authorId;

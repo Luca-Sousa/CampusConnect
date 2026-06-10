@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ShieldAlertIcon } from "lucide-react";
 import { feedKeys } from "@/features/feed/query-keys";
@@ -25,6 +25,7 @@ export default function PostDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const openComments = searchParams.get("comments") === "true";
+  const navigate = useNavigate();
   const { data: session } = useSession();
 
   const currentUserRole = (session?.user as { role?: string } | undefined)?.role;
@@ -145,6 +146,7 @@ export default function PostDetailPage() {
                   currentUserId={currentUserId}
                   currentUserRole={currentUserRole}
                   currentUserCargo={currentUserCargo}
+                  onRejectSuccess={() => navigate("/feed")}
                 />
               )}
             </div>
