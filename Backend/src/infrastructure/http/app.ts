@@ -11,6 +11,22 @@ import fastifySwaggerUi from "@fastify/swagger-ui";
 import { errorHandler } from "./error-handler.js";
 import { env } from "../../shared/env.js";
 import { authOpenApiPaths } from "./openapi/auth.openapi.js";
+import {
+  postsOpenApiPaths,
+  postsOpenApiComponents,
+} from "./openapi/posts.openapi.js";
+import {
+  groupsOpenApiPaths,
+  groupsOpenApiComponents,
+} from "./openapi/groups.openapi.js";
+import {
+  notificationsOpenApiPaths,
+  notificationsOpenApiComponents,
+} from "./openapi/notifications.openapi.js";
+import {
+  usersOpenApiPaths,
+  usersOpenApiComponents,
+} from "./openapi/users.openapi.js";
 import { authHandler } from "./middlewares/auth.handler.js";
 import { notificationsRoute } from "./routes/notifications.route.js";
 import { notificationInAppRoutes } from "./routes/notification-in-app.route.js";
@@ -25,8 +41,19 @@ import { NotificationEventHandler } from "../../application/event-handlers/notif
 const notificationRepository = new NotificationDrizzleRepository();
 new NotificationEventHandler(notificationEventBus, notificationRepository);
 
+// ── Merge de todos os paths OpenAPI ─────────────────────────────────────────
+const allOpenApiPaths = {
+  ...authOpenApiPaths,
+  ...postsOpenApiPaths,
+  ...groupsOpenApiPaths,
+  ...notificationsOpenApiPaths,
+  ...usersOpenApiPaths,
+};
+
 export function buildApp() {
-  const app = fastify({ bodyLimit: 10 * 1024 * 1024 }).withTypeProvider<ZodTypeProvider>();
+  const app = fastify({
+    bodyLimit: 10 * 1024 * 1024,
+  }).withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
@@ -53,6 +80,41 @@ export function buildApp() {
       info: {
         title: "CampusConnect API",
         version: "1.0.0",
+        description:
+          "API do CampusConnect — rede social acadêmica com moderação AI.",
+      },
+      tags: [
+        { name: "Auth", description: "Autenticação e sessão" },
+        {
+          name: "Posts",
+          description: "CRUD de publicações (texto, imagem, evento, notícia)",
+        },
+        { name: "Curtidas", description: "Curtidas em publicações" },
+        {
+          name: "Comentários",
+          description: "Comentários e respostas em publicações",
+        },
+        { name: "RSVP", description: "Confirmação de presença em eventos" },
+        { name: "Grupos", description: "CRUD de grupos e participação" },
+        {
+          name: "Mensagens do Grupo",
+          description: "Mensagens dentro de grupos",
+        },
+        {
+          name: "Notificações",
+          description: "Notificações por email e in-app",
+        },
+        { name: "Usuários", description: "Perfil do usuário" },
+      ],
+      components: {
+        securitySchemes: {
+          cookieAuth: {
+            type: "apiKey",
+            in: "cookie",
+            name: "session",
+            description: "Sessão Better Auth (cookie httpOnly)",
+          },
+        },
       },
     },
     transform: jsonSchemaTransform,
@@ -60,7 +122,7 @@ export function buildApp() {
       if (!("openapiObject" in doc)) return doc.swaggerObject;
       return {
         ...doc.openapiObject,
-        paths: { ...doc.openapiObject.paths, ...authOpenApiPaths },
+        paths: { ...doc.openapiObject.paths, ...allOpenApiPaths },
       };
     },
   });
