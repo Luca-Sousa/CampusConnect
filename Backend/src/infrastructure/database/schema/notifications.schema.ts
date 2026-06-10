@@ -8,6 +8,7 @@ export const notificationTypeEnum = pgEnum("notification_type", [
   "post_created",
   "post_approved",
   "post_moderation_rejected",
+  "pending_moderation",
   "group_created",
   "group_message",
 ]);

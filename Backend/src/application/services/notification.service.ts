@@ -1,5 +1,5 @@
 import type { INotificationEventBus } from "../../domain/ports/services/notification-event-bus.js";
-import { getAllUserIds, getGroupMemberIds } from "../../infrastructure/helpers/user-ids.js";
+import { getAllUserIds, getGroupMemberIds, getModeratorUserIds } from "../../infrastructure/helpers/user-ids.js";
 
 function truncate(text: string, maxLen = 50): string {
   if (text.length <= maxLen) return text;
@@ -37,7 +37,27 @@ export class NotificationService {
       entityType: "post",
       entityId: postId,
       recipientIds,
-      message: `${actorName} publicou um novo ${typeLabel}.`,
+      message: `${actorName} publicou um(a) novo(a) ${typeLabel}.`,
+    });
+  }
+
+  async notifyPendingModeration(
+    postType: string,
+    actorId: string,
+    actorName: string,
+    postId: string,
+  ): Promise<void> {
+    const moderatorIds = await getModeratorUserIds();
+    const recipientIds = moderatorIds.filter((id) => id !== actorId);
+    if (recipientIds.length === 0) return;
+
+    this.eventBus.emit({
+      type: "pending_moderation",
+      actorId,
+      entityType: "post",
+      entityId: postId,
+      recipientIds,
+      message: `${actorName} publicou um(a) novo(a) ${postType === "event" ? "evento" : postType === "news" ? "notícia" : "publicação"} que está pendente de moderação.`,
     });
   }
 

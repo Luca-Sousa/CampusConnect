@@ -67,7 +67,9 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
         "aluno",
     });
 
-    if (!created.moderated) {
+    if (created.moderated) {
+      await notificationService.notifyPendingModeration(body.type, session.user.id, session.user.name, created.id);
+    } else {
       await notificationService.notifyPostCreated(body.type, session.user.id, session.user.name, created.id);
     }
 
@@ -158,6 +160,8 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
       userCargo:
         ((session.user as Record<string, unknown>).cargo as string) ?? "",
     });
+
+    await notificationService.notifyPostCreated(post.type, post.authorId, post.authorName, id);
 
     notificationService.notifyPostApproved(
       id,

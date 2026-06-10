@@ -6,6 +6,7 @@ export const TYPE_ICONS: Record<NotificationType, string> = {
   post_created: "📢",
   post_approved: "✅",
   post_moderation_rejected: "🚫",
+  pending_moderation: "⏳",
   group_created: "👥",
   group_message: "✉️",
 };

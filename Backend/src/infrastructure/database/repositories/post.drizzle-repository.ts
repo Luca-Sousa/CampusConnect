@@ -58,10 +58,11 @@ export class PostDrizzleRepository implements IPostRepository {
 
   async findById(
     id: string,
-  ): Promise<Pick<Post, "id" | "authorId" | "type" | "moderated"> | null> {
+  ): Promise<(Pick<Post, "id" | "authorId" | "type" | "moderated"> & { authorName: string }) | null> {
     const [existing] = await db
-      .select({ id: post.id, authorId: post.authorId, type: post.type, moderated: post.moderated })
+      .select({ id: post.id, authorId: post.authorId, type: post.type, moderated: post.moderated, authorName: user.name })
       .from(post)
+      .innerJoin(user, eq(post.authorId, user.id))
       .where(eq(post.id, id))
       .limit(1);
 
