@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { toErrors } from "@/lib/to-errors"
 
 interface FormInputProps {
   field: AnyFieldApi
@@ -21,12 +22,6 @@ interface FormInputProps {
   autoComplete?: string
   disabled?: boolean
   showPasswordToggle?: boolean
-}
-
-function toErrors(errors: AnyFieldApi["state"]["meta"]["errors"]) {
-  return errors.map((e) => ({
-    message: typeof e === "string" ? e : (e as { message?: string })?.message,
-  }))
 }
 
 export function FormInput({

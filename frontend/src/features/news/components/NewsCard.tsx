@@ -1,7 +1,8 @@
 import { NewspaperIcon, ClockIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CARGO_CONFIG } from "@/features/auth/constants";
-import { formatRelativeTime, getInitials } from "@/features/feed/utils/format";
+import { formatRelativeTime } from "@/features/feed/utils/format";
+import { getInitials } from "@/lib/utils";
 import type { NewsPost } from "../types";
 import { NewsActionsMenu } from "./NewsActionsMenu";
 

@@ -8,15 +8,18 @@ export function cn(...inputs: ClassValue[]) {
 export function getInitials(name: string): string {
   return name
     .split(" ")
-    .map((n) => n[0])
+    .filter(Boolean)
     .slice(0, 2)
+    .map((n) => n[0])
     .join("")
     .toUpperCase();
 }
 
-export const todayDate = new Intl.DateTimeFormat("pt-BR", {
-  weekday: "long",
-  day: "2-digit",
-  month: "long",
-  year: "numeric",
-}).format(new Date());
+export function todayDate(): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+}

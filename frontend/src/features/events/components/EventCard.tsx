@@ -10,10 +10,10 @@ import { Button } from "@/components/ui/button";
 import {
   formatEventTimeRange,
   formatRelativeTime,
-  getInitials,
   isEventInPast,
 } from "@/features/feed/utils/format";
-import { useToggleRsvp } from "../hooks/use-toggle-rsvp";
+import { getInitials } from "@/lib/utils";
+import { useToggleRsvp } from "@/features/feed/hooks/use-toggle-rsvp";
 import type { EventPost } from "../types";
 import { EventActionsMenu } from "./EventActionsMenu";
 

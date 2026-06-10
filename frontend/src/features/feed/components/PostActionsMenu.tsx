@@ -39,8 +39,7 @@ import { useDeletePost } from "../hooks/use-delete-post";
 import { useApprovePost } from "../hooks/use-approve-post";
 import { isEventInPast } from "../utils/format";
 import type { Post } from "../types";
-import { OFFICIAL_CARGOS } from "@/features/auth/constants";
-import type { CargoValue } from "@/features/auth/types";
+import { canManagePost } from "@/lib/permissions";
 
 const PREVIEW_MAX = 140;
 
@@ -94,11 +93,7 @@ export function PostActionsMenu({
 
   const editingDisabled = post.type === "event" && isEventInPast(post);
   const isModerated = post.moderated === true;
-  const canApprove =
-    isModerated &&
-    (currentUserRole === "admin" ||
-      (currentUserRole === "colaborador" &&
-        OFFICIAL_CARGOS.has(currentUserCargo as CargoValue)));
+  const canApprove = isModerated && canManagePost(currentUserRole, currentUserCargo);
 
   const handleConfirmDelete = () => {
     deletePost(post.id, {

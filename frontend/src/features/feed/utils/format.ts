@@ -3,19 +3,6 @@ import { ptBR } from "date-fns/locale";
 import type { EventPost } from "../types";
 
 /**
- * Extrai as iniciais de um nome (máximo 2 letras).
- */
-export function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-}
-
-/**
  * Formata uma data ISO em tempo relativo compacto.
  *
  * @example

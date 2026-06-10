@@ -1,87 +1,48 @@
 import type { Group, GroupMessage } from "./types";
+import { apiClient } from "@/lib/api-client";
 
-const API = import.meta.env.VITE_API_URL as string;
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
-    credentials: "include",
-    ...init,
-  });
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(
-      (body as { error?: string }).error ?? `Erro ${res.status}`,
-    );
-  }
-
-  if (res.status === 204) return undefined as T;
-  return res.json();
-}
-
-export async function fetchGroups(
-  offset = 0,
-  limit = 20,
-  search?: string,
-): Promise<Group[]> {
+export function fetchGroups(offset = 0, limit = 20, search?: string) {
   const params = new URLSearchParams({ offset: String(offset), limit: String(limit) });
   if (search) params.set("search", search);
-  return request(`/api/groups?${params.toString()}`);
+  return apiClient.get<Group[]>(`/api/groups?${params.toString()}`);
 }
 
-export async function createGroup(body: {
+export function createGroup(body: {
   name: string;
   description?: string;
   icon?: string | null;
-}): Promise<Group> {
-  return request("/api/groups", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+}) {
+  return apiClient.post<Group>("/api/groups", body);
 }
 
-export async function updateGroup(
+export function updateGroup(
   id: string,
   body: { name?: string; description?: string | null; icon?: string | null },
-): Promise<Group> {
-  return request(`/api/groups/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+) {
+  return apiClient.put<Group>(`/api/groups/${id}`, body);
 }
 
-export async function deleteGroup(id: string): Promise<void> {
-  return request(`/api/groups/${id}`, { method: "DELETE" });
+export function deleteGroup(id: string) {
+  return apiClient.delete<void>(`/api/groups/${id}`);
 }
 
-export async function toggleJoinGroup(
-  id: string,
-): Promise<{ isMember: boolean }> {
-  return request(`/api/groups/${id}/join`, { method: "POST" });
+export function toggleJoinGroup(id: string) {
+  return apiClient.post<{ isMember: boolean }>(`/api/groups/${id}/join`);
 }
 
-export async function fetchGroupMessages(
-  groupId: string,
-  offset = 0,
-  limit = 50,
-): Promise<GroupMessage[]> {
+export function fetchGroupMessages(groupId: string, offset = 0, limit = 50) {
   const params = new URLSearchParams({ offset: String(offset), limit: String(limit) });
-  return request(`/api/groups/${groupId}/messages?${params.toString()}`);
+  return apiClient.get<GroupMessage[]>(
+    `/api/groups/${groupId}/messages?${params.toString()}`,
+  );
 }
 
-export async function sendGroupMessage(
-  groupId: string,
-  content: string,
-): Promise<GroupMessage> {
-  return request(`/api/groups/${groupId}/messages`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content }),
+export function sendGroupMessage(groupId: string, content: string) {
+  return apiClient.post<GroupMessage>(`/api/groups/${groupId}/messages`, {
+    content,
   });
 }
 
-export async function deleteGroupMessage(messageId: string): Promise<void> {
-  return request(`/api/messages/${messageId}`, { method: "DELETE" });
+export function deleteGroupMessage(messageId: string) {
+  return apiClient.delete<void>(`/api/messages/${messageId}`);
 }

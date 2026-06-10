@@ -89,7 +89,7 @@ const GroupsPage = () => {
                 key={group.id}
                 group={group}
                 currentUserId={session?.user.id}
-                userRole={(session?.user as Record<string, unknown>).role as string}
+                userRole={(session?.user as { role?: string } | undefined)?.role}
                 onEdit={handleEdit}
                 onOpenMessages={handleOpenMessages}
               />

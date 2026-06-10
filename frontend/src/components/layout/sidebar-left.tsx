@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { signOut } from "@/lib/auth-client";

@@ -6,7 +6,8 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { formatRelativeTime, getInitials } from "@/features/feed/utils/format";
+import { formatRelativeTime } from "@/features/feed/utils/format";
+import { getInitials } from "@/lib/utils";
 import { useToggleJoinGroup } from "../hooks/use-toggle-join-group";
 import type { Group } from "../types";
 import { GroupActionsMenu } from "./GroupActionsMenu";

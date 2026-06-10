@@ -18,11 +18,11 @@ export function useMarkAsRead() {
 
       queryClient.setQueriesData(
         { queryKey: notificationKeys.all },
-        (old: any) => {
-          if (!old || !("notifications" in old)) return old;
+        (old: { notifications?: Array<{ id: string; readAt?: string }>; unreadCount?: number } | undefined) => {
+          if (!old?.notifications) return old;
           return {
             ...old,
-            notifications: old.notifications.map((n: any) =>
+            notifications: old.notifications.map((n) =>
               n.id === id ? { ...n, readAt: new Date().toISOString() } : n,
             ),
             unreadCount: Math.max(0, (old.unreadCount ?? 0) - 1),

@@ -54,7 +54,7 @@ const Header = () => {
             Bem-vindo, {firstName}.
           </h2>
           <p className="text-xs text-muted-foreground capitalize">
-            {todayDate}
+            {todayDate()}
           </p>
         </div>
       </div>

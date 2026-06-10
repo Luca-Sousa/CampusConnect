@@ -1,134 +1,47 @@
-import { env } from "@/env";
 import type { Post, ToggleLikeResult, Comment } from "./types";
+import { apiClient } from "@/lib/api-client";
 
-export async function fetchPosts(offset = 0, limit = 20): Promise<Post[]> {
-  const res = await fetch(
-    `${env.API_URL}/api/posts?limit=${limit}&offset=${offset}`,
-    { credentials: "include" },
+export function fetchPosts(offset = 0, limit = 20) {
+  return apiClient.get<Post[]>(`/api/posts?limit=${limit}&offset=${offset}`);
+}
+
+export function createPost(body: unknown) {
+  return apiClient.post<Post>("/api/posts", body);
+}
+
+export function deletePost(id: string) {
+  return apiClient.delete<void>(`/api/posts/${id}`);
+}
+
+export function updatePost(id: string, body: unknown) {
+  return apiClient.put<Post>(`/api/posts/${id}`, body);
+}
+
+export function toggleRsvp(postId: string) {
+  return apiClient.post<{ hasRsvp: boolean }>(`/api/posts/${postId}/rsvp`);
+}
+
+export function fetchLikeStatus(postId: string) {
+  return apiClient.get<{ likesCount: number; hasLiked: boolean }>(
+    `/api/posts/${postId}/like`,
   );
-  if (!res.ok) throw new Error("Erro ao carregar publicações.");
-  return res.json();
 }
 
-export async function createPost(body: unknown): Promise<Post> {
-  const res = await fetch(`${env.API_URL}/api/posts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(
-      (data as { message?: string; error?: string }).message ??
-        (data as { error?: string }).error ??
-        "Erro ao publicar.",
-    );
-  }
-  return res.json();
+export function toggleLike(postId: string) {
+  return apiClient.post<ToggleLikeResult>(`/api/posts/${postId}/like`, {});
 }
 
-export async function deletePost(id: string): Promise<void> {
-  const res = await fetch(`${env.API_URL}/api/posts/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Erro ao remover publicação.");
+export function approvePost(postId: string) {
+  return apiClient.post<Post>(`/api/posts/${postId}/approve`);
 }
 
-export async function updatePost(id: string, body: unknown): Promise<Post> {
-  const res = await fetch(`${env.API_URL}/api/posts/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(
-      (data as { message?: string; error?: string }).message ??
-        (data as { error?: string }).error ??
-        "Erro ao atualizar publicação.",
-    );
-  }
-  return res.json();
+export function fetchComments(postId: string) {
+  return apiClient.get<Comment[]>(`/api/posts/${postId}/comments`);
 }
 
-export async function toggleRsvp(
-  postId: string,
-): Promise<{ hasRsvp: boolean }> {
-  const res = await fetch(`${env.API_URL}/api/posts/${postId}/rsvp`, {
-    method: "POST",
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Erro ao confirmar presença.");
-  return res.json();
-}
-
-// ——— Likes ———
-
-export async function fetchLikeStatus(
-  postId: string,
-): Promise<{ likesCount: number; hasLiked: boolean }> {
-  const res = await fetch(`${env.API_URL}/api/posts/${postId}/like`, {
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Erro ao verificar curtida.");
-  return res.json();
-}
-
-export async function toggleLike(postId: string): Promise<ToggleLikeResult> {
-  const res = await fetch(`${env.API_URL}/api/posts/${postId}/like`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: "{}",
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Erro ao curtir publicação.");
-  return res.json();
-}
-
-// ——— Moderation ———
-
-export async function approvePost(postId: string): Promise<Post> {
-  const res = await fetch(`${env.API_URL}/api/posts/${postId}/approve`, {
-    method: "POST",
-    credentials: "include",
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(
-      (data as { error?: string }).error ?? "Erro ao aprovar publicação.",
-    );
-  }
-  return res.json();
-}
-
-// ——— Comments ———
-
-export async function fetchComments(postId: string): Promise<Comment[]> {
-  const res = await fetch(`${env.API_URL}/api/posts/${postId}/comments`, {
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Erro ao carregar comentários.");
-  return res.json();
-}
-
-export async function addComment(
+export function addComment(
   postId: string,
   data: { content: string; parentId?: string },
-): Promise<Comment> {
-  const res = await fetch(`${env.API_URL}/api/posts/${postId}/comments`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { error?: string }).error ?? "Erro ao comentar.",
-    );
-  }
-  return res.json();
+) {
+  return apiClient.post<Comment>(`/api/posts/${postId}/comments`, data);
 }

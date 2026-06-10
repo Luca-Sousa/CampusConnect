@@ -4,10 +4,8 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  getInitials,
-  formatRelativeTime,
-} from "@/features/feed/utils/format";
+import { formatRelativeTime } from "@/features/feed/utils/format";
+import { getInitials } from "@/lib/utils";
 import type { Comment } from "@/features/feed/types";
 
 interface CommentItemProps {

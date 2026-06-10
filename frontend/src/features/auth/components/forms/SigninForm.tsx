@@ -5,8 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { signIn } from "@/lib/auth-client";
-import { env } from "@/env";
 import { showError } from "@/lib/toast";
+import { apiClient } from "@/lib/api-client";
 import { signinSchema } from "../../schemas";
 import { FormInput } from "@/components/form/form-input";
 
@@ -22,10 +22,7 @@ export function SigninForm() {
         showError(error.message ?? "Erro ao fazer login.");
         return;
       }
-      fetch(`${env.API_URL}/api/notifications/login`, {
-        method: "POST",
-        credentials: "include",
-      }).catch(() => {});
+      apiClient.post("/api/notifications/login").catch(() => {});
       navigate("/feed");
     },
   });

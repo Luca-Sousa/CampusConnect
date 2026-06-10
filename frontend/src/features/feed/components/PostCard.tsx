@@ -10,8 +10,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CARGO_CONFIG, OFFICIAL_CARGOS } from "@/features/auth/constants";
-import type { CargoValue } from "@/features/auth/types";
+import { CARGO_CONFIG } from "@/features/auth/constants";
+import { canManagePost } from "@/lib/permissions";
 import { ActionBar } from "@/components/action-bar";
 import { useToggleRsvp } from "../hooks/use-toggle-rsvp";
 import type { EventPost, ImagePost, NewsPost, Post, TextPost } from "../types";
@@ -19,8 +19,8 @@ import {
   formatEventDate,
   formatEventTimeRange,
   formatRelativeTime,
-  getInitials,
 } from "../utils/format";
+import { getInitials } from "@/lib/utils";
 import { PostActionsMenu } from "./PostActionsMenu";
 import { ExpandableText } from "@/components/expandable-text";
 import { cn } from "@/lib/utils";
@@ -51,10 +51,7 @@ function PostHeader({ post, currentUserId, currentUserRole, currentUserCargo, on
   const cargoConfig = CARGO_CONFIG[cargo] ?? CARGO_CONFIG["aluno"];
   const isModerated = post.moderated === true;
   const isAuthor = currentUserId === post.authorId;
-  const isAdmin = currentUserRole === "admin";
-  const isColaborador = currentUserRole === "colaborador";
-  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
-  const canManage = isAdmin || hasOfficialCargo;
+  const canManage = canManagePost(currentUserRole, currentUserCargo);
 
   return (
     <div className="flex items-center justify-between px-4 pt-4 pb-2">
@@ -118,10 +115,7 @@ function BannerAuthorRow({ post, currentUserId, currentUserRole, currentUserCarg
   const authorName = post.author?.name ?? "Usuário";
   const isModerated = post.moderated === true;
   const isAuthor = currentUserId === post.authorId;
-  const isAdmin = currentUserRole === "admin";
-  const isColaborador = currentUserRole === "colaborador";
-  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
-  const canManage = isAdmin || hasOfficialCargo;
+  const canManage = canManagePost(currentUserRole, currentUserCargo);
 
   return (
     <div className="flex items-center justify-between">
@@ -174,10 +168,7 @@ function TextPostCard({
   onEdit: (post: Post) => void;
 }) {
   const isModerated = post.moderated === true;
-  const isAdmin = currentUserRole === "admin";
-  const isColaborador = currentUserRole === "colaborador";
-  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
-  const canManage = isAdmin || hasOfficialCargo;
+  const canManage = canManagePost(currentUserRole, currentUserCargo);
   const isAuthor = currentUserId === post.authorId;
   const hideActions = isModerated && !canManage && !isAuthor;
 
@@ -210,10 +201,7 @@ function ImagePostCard({
   onEdit: (post: Post) => void;
 }) {
   const isModerated = post.moderated === true;
-  const isAdmin = currentUserRole === "admin";
-  const isColaborador = currentUserRole === "colaborador";
-  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
-  const canManage = isAdmin || hasOfficialCargo;
+  const canManage = canManagePost(currentUserRole, currentUserCargo);
   const isAuthor = currentUserId === post.authorId;
   const hideActions = isModerated && !canManage && !isAuthor;
 
@@ -258,10 +246,7 @@ function EventPostCard({
 }) {
   const { mutate: toggleRsvp, isPending } = useToggleRsvp();
   const isModerated = post.moderated === true;
-  const isAdmin = currentUserRole === "admin";
-  const isColaborador = currentUserRole === "colaborador";
-  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
-  const canManage = isAdmin || hasOfficialCargo;
+  const canManage = canManagePost(currentUserRole, currentUserCargo);
   const isAuthor = currentUserId === post.authorId;
   const hideActions = isModerated && !canManage && !isAuthor;
 
@@ -378,10 +363,7 @@ function NewsPostCard({
   onEdit: (post: Post) => void;
 }) {
   const isModerated = post.moderated === true;
-  const isAdmin = currentUserRole === "admin";
-  const isColaborador = currentUserRole === "colaborador";
-  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
-  const canManage = isAdmin || hasOfficialCargo;
+  const canManage = canManagePost(currentUserRole, currentUserCargo);
   const isAuthor = currentUserId === post.authorId;
   const hideActions = isModerated && !canManage && !isAuthor;
 

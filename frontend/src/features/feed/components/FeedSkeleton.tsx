@@ -105,10 +105,44 @@ function EventPostSkeleton() {
   );
 }
 
+function NewsPostSkeleton() {
+  return (
+    <article className="rounded-xl border border-orange-200/60 dark:border-orange-800/40 bg-card shadow-sm overflow-hidden">
+      <div className="bg-muted px-4 pt-4 pb-5">
+        <div className="flex items-center gap-2.5 mb-3">
+          <Skeleton className="h-9 w-9 rounded-full ring-2 ring-white/25" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-3.5 w-28" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </div>
+        <Skeleton className="h-5 w-3/4" />
+      </div>
+
+      <div className="px-4 py-3 flex flex-wrap gap-2 border-b">
+        <Skeleton className="h-7 w-24 rounded-full" />
+        <Skeleton className="h-7 w-20 rounded-full" />
+      </div>
+
+      <div className="px-4 pt-3 pb-1 space-y-2">
+        <Skeleton className="h-4 w-[250px] sm:w-[320px] md:w-[400px] lg:w-[480px] xl:w-[560px] 2xl:w-[640px]" />
+        <Skeleton className="h-4 w-[200px] sm:w-[260px] md:w-[320px] lg:w-[380px] xl:w-[440px] 2xl:w-[500px]" />
+      </div>
+
+      <div className="px-4 py-3 flex items-center justify-between border-t">
+        <Skeleton className="h-3 w-32" />
+      </div>
+
+      <ActionBarSkeleton />
+    </article>
+  );
+}
+
 const SKELETON_MAP = {
   text: TextPostSkeleton,
   image: ImagePostSkeleton,
   event: EventPostSkeleton,
+  news: NewsPostSkeleton,
 } as const;
 
 type SkeletonType = keyof typeof SKELETON_MAP;

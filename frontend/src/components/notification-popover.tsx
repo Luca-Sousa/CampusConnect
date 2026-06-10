@@ -15,28 +15,8 @@ import { useMarkAsRead } from "@/features/notifications/hooks/use-mark-as-read";
 import { useMarkAllAsRead } from "@/features/notifications/hooks/use-mark-all-as-read";
 import { formatRelativeTime } from "@/features/feed/utils/format";
 import { getInitials } from "@/lib/utils";
-import type { Notification, NotificationType } from "@/features/notifications/types";
-
-const TYPE_ICONS: Record<NotificationType, string> = {
-  like: "❤️",
-  comment: "💬",
-  post_created: "📢",
-  group_created: "👥",
-  group_message: "✉️",
-};
-
-function getEntityPath(notification: Notification): string {
-  switch (notification.entityType) {
-    case "post":
-      return `/post/${notification.entityId}`;
-    case "group":
-      return `/groups?chat=${notification.entityId}`;
-    case "group_message":
-      return `/groups?chat=${notification.entityId}`;
-    default:
-      return "/feed";
-  }
-}
+import type { Notification } from "@/features/notifications/types";
+import { TYPE_ICONS, getEntityPath } from "@/features/notifications/utils";
 
 export function NotificationPopover() {
   const navigate = useNavigate();

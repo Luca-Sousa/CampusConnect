@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { showError } from "@/lib/toast"
+import { toErrors } from "@/lib/to-errors"
 import { IMAGE_MAX_BYTES } from "@/features/feed/schemas"
 
 interface PostImageUploadProps {
@@ -21,12 +22,6 @@ interface PostImageUploadProps {
   label?: string
   description?: string
   id: string
-}
-
-function toErrors(errors: Array<{ message?: string } | string | undefined> | undefined) {
-  return (errors ?? []).map((e) => ({
-    message: typeof e === "string" ? e : e?.message,
-  }))
 }
 
 export function PostImageUpload({

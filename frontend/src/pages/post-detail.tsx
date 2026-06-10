@@ -11,9 +11,9 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import {
-  getInitials,
   formatRelativeTime,
 } from "@/features/feed/utils/format";
+import { getInitials } from "@/lib/utils";
 import { CARGO_CONFIG } from "@/features/auth/constants";
 
 export default function PostDetailPage() {

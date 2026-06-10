@@ -10,7 +10,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatRelativeTime, getInitials } from "@/features/feed/utils/format";
+import { formatRelativeTime } from "@/features/feed/utils/format";
+import { getInitials } from "@/lib/utils";
 import { useGroupMessages } from "../hooks/use-group-messages";
 import { useSendGroupMessage } from "../hooks/use-send-group-message";
 import type { Group } from "../types";

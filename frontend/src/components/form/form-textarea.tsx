@@ -13,6 +13,7 @@ import {
   InputGroupTextarea,
 } from "@/components/ui/input-group"
 import { Textarea } from "@/components/ui/textarea"
+import { toErrors } from "@/lib/to-errors"
 
 interface FormTextareaProps {
   field: AnyFieldApi
@@ -23,12 +24,6 @@ interface FormTextareaProps {
   maxLength?: number
   showCounter?: boolean
   disabled?: boolean
-}
-
-function toErrors(errors: AnyFieldApi["state"]["meta"]["errors"]) {
-  return errors.map((e) => ({
-    message: typeof e === "string" ? e : (e as { message?: string })?.message,
-  }))
 }
 
 export function FormTextarea({

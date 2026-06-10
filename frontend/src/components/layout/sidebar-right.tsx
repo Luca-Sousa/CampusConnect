@@ -25,7 +25,7 @@ import {
 import { useEvents } from "@/features/events/hooks/use-events";
 import { useNews } from "@/features/news/hooks/use-news";
 import { useGroups } from "@/features/groups/hooks/use-groups";
-import { getInitials } from "@/features/feed/utils/format";
+import { getInitials } from "@/lib/utils";
 
 const MAX_ITEMS = 4;
 const NEW_THRESHOLD_DAYS = 3;

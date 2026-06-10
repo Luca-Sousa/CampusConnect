@@ -23,6 +23,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { toErrors } from "@/lib/to-errors"
 import { CalendarIcon, Clock2Icon } from "lucide-react"
 
 interface EventDateTimePickerProps {
@@ -31,12 +32,6 @@ interface EventDateTimePickerProps {
   endTimeField: AnyFieldApi
   label: ReactNode
   disabled?: boolean
-}
-
-function toErrors(errors: AnyFieldApi["state"]["meta"]["errors"]) {
-  return errors.map((e) => ({
-    message: typeof e === "string" ? e : (e as { message?: string })?.message,
-  }))
 }
 
 function parseIsoDate(value: string): Date | undefined {
