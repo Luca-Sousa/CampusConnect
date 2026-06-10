@@ -88,6 +88,22 @@ export async function toggleLike(postId: string): Promise<ToggleLikeResult> {
   return res.json();
 }
 
+// ——— Moderation ———
+
+export async function approvePost(postId: string): Promise<Post> {
+  const res = await fetch(`${env.API_URL}/api/posts/${postId}/approve`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(
+      (data as { error?: string }).error ?? "Erro ao aprovar publicação.",
+    );
+  }
+  return res.json();
+}
+
 // ——— Comments ———
 
 export async function fetchComments(postId: string): Promise<Comment[]> {
