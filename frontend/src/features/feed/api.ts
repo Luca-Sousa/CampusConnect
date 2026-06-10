@@ -36,7 +36,7 @@ export function approvePost(postId: string) {
 }
 
 export function rejectPost(postId: string) {
-  return apiClient.delete<void>(`/api/posts/${postId}/reject`);
+  return apiClient.post<void>(`/api/posts/${postId}/reject`);
 }
 
 export function fetchComments(postId: string) {
