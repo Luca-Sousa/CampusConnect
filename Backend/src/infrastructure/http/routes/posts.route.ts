@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { createPostSchema, updatePostSchema, pickField } from "../schemas/post.schemas.js";
-import { postRepository, likeRepository, commentRepository, createPostUseCase, listPostsUseCase, deletePostUseCase, toggleRsvpUseCase, updatePostUseCase, approvePostUseCase, toggleLikeUseCase, listCommentsUseCase, addCommentUseCase, notificationService } from "../di/posts.di.js";
+import { postRepository, likeRepository, commentRepository, createPostUseCase, listPostsUseCase, deletePostUseCase, toggleRsvpUseCase, updatePostUseCase, approvePostUseCase, rejectPostUseCase, toggleLikeUseCase, listCommentsUseCase, addCommentUseCase, notificationService } from "../di/posts.di.js";
 import { getSession } from "../helpers/session.js";
 
 export async function postsRoute(app: FastifyInstance): Promise<void> {
@@ -133,7 +133,7 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
     });
 
     if (result.notifyAuthor && result.authorId) {
-      notificationService.notifyModerationRejected(id, result.authorId, session.user.id);
+    notificationService.notifyModerationRejected(id, result.authorId, session.user.id, ((session.user as Record<string, unknown>).role as string) ?? "aluno");
     }
 
     return reply.status(204).send();
@@ -161,6 +161,32 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
     });
 
     return reply.send(updated);
+  });
+
+  /**
+   * POST /api/posts/:id/reject
+   * Rejeita uma publicação retida pela moderação (deleta o post e notifica o autor).
+   */
+  app.post("/api/posts/:id/reject", async (request, reply) => {
+    const session = await getSession(request);
+    if (!session) {
+      return reply.status(401).send({ error: "Não autorizado." });
+    }
+
+    const { id } = request.params as { id: string };
+
+    const result = await rejectPostUseCase.execute({
+      postId: id,
+      userId: session.user.id,
+      userRole:
+        ((session.user as Record<string, unknown>).role as string) ?? "aluno",
+      userCargo:
+        ((session.user as Record<string, unknown>).cargo as string) ?? "",
+    });
+
+    notificationService.notifyModerationRejected(id, result.authorId, session.user.id, ((session.user as Record<string, unknown>).role as string) ?? "aluno");
+
+    return reply.status(204).send();
   });
 
   /**

@@ -9,6 +9,7 @@ import { DeletePostUseCase } from "../../../application/use-cases/posts/delete-p
 import { ToggleRsvpUseCase } from "../../../application/use-cases/posts/toggle-rsvp.use-case.js";
 import { UpdatePostUseCase } from "../../../application/use-cases/posts/update-post.use-case.js";
 import { ApprovePostUseCase } from "../../../application/use-cases/posts/approve-post.use-case.js";
+import { RejectPostUseCase } from "../../../application/use-cases/posts/reject-post.use-case.js";
 import { ToggleLikeUseCase } from "../../../application/use-cases/toggle-like.use-case.js";
 import { ListCommentsUseCase } from "../../../application/use-cases/list-comments.use-case.js";
 import { AddCommentUseCase } from "../../../application/use-cases/add-comment.use-case.js";
@@ -27,6 +28,7 @@ export const deletePostUseCase = new DeletePostUseCase(postRepository);
 export const toggleRsvpUseCase = new ToggleRsvpUseCase(postRepository);
 export const updatePostUseCase = new UpdatePostUseCase(postRepository, contentModerator);
 export const approvePostUseCase = new ApprovePostUseCase(postRepository);
+export const rejectPostUseCase = new RejectPostUseCase(postRepository);
 export const toggleLikeUseCase = new ToggleLikeUseCase(likeRepository);
 export const listCommentsUseCase = new ListCommentsUseCase(commentRepository);
 export const addCommentUseCase = new AddCommentUseCase(commentRepository);

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  BanIcon,
   CalendarIcon,
   CheckCircleIcon,
   ImageIcon,
@@ -37,6 +38,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useDeletePost } from "../hooks/use-delete-post";
 import { useApprovePost } from "../hooks/use-approve-post";
+import { useRejectPost } from "../hooks/use-reject-post";
 import { isEventInPast } from "../utils/format";
 import type { Post } from "../types";
 import { canManagePost } from "@/lib/permissions";
@@ -68,16 +70,8 @@ interface PostActionsMenuProps {
 /**
  * Menu de ações do dono (ou admin) de um post.
  *
- * Encapsula:
- *  - `<DropdownMenu>` com as ações **Aprovar** (se admin + moderado), **Editar** e **Excluir**.
- *  - `<AlertDialog>` de confirmação para a exclusão, com prévia do post.
- *
- * Comportamentos:
- *  - Em eventos passados, "Editar" fica **desabilitado** com tooltip
- *    explicativo — apenas a exclusão permanece disponível.
- *  - O dropdown suporta dois visuais: `default` (ícone neutro sobre
- *    `bg-card`) e `banner` (ícone claro para uso sobre o gradiente do
- *    card de evento).
+ * Para posts moderados, mostra apenas **Aprovar** e **Reprovar**.
+ * Para posts normais, mostra **Editar** e **Excluir**.
  */
 export function PostActionsMenu({
   post,
@@ -88,12 +82,16 @@ export function PostActionsMenu({
 }: PostActionsMenuProps) {
   const [alertOpen, setAlertOpen] = useState(false);
   const [approveAlertOpen, setApproveAlertOpen] = useState(false);
+  const [rejectAlertOpen, setRejectAlertOpen] = useState(false);
   const { mutate: deletePost, isPending } = useDeletePost();
   const { mutate: approvePost, isPending: isApproving } = useApprovePost();
+  const { mutate: rejectPost, isPending: isRejecting } = useRejectPost();
+
+  const isModerated = post.moderated === true;
+  const canManage = canManagePost(currentUserRole, currentUserCargo);
+  const isModerationAction = isModerated && canManage;
 
   const editingDisabled = post.type === "event" && isEventInPast(post);
-  const isModerated = post.moderated === true;
-  const canApprove = isModerated && canManagePost(currentUserRole, currentUserCargo);
 
   const handleConfirmDelete = () => {
     deletePost(post.id, {
@@ -104,6 +102,12 @@ export function PostActionsMenu({
   const handleConfirmApprove = () => {
     approvePost(post.id, {
       onSuccess: () => setApproveAlertOpen(false),
+    });
+  };
+
+  const handleConfirmReject = () => {
+    rejectPost(post.id, {
+      onSuccess: () => setRejectAlertOpen(false),
     });
   };
 
@@ -126,7 +130,7 @@ export function PostActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-44">
-          {canApprove && (
+          {isModerationAction ? (
             <>
               <DropdownMenuItem
                 onSelect={(e) => {
@@ -138,44 +142,57 @@ export function PostActionsMenu({
                 Aprovar publicação
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-            </>
-          )}
-          <Tooltip>
-            <TooltipTrigger
-              asChild
-              disabled={!editingDisabled}
-            >
               <DropdownMenuItem
-                disabled={editingDisabled}
+                variant="destructive"
                 onSelect={(e) => {
-                  if (editingDisabled) {
-                    e.preventDefault();
-                    return;
-                  }
-                  onEdit(post);
+                  e.preventDefault();
+                  setRejectAlertOpen(true);
                 }}
               >
-                <PencilIcon />
-                Editar
+                <BanIcon />
+                Reprovar publicação
               </DropdownMenuItem>
-            </TooltipTrigger>
-            {editingDisabled && (
-              <TooltipContent side="left">
-                Eventos passados não podem ser editados. Apenas excluídos.
-              </TooltipContent>
-            )}
-          </Tooltip>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            variant="destructive"
-            onSelect={(e) => {
-              e.preventDefault();
-              setAlertOpen(true);
-            }}
-          >
-            <Trash2Icon />
-            Excluir
-          </DropdownMenuItem>
+            </>
+          ) : (
+            <>
+              <Tooltip>
+                <TooltipTrigger
+                  asChild
+                  disabled={!editingDisabled}
+                >
+                  <DropdownMenuItem
+                    disabled={editingDisabled}
+                    onSelect={(e) => {
+                      if (editingDisabled) {
+                        e.preventDefault();
+                        return;
+                      }
+                      onEdit(post);
+                    }}
+                  >
+                    <PencilIcon />
+                    Editar
+                  </DropdownMenuItem>
+                </TooltipTrigger>
+                {editingDisabled && (
+                  <TooltipContent side="left">
+                    Eventos passados não podem ser editados. Apenas excluídos.
+                  </TooltipContent>
+                )}
+              </Tooltip>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setAlertOpen(true);
+                }}
+              >
+                <Trash2Icon />
+                Excluir
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -212,7 +229,39 @@ export function PostActionsMenu({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete confirmation dialog */}
+      {/* Reject confirmation dialog */}
+      <AlertDialog open={rejectAlertOpen} onOpenChange={setRejectAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+              <BanIcon />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Rejeitar publicação?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta publicação foi retida pela moderação de IA. Ao rejeitar, ela
+              será permanentemente removida e o autor será notificado.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <PostPreview post={post} />
+
+          <AlertDialogFooter>
+            <AlertDialogCancel variant="outline" disabled={isRejecting} size="lg">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmReject}
+              disabled={isRejecting}
+              variant="destructive"
+              size="lg"
+            >
+              <BanIcon className="size-4" />
+              {isRejecting ? "Rejeitando..." : "Rejeitar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete confirmation dialog (for non-moderated posts) */}
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

@@ -45,14 +45,17 @@ export class NotificationService {
     postId: string,
     authorId: string,
     actorId: string,
+    actorRole?: string,
   ): void {
+    const roleLabel = actorRole === "colaborador" ? "um colaborador" : "um administrador";
+
     this.eventBus.emit({
       type: "post_moderation_rejected",
       actorId,
       entityType: "post",
       entityId: postId,
       recipientIds: [authorId],
-      message: "Sua publicação foi rejeitada pela moderação e removida por um administrador.",
+      message: `Sua publicação foi rejeitada pela moderação e removida por ${roleLabel}.`,
     });
   }
 
