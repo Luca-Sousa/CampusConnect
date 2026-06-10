@@ -9,11 +9,6 @@ const sendLoginNotificationUseCase = new SendLoginNotificationUseCase(
 );
 
 export async function notificationsRoute(app: FastifyInstance): Promise<void> {
-  // Aceita POST sem Content-Type (fire-and-forget, só lê cookies)
-  app.addContentTypeParser("*", { parseAs: "string" }, (_req, _payload, done) => {
-    done(null, undefined);
-  });
-
   /**
    * POST /api/notifications/login
    * Envia notificação de novo acesso ao usuário da sessão atual.

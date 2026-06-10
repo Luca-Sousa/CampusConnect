@@ -59,6 +59,11 @@ export function buildApp() {
   app.setSerializerCompiler(serializerCompiler);
   app.setErrorHandler(errorHandler);
 
+  // Aceita requests sem Content-Type (DELETE, POST fire-and-forget, etc.)
+  app.addContentTypeParser("*", { parseAs: "string" }, (_req, _payload, done) => {
+    done(null, undefined);
+  });
+
   const allowedOrigins = env.FRONTEND_URL.split(",").map((o) => o.trim());
 
   app.register(fastifyCors, {
