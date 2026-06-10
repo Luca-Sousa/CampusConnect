@@ -41,7 +41,7 @@ import { useApprovePost } from "../hooks/use-approve-post";
 import { useRejectPost } from "../hooks/use-reject-post";
 import { isEventInPast } from "../utils/format";
 import type { Post } from "../types";
-import { canManagePost } from "@/lib/permissions";
+import { canModeratePost } from "@/lib/permissions";
 
 const PREVIEW_MAX = 140;
 
@@ -63,20 +63,23 @@ interface PostActionsMenuProps {
   post: Post;
   onEdit: (post: Post) => void;
   variant?: "default" | "banner";
+  currentUserId?: string;
   currentUserRole?: string;
   currentUserCargo?: string;
 }
 
 /**
- * Menu de ações do dono (ou admin) de um post.
+ * Menu de ações de um post.
  *
- * Para posts moderados, mostra apenas **Aprovar** e **Reprovar**.
- * Para posts normais, mostra **Editar** e **Excluir**.
+ * - **Autor (post não moderado)**: Editar e Excluir.
+ * - **Moderador (post moderado)**: Aprovar e Reprovar.
+ * - Caso nenhum se aplique, o menu não é exibido (controlado pelo PostCard).
  */
 export function PostActionsMenu({
   post,
   onEdit,
   variant = "default",
+  currentUserId,
   currentUserRole,
   currentUserCargo,
 }: PostActionsMenuProps) {
@@ -88,8 +91,10 @@ export function PostActionsMenu({
   const { mutate: rejectPost, isPending: isRejecting } = useRejectPost();
 
   const isModerated = post.moderated === true;
-  const canManage = canManagePost(currentUserRole, currentUserCargo);
-  const isModerationAction = isModerated && canManage;
+  const isAuthor = currentUserId === post.authorId;
+  const canModerate = canModeratePost(currentUserRole, currentUserCargo);
+  const showModerationActions = isModerated && canModerate;
+  const showOwnerActions = isAuthor && !isModerated;
 
   const editingDisabled = post.type === "event" && isEventInPast(post);
 
@@ -130,7 +135,7 @@ export function PostActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-44">
-          {isModerationAction ? (
+          {showModerationActions && (
             <>
               <DropdownMenuItem
                 onSelect={(e) => {
@@ -153,7 +158,8 @@ export function PostActionsMenu({
                 Reprovar publicação
               </DropdownMenuItem>
             </>
-          ) : (
+          )}
+          {showOwnerActions && (
             <>
               <Tooltip>
                 <TooltipTrigger

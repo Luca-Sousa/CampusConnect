@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CARGO_CONFIG } from "@/features/auth/constants";
-import { canManagePost } from "@/lib/permissions";
+import { canModeratePost } from "@/lib/permissions";
 import { ActionBar } from "@/components/action-bar";
 import { useToggleRsvp } from "../hooks/use-toggle-rsvp";
 import type { EventPost, ImagePost, NewsPost, Post, TextPost } from "../types";
@@ -51,7 +51,7 @@ function PostHeader({ post, currentUserId, currentUserRole, currentUserCargo, on
   const cargoConfig = CARGO_CONFIG[cargo] ?? CARGO_CONFIG["aluno"];
   const isModerated = post.moderated === true;
   const isAuthor = currentUserId === post.authorId;
-  const canManage = canManagePost(currentUserRole, currentUserCargo);
+  const canManage = canModeratePost(currentUserRole, currentUserCargo);
 
   return (
     <div className="flex items-center justify-between px-4 pt-4 pb-2">
@@ -91,8 +91,8 @@ function PostHeader({ post, currentUserId, currentUserRole, currentUserCargo, on
             {canManage ? "Moderação Pendente" : "Aguardando moderação"}
           </span>
         )}
-        {(isAuthor || canManage) && (
-          <PostActionsMenu post={post} onEdit={onEdit} currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} />
+        {(isAuthor || (canManage && isModerated)) && (
+          <PostActionsMenu post={post} onEdit={onEdit} currentUserId={currentUserId} currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} />
         )}
       </div>
     </div>
@@ -115,7 +115,7 @@ function BannerAuthorRow({ post, currentUserId, currentUserRole, currentUserCarg
   const authorName = post.author?.name ?? "Usuário";
   const isModerated = post.moderated === true;
   const isAuthor = currentUserId === post.authorId;
-  const canManage = canManagePost(currentUserRole, currentUserCargo);
+  const canManage = canModeratePost(currentUserRole, currentUserCargo);
 
   return (
     <div className="flex items-center justify-between">
@@ -142,8 +142,8 @@ function BannerAuthorRow({ post, currentUserId, currentUserRole, currentUserCarg
             {canManage ? "Moderação Pendente" : "Aguardando moderação"}
           </span>
         )}
-        {(isAuthor || canManage) && (
-          <PostActionsMenu post={post} onEdit={onEdit} variant="banner" currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} />
+        {(isAuthor || (canManage && isModerated)) && (
+          <PostActionsMenu post={post} onEdit={onEdit} variant="banner" currentUserId={currentUserId} currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} />
         )}
       </div>
     </div>
@@ -168,7 +168,7 @@ function TextPostCard({
   onEdit: (post: Post) => void;
 }) {
   const isModerated = post.moderated === true;
-  const canManage = canManagePost(currentUserRole, currentUserCargo);
+  const canManage = canModeratePost(currentUserRole, currentUserCargo);
   const isAuthor = currentUserId === post.authorId;
   const hideActions = isModerated && !canManage && !isAuthor;
 
@@ -201,7 +201,7 @@ function ImagePostCard({
   onEdit: (post: Post) => void;
 }) {
   const isModerated = post.moderated === true;
-  const canManage = canManagePost(currentUserRole, currentUserCargo);
+  const canManage = canModeratePost(currentUserRole, currentUserCargo);
   const isAuthor = currentUserId === post.authorId;
   const hideActions = isModerated && !canManage && !isAuthor;
 
@@ -246,7 +246,7 @@ function EventPostCard({
 }) {
   const { mutate: toggleRsvp, isPending } = useToggleRsvp();
   const isModerated = post.moderated === true;
-  const canManage = canManagePost(currentUserRole, currentUserCargo);
+  const canManage = canModeratePost(currentUserRole, currentUserCargo);
   const isAuthor = currentUserId === post.authorId;
   const hideActions = isModerated && !canManage && !isAuthor;
 
@@ -363,7 +363,7 @@ function NewsPostCard({
   onEdit: (post: Post) => void;
 }) {
   const isModerated = post.moderated === true;
-  const canManage = canManagePost(currentUserRole, currentUserCargo);
+  const canManage = canModeratePost(currentUserRole, currentUserCargo);
   const isAuthor = currentUserId === post.authorId;
   const hideActions = isModerated && !canManage && !isAuthor;
 

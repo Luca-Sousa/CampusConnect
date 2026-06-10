@@ -96,8 +96,6 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
     const updated = await updatePostUseCase.execute({
       postId: id,
       userId: session.user.id,
-      userRole:
-        ((session.user as Record<string, unknown>).role as string) ?? "aluno",
       input: {
         content: pickField(body, "content"),
         imageUrl: pickField(body, "imageUrl"),
@@ -115,7 +113,7 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
 
   /**
    * DELETE /api/posts/:id
-   * Remove uma publicação (dono ou admin).
+   * Remove uma publicação (apenas o autor).
    */
   app.delete("/api/posts/:id", async (request, reply) => {
     const session = await getSession(request);
@@ -125,16 +123,10 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
 
     const { id } = request.params as { id: string };
 
-    const result = await deletePostUseCase.execute({
+    await deletePostUseCase.execute({
       postId: id,
       userId: session.user.id,
-      userRole:
-        ((session.user as Record<string, unknown>).role as string) ?? "aluno",
     });
-
-    if (result.notifyAuthor && result.authorId) {
-    notificationService.notifyModerationRejected(id, result.authorId, session.user.id, ((session.user as Record<string, unknown>).role as string) ?? "aluno");
-    }
 
     return reply.status(204).send();
   });

@@ -10,7 +10,6 @@ import { ForbiddenError } from "../../../domain/errors/forbidden.js";
 export interface UpdatePostCommand {
   postId: string;
   userId: string;
-  userRole: string;
   input: UpdatePostInput;
 }
 
@@ -18,7 +17,7 @@ export interface UpdatePostCommand {
  * Caso de uso: edição de publicação com moderação AI.
  *
  * Responsabilidades (SRP):
- *  1. Verificar existência e autorização (autor ou admin).
+ *  1. Verificar existência e autorização (apenas autor).
  *  2. Delegar moderação ao `ContentModerator` quando o conteúdo é alterado.
  *  3. Atualizar o post via repositório.
  *
@@ -45,7 +44,7 @@ export class UpdatePostUseCase {
       throw new NotFoundError();
     }
 
-    if (post.authorId !== command.userId && command.userRole !== "admin") {
+    if (post.authorId !== command.userId) {
       throw new ForbiddenError();
     }
 

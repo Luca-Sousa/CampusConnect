@@ -1,7 +1,7 @@
 import { OFFICIAL_CARGOS } from "@/features/auth/constants";
 import type { CargoValue } from "@/features/auth/types";
 
-export function canManagePost(
+export function canModeratePost(
   currentUserRole?: string,
   currentUserCargo?: string,
 ): boolean {
