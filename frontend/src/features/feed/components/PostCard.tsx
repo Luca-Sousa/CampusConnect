@@ -10,7 +10,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CARGO_CONFIG } from "@/features/auth/constants";
+import { CARGO_CONFIG, OFFICIAL_CARGOS } from "@/features/auth/constants";
+import type { CargoValue } from "@/features/auth/types";
 import { ActionBar } from "@/components/action-bar";
 import { useToggleRsvp } from "../hooks/use-toggle-rsvp";
 import type { EventPost, ImagePost, NewsPost, Post, TextPost } from "../types";
@@ -51,6 +52,9 @@ function PostHeader({ post, currentUserId, currentUserRole, currentUserCargo, on
   const isModerated = post.moderated === true;
   const isAuthor = currentUserId === post.authorId;
   const isAdmin = currentUserRole === "admin";
+  const isColaborador = currentUserRole === "colaborador";
+  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
+  const canManage = isAdmin || hasOfficialCargo;
 
   return (
     <div className="flex items-center justify-between px-4 pt-4 pb-2">
@@ -82,15 +86,15 @@ function PostHeader({ post, currentUserId, currentUserRole, currentUserCargo, on
         {isModerated && (
           <span className={cn(
             "inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full",
-            isAdmin
+            canManage
               ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400"
               : "bg-orange-500/20 text-orange-600 dark:text-orange-400",
           )}>
             <ShieldAlertIcon className="h-3 w-3" />
-            {isAdmin ? "Moderação Pendente" : "Aguardando moderação"}
+            {canManage ? "Moderação Pendente" : "Aguardando moderação"}
           </span>
         )}
-        {(isAuthor || isAdmin) && (
+        {(isAuthor || canManage) && (
           <PostActionsMenu post={post} onEdit={onEdit} currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} />
         )}
       </div>
@@ -115,6 +119,9 @@ function BannerAuthorRow({ post, currentUserId, currentUserRole, currentUserCarg
   const isModerated = post.moderated === true;
   const isAuthor = currentUserId === post.authorId;
   const isAdmin = currentUserRole === "admin";
+  const isColaborador = currentUserRole === "colaborador";
+  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
+  const canManage = isAdmin || hasOfficialCargo;
 
   return (
     <div className="flex items-center justify-between">
@@ -138,10 +145,10 @@ function BannerAuthorRow({ post, currentUserId, currentUserRole, currentUserCarg
         {isModerated && (
           <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full bg-yellow-500/30 text-yellow-100">
             <ShieldAlertIcon className="h-3 w-3" />
-            {isAdmin ? "Moderação Pendente" : "Aguardando moderação"}
+            {canManage ? "Moderação Pendente" : "Aguardando moderação"}
           </span>
         )}
-        {(isAuthor || isAdmin) && (
+        {(isAuthor || canManage) && (
           <PostActionsMenu post={post} onEdit={onEdit} variant="banner" currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} />
         )}
       </div>
@@ -168,14 +175,17 @@ function TextPostCard({
 }) {
   const isModerated = post.moderated === true;
   const isAdmin = currentUserRole === "admin";
+  const isColaborador = currentUserRole === "colaborador";
+  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
+  const canManage = isAdmin || hasOfficialCargo;
   const isAuthor = currentUserId === post.authorId;
-  const hideActions = isModerated && !isAdmin && !isAuthor;
+  const hideActions = isModerated && !canManage && !isAuthor;
 
   return (
     <Card className={cn(
       "shadow-sm overflow-hidden p-0",
-      isModerated && !isAdmin && "bg-muted/50 opacity-80",
-      isModerated && isAdmin && "bg-yellow-50/50 dark:bg-yellow-950/20",
+      isModerated && !canManage && "bg-muted/50 opacity-80",
+      isModerated && canManage && "bg-yellow-50/50 dark:bg-yellow-950/20",
     )}>
       <CardContent className="p-0">
         <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} onEdit={onEdit} />
@@ -201,14 +211,17 @@ function ImagePostCard({
 }) {
   const isModerated = post.moderated === true;
   const isAdmin = currentUserRole === "admin";
+  const isColaborador = currentUserRole === "colaborador";
+  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
+  const canManage = isAdmin || hasOfficialCargo;
   const isAuthor = currentUserId === post.authorId;
-  const hideActions = isModerated && !isAdmin && !isAuthor;
+  const hideActions = isModerated && !canManage && !isAuthor;
 
   return (
     <Card className={cn(
       "shadow-sm overflow-hidden p-0",
-      isModerated && !isAdmin && "bg-muted/50 opacity-80",
-      isModerated && isAdmin && "bg-yellow-50/50 dark:bg-yellow-950/20",
+      isModerated && !canManage && "bg-muted/50 opacity-80",
+      isModerated && canManage && "bg-yellow-50/50 dark:bg-yellow-950/20",
     )}>
       <CardContent className="p-0">
         <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} onEdit={onEdit} />
@@ -220,8 +233,8 @@ function ImagePostCard({
           alt="Imagem da publicação"
           className={cn(
             "w-full max-h-125 object-cover",
-            isModerated && !isAdmin && "grayscale",
-            isModerated && isAdmin && "brightness-95",
+            isModerated && !canManage && "grayscale",
+            isModerated && canManage && "brightness-95",
           )}
         />
         {!hideActions && <ActionBar postId={post.id} commentsCount={0} />}
@@ -246,23 +259,26 @@ function EventPostCard({
   const { mutate: toggleRsvp, isPending } = useToggleRsvp();
   const isModerated = post.moderated === true;
   const isAdmin = currentUserRole === "admin";
+  const isColaborador = currentUserRole === "colaborador";
+  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
+  const canManage = isAdmin || hasOfficialCargo;
   const isAuthor = currentUserId === post.authorId;
-  const hideActions = isModerated && !isAdmin && !isAuthor;
+  const hideActions = isModerated && !canManage && !isAuthor;
 
   return (
     <article className={cn(
       "rounded-xl border shadow-sm overflow-hidden",
-      isModerated && !isAdmin
+      isModerated && !canManage
         ? "border-gray-300 dark:border-gray-700 bg-card opacity-80"
-        : isModerated && isAdmin
+        : isModerated && canManage
           ? "border-yellow-200/60 dark:border-yellow-800/40 bg-card"
           : "border-violet-200/60 dark:border-violet-800/40 bg-card",
     )}>
       <div className={cn(
         "bg-linear-to-br px-4 pt-4 pb-5",
-        isModerated && !isAdmin
+        isModerated && !canManage
           ? "from-gray-400 to-gray-500"
-          : isModerated && isAdmin
+          : isModerated && canManage
             ? "from-yellow-500 to-amber-600"
             : "from-violet-600 to-indigo-700",
       )}>
@@ -304,8 +320,8 @@ function EventPostCard({
           alt="Imagem do evento"
           className={cn(
             "w-full max-h-100 object-cover",
-            isModerated && !isAdmin && "grayscale",
-            isModerated && isAdmin && "brightness-95",
+            isModerated && !canManage && "grayscale",
+            isModerated && canManage && "brightness-95",
           )}
         />
       )}
@@ -363,23 +379,26 @@ function NewsPostCard({
 }) {
   const isModerated = post.moderated === true;
   const isAdmin = currentUserRole === "admin";
+  const isColaborador = currentUserRole === "colaborador";
+  const hasOfficialCargo = isColaborador && OFFICIAL_CARGOS.has((currentUserCargo ?? "") as CargoValue);
+  const canManage = isAdmin || hasOfficialCargo;
   const isAuthor = currentUserId === post.authorId;
-  const hideActions = isModerated && !isAdmin && !isAuthor;
+  const hideActions = isModerated && !canManage && !isAuthor;
 
   return (
     <article className={cn(
       "rounded-xl border shadow-sm overflow-hidden",
-      isModerated && !isAdmin
+      isModerated && !canManage
         ? "border-gray-300 dark:border-gray-700 bg-card opacity-80"
-        : isModerated && isAdmin
+        : isModerated && canManage
           ? "border-yellow-200/60 dark:border-yellow-800/40 bg-card"
           : "border-orange-200/60 dark:border-orange-800/40 bg-card",
     )}>
       <div className={cn(
         "bg-linear-to-br p-3",
-        isModerated && !isAdmin
+        isModerated && !canManage
           ? "from-gray-400 to-gray-500"
-          : isModerated && isAdmin
+          : isModerated && canManage
             ? "from-yellow-500 to-amber-600"
             : "from-orange-500 to-amber-500",
       )}>
@@ -400,8 +419,8 @@ function NewsPostCard({
           alt="Imagem do comunicado"
           className={cn(
             "w-full max-h-100 object-cover",
-            isModerated && !isAdmin && "grayscale",
-            isModerated && isAdmin && "brightness-95",
+            isModerated && !canManage && "grayscale",
+            isModerated && canManage && "brightness-95",
           )}
         />
       )}

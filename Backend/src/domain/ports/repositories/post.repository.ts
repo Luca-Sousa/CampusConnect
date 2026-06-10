@@ -10,6 +10,7 @@ export interface ListPostsOptions {
   offset: number;
   currentUserId?: string;
   currentUserRole?: string;
+  currentUserCargo?: string;
 }
 
 export interface IPostRepository {

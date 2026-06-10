@@ -2,6 +2,7 @@ import { and, count, desc, eq, or, isNull } from "drizzle-orm";
 import { db } from "../client.js";
 import { post, rsvp } from "../schema/posts.schema.js";
 import { user } from "../schema/auth.schema.js";
+import { OFFICIAL_CARGOS } from "../../../application/constants/permissions.js";
 import type {
   IPostRepository,
   ListPostsOptions,
@@ -67,11 +68,16 @@ export class PostDrizzleRepository implements IPostRepository {
   async findMany(options: ListPostsOptions): Promise<PostWithAuthor[]> {
     // Build moderation filter:
     // - Non-moderated posts: always visible
-    // - Moderated posts: visible to author and admins
+    // - Moderated posts: visible to author, admins, and collaborators with official cargos
+    const canSeeModerated =
+      options.currentUserRole === "admin" ||
+      (options.currentUserRole === "colaborador" &&
+        OFFICIAL_CARGOS.has(options.currentUserCargo ?? ""));
+
     const moderationFilter = or(
       eq(post.moderated, false),
       options.currentUserId ? eq(post.authorId, options.currentUserId) : undefined,
-      options.currentUserRole === "admin" ? eq(post.moderated, true) : undefined,
+      canSeeModerated ? eq(post.moderated, true) : undefined,
     );
 
     const rows = await db
