@@ -4,10 +4,10 @@ export const MODERATION_SYSTEM_PROMPT =
 export function buildModerationPrompt(text: string): string {
   return `Analise o texto abaixo e classifique-o em EXATAMENTE UMA das seguintes categorias:
 
-- "Aceitável": conteúdo normal, seguro para publicação
-- "Spam": propaganda não solicitada, links suspeitos, conteúdo promocional repetitivo
-- "Toxicidade Leve": ofensas leves, palavrões, grosseria, mas sem caráter pessoal grave
-- "Toxicidade Grave": bullying, discurso de ódio, ameaças, assédio, discriminação
+- "Aceitável": Conteúdo normal, seguro para publicação, amigável ou neutro.
+- "Spam": Propaganda não solicitada, links suspeitos, golpes, correntes, conteúdo promocional repetitivo e sequências de termos aleatórios/palavras desconexas que não fazem sentido no contexto.
+- "Toxicidade Leve": Ofensas leves, palavrões sem direcionamento grave, grosserias, sarcasmo hostil ou desrespeito moderado.
+- "Toxicidade Grave": Bullying, discurso de ódio (raça, gênero, religião, etc.), ameaças de violência, assédio direcionado ou discriminação explícita.
 
 Responda APENAS com um JSON no formato:
 {"category": "Aceitável|Spam|Toxicidade Leve|Toxicidade Grave", "reason": "breve explicação em pt-BR"}

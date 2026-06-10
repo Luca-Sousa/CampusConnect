@@ -27,11 +27,22 @@ interface TagResponse {
   score?: number;
 }
 
-class GroqService implements IAIService {
+/**
+ * Implementação de `IAIService` usando Groq (LLM).
+ *
+ * Segue DIP: a classe implementa a porta `IAIService` e pode ser
+ * injetada em qualquer use case que dependa da interface.
+ *
+ * Em produção, o construtor recebe a API key via `env`.
+ * Se a chave não estiver configurada, os métodos retornam valores
+ * seguros (allowed: true / tags vazias) — o app não quebra.
+ */
+export class GroqAIService implements IAIService {
   private readonly client: GroqClient | null;
 
-  constructor() {
-    this.client = env.AI_API_KEY ? new GroqClient(env.AI_API_KEY) : null;
+  constructor(apiKey?: string) {
+    const key = apiKey ?? env.AI_API_KEY;
+    this.client = key ? new GroqClient(key) : null;
   }
 
   async moderate(text: string): Promise<ModerationResult> {
@@ -87,7 +98,7 @@ class GroqService implements IAIService {
   }
 
   private buildModerationResult(response: ModerationResponse): ModerationResult {
-    const allowed = response.category === "Aceitável";
+    const allowed = response.category === "Aceitavel";
     const categories: ModerationCategory[] = [
       { name: response.category, score: allowed ? 0 : 1 },
     ];
@@ -96,5 +107,3 @@ class GroqService implements IAIService {
     return { allowed, categories, reasons };
   }
 }
-
-export const aiService = new GroqService();

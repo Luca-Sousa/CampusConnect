@@ -14,7 +14,7 @@ const envSchema = z.object({
   SMTP_FROM: z.string().optional(),
   // AI provider configuration (Groq - gratuito)
   AI_API_KEY: z.string().optional(),
-  AI_MODEL: z.string().default("llama3-8b-8192"),
+  AI_MODEL: z.string().default("llama-3.1-8b-instant"),
   MODERATION_THRESHOLD: z.coerce.number().default(0.6),
 });
 
