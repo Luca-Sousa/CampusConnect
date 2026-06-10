@@ -1,54 +1,70 @@
 import type { IPostRepository } from "../../../domain/ports/repositories/post.repository.js";
 import type { Post, CreatePostInput } from "../../../domain/entities/post.js";
 import { OFFICIAL_CARGOS } from "../../constants/permissions.js";
-import { aiService } from "../../../infrastructure/ai/groq-ai.service.js";
+import type { ContentModerator } from "../../services/content-moderator.js";
 
 export interface CreatePostCommand extends CreatePostInput {
   userRole: string;
   userCargo: string;
 }
 
+/**
+ * Caso de uso: criação de publicação com moderação AI.
+ *
+ * Responsabilidades (SRP):
+ *  1. Validar permissões de tipo por role/cargo.
+ *  2. Delegar moderação e tags ao `ContentModerator`.
+ *  3. Persistir o post via repositório.
+ *
+ * Dependências (DIP):
+ *  - `IPostRepository` (porta de persistência).
+ *  - `ContentModerator` (service de moderação — depende de `IAIService`).
+ *
+ * Regras de moderação (centralizadas no `ContentModerator`):
+ *  - Texto aceitável → publicação imediata com tags AI.
+ *  - Spam / toxicidade leve → retido para moderação (`moderated: true`).
+ *  - Toxicidade grave → bloqueado (erro `INVALID:`).
+ */
 export class CreatePostUseCase {
-  constructor(private readonly postRepository: IPostRepository) {}
+  constructor(
+    private readonly postRepository: IPostRepository,
+    private readonly contentModerator: ContentModerator,
+  ) {}
 
   async execute(command: CreatePostCommand): Promise<Post> {
-    if (command.type === "news") {
-      if (
-        command.userRole !== "admin" &&
-        !OFFICIAL_CARGOS.has(command.userCargo)
-      ) {
-        throw new Error("FORBIDDEN");
-      }
-    }
+    this.assertTypePermissions(command);
 
-    // If there's textual content, run moderation first
     const textToCheck = command.content ?? "";
-    if (textToCheck.trim().length > 0) {
-      const mod = await aiService.moderate(textToCheck);
-      if (!mod.allowed) {
-        // mark as moderated and save reasons, do not publish
-        const createInput: CreatePostInput = {
-          ...command,
-          tags: [],
-          moderated: true,
-          moderationReasons: mod.reasons ?? [],
-        };
-        return this.postRepository.create(createInput);
+    const moderation = await this.contentModerator.moderate(textToCheck);
+
+    const createInput: CreatePostInput = {
+      ...command,
+      tags: moderation.tags,
+      moderated: moderation.moderated,
+      moderationReasons: moderation.moderationReasons,
+    };
+
+    return this.postRepository.create(createInput);
+  }
+
+  private assertTypePermissions(command: CreatePostCommand): void {
+    if (command.userRole === "aluno") {
+      if (command.type === "event") {
+        throw new Error("FORBIDDEN:Alunos não podem criar eventos.");
       }
-
-      // If allowed, get tag suggestions
-      const suggestions = await aiService.suggestTags(textToCheck, 5);
-      const tags = suggestions.map((s) => s.tag);
-
-      const createInput: CreatePostInput = {
-        ...command,
-        tags,
-        moderated: false,
-      };
-
-      return this.postRepository.create(createInput);
+      if (command.type === "news") {
+        throw new Error(
+          "FORBIDDEN:Apenas perfis oficiais podem publicar notícias.",
+        );
+      }
     }
 
-    return this.postRepository.create(command);
+    if (
+      command.type === "news" &&
+      command.userRole !== "admin" &&
+      !OFFICIAL_CARGOS.has(command.userCargo)
+    ) {
+      throw new Error("FORBIDDEN");
+    }
   }
 }

@@ -6,6 +6,7 @@ export const notificationTypeEnum = pgEnum("notification_type", [
   "like",
   "comment",
   "post_created",
+  "post_moderation_rejected",
   "group_created",
   "group_message",
 ]);

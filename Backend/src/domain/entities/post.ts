@@ -63,4 +63,6 @@ export interface UpdatePostInput {
   eventEndTime?: string | null;
   eventLocation?: string | null;
   newsTitle?: string | null;
+  moderated?: boolean;
+  moderationReasons?: string[] | null;
 }

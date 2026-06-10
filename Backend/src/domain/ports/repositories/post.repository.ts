@@ -9,11 +9,12 @@ export interface ListPostsOptions {
   limit: number;
   offset: number;
   currentUserId?: string;
+  currentUserRole?: string;
 }
 
 export interface IPostRepository {
   create(input: CreatePostInput): Promise<Post>;
-  findById(id: string): Promise<Pick<Post, "id" | "authorId" | "type"> | null>;
+  findById(id: string): Promise<Pick<Post, "id" | "authorId" | "type" | "moderated"> | null>;
   findMany(options: ListPostsOptions): Promise<PostWithAuthor[]>;
   update(id: string, input: UpdatePostInput): Promise<Post>;
   delete(id: string): Promise<void>;

@@ -3,6 +3,7 @@ import type {
   Post,
   UpdatePostInput,
 } from "../../../domain/entities/post.js";
+import type { ContentModerator } from "../../services/content-moderator.js";
 
 export interface UpdatePostCommand {
   postId: string;
@@ -12,19 +13,28 @@ export interface UpdatePostCommand {
 }
 
 /**
- * Edita uma publicação existente.
+ * Caso de uso: edição de publicação com moderação AI.
  *
- * Regras de autorização (espelhadas de `DeletePostUseCase`):
- *  - O post precisa existir (`NOT_FOUND` caso contrário).
- *  - Apenas o autor original ou um admin pode editar (`FORBIDDEN`).
+ * Responsabilidades (SRP):
+ *  1. Verificar existência e autorização (autor ou admin).
+ *  2. Delegar moderação ao `ContentModerator` quando o conteúdo é alterado.
+ *  3. Atualizar o post via repositório.
  *
- * Observação: o `type` do post é decidido na criação e NÃO pode ser alterado
- * aqui. A rota HTTP não aceita `type` no body do PUT; a UI também não oferece
- * essa opção. Permissões de "news" não são revalidadas porque o post já
- * existe e seu tipo é imutável.
+ * Dependências (DIP):
+ *  - `IPostRepository` (porta de persistência).
+ *  - `ContentModerator` (service de moderação — depende de `IAIService`).
+ *
+ * Regras de moderação (mesmas da criação):
+ *  - Se `content` não está sendo alterado → sem moderação.
+ *  - Texto aceitável → limpa flags de moderação.
+ *  - Spam / toxicidade leve → retido (`moderated: true`).
+ *  - Toxicidade grave → bloqueado (erro `INVALID:`).
  */
 export class UpdatePostUseCase {
-  constructor(private readonly postRepository: IPostRepository) {}
+  constructor(
+    private readonly postRepository: IPostRepository,
+    private readonly contentModerator: ContentModerator,
+  ) {}
 
   async execute(command: UpdatePostCommand): Promise<Post> {
     const post = await this.postRepository.findById(command.postId);
@@ -35,6 +45,19 @@ export class UpdatePostUseCase {
 
     if (post.authorId !== command.userId && command.userRole !== "admin") {
       throw new Error("FORBIDDEN");
+    }
+
+    // Moderar apenas se o conteúdo está sendo alterado
+    if (command.input.content !== undefined) {
+      const moderation = await this.contentModerator.moderate(
+        command.input.content ?? "",
+      );
+
+      return this.postRepository.update(command.postId, {
+        ...command.input,
+        moderated: moderation.moderated,
+        moderationReasons: moderation.moderationReasons,
+      });
     }
 
     return this.postRepository.update(command.postId, command.input);

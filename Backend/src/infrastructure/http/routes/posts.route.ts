@@ -4,26 +4,34 @@ import { auth } from "../../auth/better-auth.js";
 import { PostDrizzleRepository } from "../../database/repositories/post.drizzle-repository.js";
 import { LikeDrizzleRepository } from "../../database/repositories/like.drizzle-repository.js";
 import { CommentDrizzleRepository } from "../../database/repositories/comment.drizzle-repository.js";
+import { GroqAIService } from "../../ai/groq-ai.service.js";
+import { ContentModerator } from "../../../application/services/content-moderator.js";
 import { CreatePostUseCase } from "../../../application/use-cases/posts/create-post.use-case.js";
 import { ListPostsUseCase } from "../../../application/use-cases/posts/list-posts.use-case.js";
 import { DeletePostUseCase } from "../../../application/use-cases/posts/delete-post.use-case.js";
 import { ToggleRsvpUseCase } from "../../../application/use-cases/posts/toggle-rsvp.use-case.js";
 import { UpdatePostUseCase } from "../../../application/use-cases/posts/update-post.use-case.js";
+import { ApprovePostUseCase } from "../../../application/use-cases/posts/approve-post.use-case.js";
 import { ToggleLikeUseCase } from "../../../application/use-cases/toggle-like.use-case.js";
 import { ListCommentsUseCase } from "../../../application/use-cases/list-comments.use-case.js";
 import { AddCommentUseCase } from "../../../application/use-cases/add-comment.use-case.js";
 import { notificationEventBus } from "../../events/index.js";
 import { getAllUserIds } from "../../helpers/user-ids.js";
 
+// ——— DI: infra → application ———
+const aiService = new GroqAIService();
+const contentModerator = new ContentModerator(aiService);
+
 // ——— Singletons de repositório e casos de uso ———
 const postRepository = new PostDrizzleRepository();
 const likeRepository = new LikeDrizzleRepository();
 const commentRepository = new CommentDrizzleRepository();
-const createPostUseCase = new CreatePostUseCase(postRepository);
+const createPostUseCase = new CreatePostUseCase(postRepository, contentModerator);
 const listPostsUseCase = new ListPostsUseCase(postRepository);
 const deletePostUseCase = new DeletePostUseCase(postRepository);
 const toggleRsvpUseCase = new ToggleRsvpUseCase(postRepository);
-const updatePostUseCase = new UpdatePostUseCase(postRepository);
+const updatePostUseCase = new UpdatePostUseCase(postRepository, contentModerator);
+const approvePostUseCase = new ApprovePostUseCase(postRepository);
 const toggleLikeUseCase = new ToggleLikeUseCase(likeRepository);
 const listCommentsUseCase = new ListCommentsUseCase(commentRepository);
 const addCommentUseCase = new AddCommentUseCase(commentRepository);
@@ -231,6 +239,7 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
       limit,
       offset,
       currentUserId: session?.user.id,
+      currentUserRole: session ? ((session.user as Record<string, unknown>).role as string) ?? "aluno" : undefined,
     });
 
     return reply.send(posts);
@@ -301,10 +310,20 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
 
       return reply.status(201).send(created);
     } catch (err) {
-      if (err instanceof Error && err.message === "FORBIDDEN") {
-        return reply
-          .status(403)
-          .send({ error: "Apenas perfis oficiais podem publicar notícias." });
+      if (err instanceof Error) {
+        if (err.message === "FORBIDDEN") {
+          return reply
+            .status(403)
+            .send({ error: "Apenas perfis oficiais podem publicar notícias." });
+        }
+        if (err.message.startsWith("FORBIDDEN:")) {
+          const message = err.message.replace("FORBIDDEN:", "").trim();
+          return reply.status(403).send({ error: message });
+        }
+        if (err.message.startsWith("INVALID:")) {
+          const message = err.message.replace("INVALID:", "").trim();
+          return reply.status(400).send({ error: message });
+        }
       }
       throw err;
     }
@@ -362,6 +381,11 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
             .status(403)
             .send({ error: "Sem permissão para editar esta publicação." });
         }
+        if (err.message.startsWith("INVALID:")) {
+          return reply.status(400).send({
+            error: err.message.replace("INVALID:", ""),
+          });
+        }
       }
       throw err;
     }
@@ -380,12 +404,24 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
     const { id } = request.params as { id: string };
 
     try {
-      await deletePostUseCase.execute({
+      const result = await deletePostUseCase.execute({
         postId: id,
         userId: session.user.id,
         userRole:
           ((session.user as Record<string, unknown>).role as string) ?? "aluno",
       });
+
+      // Notify author if admin deleted their moderated post
+      if (result.notifyAuthor && result.authorId) {
+        notificationEventBus.emit({
+          type: "post_moderation_rejected",
+          actorId: session.user.id,
+          entityType: "post",
+          entityId: id,
+          recipientIds: [result.authorId],
+          message: "Sua publicação foi rejeitada pela moderação e removida por um administrador.",
+        });
+      }
 
       return reply.status(204).send();
     } catch (err) {
@@ -399,6 +435,44 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
           return reply
             .status(403)
             .send({ error: "Sem permissão para remover esta publicação." });
+        }
+      }
+      throw err;
+    }
+  });
+
+  /**
+   * POST /api/posts/:id/approve
+   * Aprova uma publicação retida pela moderação (apenas admins).
+   */
+  app.post("/api/posts/:id/approve", async (request, reply) => {
+    const session = await getSession(request);
+    if (!session) {
+      return reply.status(401).send({ error: "Não autorizado." });
+    }
+
+    const { id } = request.params as { id: string };
+
+    try {
+      const updated = await approvePostUseCase.execute({
+        postId: id,
+        userId: session.user.id,
+        userRole:
+          ((session.user as Record<string, unknown>).role as string) ?? "aluno",
+      });
+
+      return reply.send(updated);
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === "NOT_FOUND") {
+          return reply
+            .status(404)
+            .send({ error: "Publicação não encontrada." });
+        }
+        if (err.message === "FORBIDDEN") {
+          return reply
+            .status(403)
+            .send({ error: "Apenas administradores podem aprovar publicações." });
         }
       }
       throw err;

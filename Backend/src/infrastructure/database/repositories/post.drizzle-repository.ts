@@ -1,4 +1,4 @@
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, or, isNull } from "drizzle-orm";
 import { db } from "../client.js";
 import { post, rsvp } from "../schema/posts.schema.js";
 import { user } from "../schema/auth.schema.js";
@@ -54,9 +54,9 @@ export class PostDrizzleRepository implements IPostRepository {
 
   async findById(
     id: string,
-  ): Promise<Pick<Post, "id" | "authorId" | "type"> | null> {
+  ): Promise<Pick<Post, "id" | "authorId" | "type" | "moderated"> | null> {
     const [existing] = await db
-      .select({ id: post.id, authorId: post.authorId, type: post.type })
+      .select({ id: post.id, authorId: post.authorId, type: post.type, moderated: post.moderated })
       .from(post)
       .where(eq(post.id, id))
       .limit(1);
@@ -65,6 +65,15 @@ export class PostDrizzleRepository implements IPostRepository {
   }
 
   async findMany(options: ListPostsOptions): Promise<PostWithAuthor[]> {
+    // Build moderation filter:
+    // - Non-moderated posts: always visible
+    // - Moderated posts: visible to author and admins
+    const moderationFilter = or(
+      eq(post.moderated, false),
+      options.currentUserId ? eq(post.authorId, options.currentUserId) : undefined,
+      options.currentUserRole === "admin" ? eq(post.moderated, true) : undefined,
+    );
+
     const rows = await db
       .select({
         post,
@@ -79,6 +88,7 @@ export class PostDrizzleRepository implements IPostRepository {
       .from(post)
       .leftJoin(user, eq(post.authorId, user.id))
       .leftJoin(rsvp, eq(rsvp.postId, post.id))
+      .where(moderationFilter)
       .groupBy(post.id, user.id)
       .orderBy(desc(post.createdAt))
       .limit(options.limit)
@@ -153,6 +163,12 @@ export class PostDrizzleRepository implements IPostRepository {
     if (input.eventEndTime !== undefined) updates.eventEndTime = input.eventEndTime ?? null;
     if (input.eventLocation !== undefined) updates.eventLocation = input.eventLocation ?? null;
     if (input.newsTitle !== undefined) updates.newsTitle = input.newsTitle ?? null;
+    if (input.moderated !== undefined) updates.moderated = input.moderated;
+    if (input.moderationReasons !== undefined) {
+      updates.moderationReasons = input.moderationReasons
+        ? JSON.stringify(input.moderationReasons)
+        : null;
+    }
 
     const [updated] = await db
       .update(post)
@@ -160,7 +176,22 @@ export class PostDrizzleRepository implements IPostRepository {
       .where(eq(post.id, id))
       .returning();
 
-    return updated as Post;
+    // parse JSON fields
+    const parsed = { ...updated } as any;
+    try {
+      parsed.tags = updated.tags ? JSON.parse(updated.tags) : null;
+    } catch (e) {
+      parsed.tags = null;
+    }
+    try {
+      parsed.moderationReasons = updated.moderationReasons
+        ? JSON.parse(updated.moderationReasons)
+        : null;
+    } catch (e) {
+      parsed.moderationReasons = null;
+    }
+
+    return parsed as Post;
   }
 
   async findRsvp(
