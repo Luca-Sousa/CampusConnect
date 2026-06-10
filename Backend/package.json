@@ -11,8 +11,7 @@
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",
     "push": "drizzle-kit push",
-    "studio": "drizzle-kit studio",
-    "ai-test": "tsx src/infrastructure/ai/test-ai.ts"
+    "studio": "drizzle-kit studio"
   },
   "engines": {
     "node": ">=22"

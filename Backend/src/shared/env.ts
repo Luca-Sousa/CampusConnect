@@ -12,11 +12,9 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
-  // AI provider configuration
-  AI_PROVIDER: z.string().default("openai"),
+  // AI provider configuration (Groq - gratuito)
   AI_API_KEY: z.string().optional(),
-  AI_API_URL: z.string().optional(),
-  AI_MODEL: z.string().default("gpt-4o-mini"),
+  AI_MODEL: z.string().default("llama3-8b-8192"),
   MODERATION_THRESHOLD: z.coerce.number().default(0.6),
 });
 

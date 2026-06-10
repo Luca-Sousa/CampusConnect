@@ -1,7 +1,7 @@
 import type { IPostRepository } from "../../../domain/ports/repositories/post.repository.js";
 import type { Post, CreatePostInput } from "../../../domain/entities/post.js";
 import { OFFICIAL_CARGOS } from "../../constants/permissions.js";
-import { aiService } from "../../../infrastructure/ai/openai-ai.service.js";
+import { aiService } from "../../../infrastructure/ai/groq-ai.service.js";
 
 export interface CreatePostCommand extends CreatePostInput {
   userRole: string;
