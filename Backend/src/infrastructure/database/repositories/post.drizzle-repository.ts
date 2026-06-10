@@ -79,7 +79,6 @@ export class PostDrizzleRepository implements IPostRepository {
 
     const moderationFilter = or(
       eq(post.moderated, false),
-      options.currentUserId ? eq(post.authorId, options.currentUserId) : undefined,
       canSeeModerated ? eq(post.moderated, true) : undefined,
     );
 

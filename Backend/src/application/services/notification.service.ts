@@ -59,6 +59,24 @@ export class NotificationService {
     });
   }
 
+  notifyPostApproved(
+    postId: string,
+    authorId: string,
+    actorId: string,
+    actorRole?: string,
+  ): void {
+    const roleLabel = actorRole === "colaborador" ? "um colaborador" : "um administrador";
+
+    this.eventBus.emit({
+      type: "post_approved",
+      actorId,
+      entityType: "post",
+      entityId: postId,
+      recipientIds: [authorId],
+      message: `Sua publicação foi aprovada por ${roleLabel} e já está visível no feed.`,
+    });
+  }
+
   notifyLike(
     postId: string,
     postAuthorId: string,

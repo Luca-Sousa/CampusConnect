@@ -12,7 +12,7 @@ const notificationSchema = {
     id: { type: "string", format: "uuid" },
     recipientId: { type: "string", format: "uuid" },
     actorId: { type: "string", format: "uuid", nullable: true },
-    type: { type: "string", enum: ["like", "comment", "post_created", "post_moderation_rejected", "group_created", "group_message"] },
+    type: { type: "string", enum: ["like", "comment", "post_created", "post_approved", "post_moderation_rejected", "group_created", "group_message"] },
     entityType: { type: "string" },
     entityId: { type: "string", format: "uuid" },
     message: { type: "string" },

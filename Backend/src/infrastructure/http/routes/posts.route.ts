@@ -67,7 +67,9 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
         "aluno",
     });
 
-    await notificationService.notifyPostCreated(body.type, session.user.id, session.user.name, created.id);
+    if (!created.moderated) {
+      await notificationService.notifyPostCreated(body.type, session.user.id, session.user.name, created.id);
+    }
 
     return reply.status(201).send(created);
   });
@@ -143,6 +145,11 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
 
     const { id } = request.params as { id: string };
 
+    const post = await postRepository.findById(id);
+    if (!post) {
+      return reply.status(404).send({ error: "Publicação não encontrada." });
+    }
+
     const updated = await approvePostUseCase.execute({
       postId: id,
       userId: session.user.id,
@@ -151,6 +158,13 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
       userCargo:
         ((session.user as Record<string, unknown>).cargo as string) ?? "",
     });
+
+    notificationService.notifyPostApproved(
+      id,
+      post.authorId,
+      session.user.id,
+      ((session.user as Record<string, unknown>).role as string) ?? "aluno",
+    );
 
     return reply.send(updated);
   });

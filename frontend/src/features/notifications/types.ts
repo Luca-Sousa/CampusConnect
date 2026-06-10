@@ -2,6 +2,7 @@ export type NotificationType =
   | "like"
   | "comment"
   | "post_created"
+  | "post_approved"
   | "post_moderation_rejected"
   | "group_created"
   | "group_message";
