@@ -28,6 +28,7 @@ interface PostCardProps {
   post: Post;
   currentUserId?: string;
   currentUserRole?: string;
+  currentUserCargo?: string;
   onEdit: (post: Post) => void;
 }
 
@@ -39,10 +40,11 @@ interface PostHeaderProps {
   post: Post;
   currentUserId?: string;
   currentUserRole?: string;
+  currentUserCargo?: string;
   onEdit: (post: Post) => void;
 }
 
-function PostHeader({ post, currentUserId, currentUserRole, onEdit }: PostHeaderProps) {
+function PostHeader({ post, currentUserId, currentUserRole, currentUserCargo, onEdit }: PostHeaderProps) {
   const authorName = post.author?.name ?? "Usuário";
   const cargo = post.author?.cargo ?? "aluno";
   const cargoConfig = CARGO_CONFIG[cargo] ?? CARGO_CONFIG["aluno"];
@@ -89,7 +91,7 @@ function PostHeader({ post, currentUserId, currentUserRole, onEdit }: PostHeader
           </span>
         )}
         {(isAuthor || isAdmin) && (
-          <PostActionsMenu post={post} onEdit={onEdit} currentUserRole={currentUserRole} />
+          <PostActionsMenu post={post} onEdit={onEdit} currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} />
         )}
       </div>
     </div>
@@ -104,10 +106,11 @@ interface BannerAuthorRowProps {
   post: Post;
   currentUserId?: string;
   currentUserRole?: string;
+  currentUserCargo?: string;
   onEdit: (post: Post) => void;
 }
 
-function BannerAuthorRow({ post, currentUserId, currentUserRole, onEdit }: BannerAuthorRowProps) {
+function BannerAuthorRow({ post, currentUserId, currentUserRole, currentUserCargo, onEdit }: BannerAuthorRowProps) {
   const authorName = post.author?.name ?? "Usuário";
   const isModerated = post.moderated === true;
   const isAuthor = currentUserId === post.authorId;
@@ -139,7 +142,7 @@ function BannerAuthorRow({ post, currentUserId, currentUserRole, onEdit }: Banne
           </span>
         )}
         {(isAuthor || isAdmin) && (
-          <PostActionsMenu post={post} onEdit={onEdit} variant="banner" currentUserRole={currentUserRole} />
+          <PostActionsMenu post={post} onEdit={onEdit} variant="banner" currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} />
         )}
       </div>
     </div>
@@ -154,11 +157,13 @@ function TextPostCard({
   post,
   currentUserId,
   currentUserRole,
+  currentUserCargo,
   onEdit,
 }: {
   post: TextPost;
   currentUserId?: string;
   currentUserRole?: string;
+  currentUserCargo?: string;
   onEdit: (post: Post) => void;
 }) {
   const isModerated = post.moderated === true;
@@ -173,7 +178,7 @@ function TextPostCard({
       isModerated && isAdmin && "bg-yellow-50/50 dark:bg-yellow-950/20",
     )}>
       <CardContent className="p-0">
-        <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} onEdit={onEdit} />
+        <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} onEdit={onEdit} />
         <ExpandableText text={post.content ?? ""} />
         {!hideActions && <ActionBar postId={post.id} commentsCount={0} />}
       </CardContent>
@@ -185,11 +190,13 @@ function ImagePostCard({
   post,
   currentUserId,
   currentUserRole,
+  currentUserCargo,
   onEdit,
 }: {
   post: ImagePost;
   currentUserId?: string;
   currentUserRole?: string;
+  currentUserCargo?: string;
   onEdit: (post: Post) => void;
 }) {
   const isModerated = post.moderated === true;
@@ -204,7 +211,7 @@ function ImagePostCard({
       isModerated && isAdmin && "bg-yellow-50/50 dark:bg-yellow-950/20",
     )}>
       <CardContent className="p-0">
-        <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} onEdit={onEdit} />
+        <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} onEdit={onEdit} />
         {post.content && (
           <ExpandableText text={post.content} />
         )}
@@ -227,11 +234,13 @@ function EventPostCard({
   post,
   currentUserId,
   currentUserRole,
+  currentUserCargo,
   onEdit,
 }: {
   post: EventPost;
   currentUserId?: string;
   currentUserRole?: string;
+  currentUserCargo?: string;
   onEdit: (post: Post) => void;
 }) {
   const { mutate: toggleRsvp, isPending } = useToggleRsvp();
@@ -261,6 +270,7 @@ function EventPostCard({
           post={post}
           currentUserId={currentUserId}
           currentUserRole={currentUserRole}
+          currentUserCargo={currentUserCargo}
           onEdit={onEdit}
         />
         <div className="mt-4 flex items-start gap-3">
@@ -342,11 +352,13 @@ function NewsPostCard({
   post,
   currentUserId,
   currentUserRole,
+  currentUserCargo,
   onEdit,
 }: {
   post: NewsPost;
   currentUserId?: string;
   currentUserRole?: string;
+  currentUserCargo?: string;
   onEdit: (post: Post) => void;
 }) {
   const isModerated = post.moderated === true;
@@ -380,7 +392,7 @@ function NewsPostCard({
         </h2>
       </div>
 
-      <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} onEdit={onEdit} />
+      <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} currentUserCargo={currentUserCargo} onEdit={onEdit} />
 
       {post.imageUrl && (
         <img
@@ -407,7 +419,7 @@ function NewsPostCard({
 // Public API
 // ---------------------------------------------------------------------------
 
-export function PostCard({ post, currentUserId, currentUserRole, onEdit }: PostCardProps) {
+export function PostCard({ post, currentUserId, currentUserRole, currentUserCargo, onEdit }: PostCardProps) {
   switch (post.type) {
     case "text":
       return (
@@ -415,6 +427,7 @@ export function PostCard({ post, currentUserId, currentUserRole, onEdit }: PostC
           post={post}
           currentUserId={currentUserId}
           currentUserRole={currentUserRole}
+          currentUserCargo={currentUserCargo}
           onEdit={onEdit}
         />
       );
@@ -424,6 +437,7 @@ export function PostCard({ post, currentUserId, currentUserRole, onEdit }: PostC
           post={post}
           currentUserId={currentUserId}
           currentUserRole={currentUserRole}
+          currentUserCargo={currentUserCargo}
           onEdit={onEdit}
         />
       );
@@ -433,6 +447,7 @@ export function PostCard({ post, currentUserId, currentUserRole, onEdit }: PostC
           post={post}
           currentUserId={currentUserId}
           currentUserRole={currentUserRole}
+          currentUserCargo={currentUserCargo}
           onEdit={onEdit}
         />
       );
@@ -442,6 +457,7 @@ export function PostCard({ post, currentUserId, currentUserRole, onEdit }: PostC
           post={post}
           currentUserId={currentUserId}
           currentUserRole={currentUserRole}
+          currentUserCargo={currentUserCargo}
           onEdit={onEdit}
         />
       );

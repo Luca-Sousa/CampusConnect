@@ -39,6 +39,8 @@ import { useDeletePost } from "../hooks/use-delete-post";
 import { useApprovePost } from "../hooks/use-approve-post";
 import { isEventInPast } from "../utils/format";
 import type { Post } from "../types";
+import { OFFICIAL_CARGOS } from "@/features/auth/constants";
+import type { CargoValue } from "@/features/auth/types";
 
 const PREVIEW_MAX = 140;
 
@@ -61,6 +63,7 @@ interface PostActionsMenuProps {
   onEdit: (post: Post) => void;
   variant?: "default" | "banner";
   currentUserRole?: string;
+  currentUserCargo?: string;
 }
 
 /**
@@ -82,6 +85,7 @@ export function PostActionsMenu({
   onEdit,
   variant = "default",
   currentUserRole,
+  currentUserCargo,
 }: PostActionsMenuProps) {
   const [alertOpen, setAlertOpen] = useState(false);
   const [approveAlertOpen, setApproveAlertOpen] = useState(false);
@@ -90,8 +94,11 @@ export function PostActionsMenu({
 
   const editingDisabled = post.type === "event" && isEventInPast(post);
   const isModerated = post.moderated === true;
-  const isAdmin = currentUserRole === "admin";
-  const canApprove = isModerated && isAdmin;
+  const canApprove =
+    isModerated &&
+    (currentUserRole === "admin" ||
+      (currentUserRole === "colaborador" &&
+        OFFICIAL_CARGOS.has(currentUserCargo as CargoValue)));
 
   const handleConfirmDelete = () => {
     deletePost(post.id, {

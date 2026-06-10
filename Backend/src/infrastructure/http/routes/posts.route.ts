@@ -459,6 +459,8 @@ export async function postsRoute(app: FastifyInstance): Promise<void> {
         userId: session.user.id,
         userRole:
           ((session.user as Record<string, unknown>).role as string) ?? "aluno",
+        userCargo:
+          ((session.user as Record<string, unknown>).cargo as string) ?? "",
       });
 
       return reply.send(updated);

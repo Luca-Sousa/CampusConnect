@@ -12,6 +12,7 @@ const FeedPage = () => {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
 
   const currentUserRole = (session?.user as { role?: string } | undefined)?.role;
+  const currentUserCargo = (session?.user as { cargo?: string } | undefined)?.cargo;
 
   return (
     <div className="max-w-2xl mx-auto w-full px-4 py-6 flex flex-col gap-5">
@@ -33,6 +34,7 @@ const FeedPage = () => {
             post={post}
             currentUserId={session?.user?.id}
             currentUserRole={currentUserRole}
+            currentUserCargo={currentUserCargo}
             onEdit={setEditingPost}
           />
         ))
