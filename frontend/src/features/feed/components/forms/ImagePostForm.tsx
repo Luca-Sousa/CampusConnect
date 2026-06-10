@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form"
 
 import { FieldGroup } from "@/components/ui/field"
-import { showError, showSuccess } from "@/lib/toast"
+import { showError, showSuccess, showWarning } from "@/lib/toast"
 import { FormTextarea } from "@/components/form/form-textarea"
 import { useCreatePost } from "../../hooks/use-create-post"
 import { useUpdatePost } from "../../hooks/use-update-post"
@@ -20,6 +20,7 @@ interface ImagePostFormProps {
   mode?: "create" | "edit"
   postId?: string
   defaultValues?: Partial<ImagePostValues>
+  onSubmittingChange?: (submitting: boolean) => void
 }
 
 export function ImagePostForm({
@@ -27,6 +28,7 @@ export function ImagePostForm({
   mode = "create",
   postId,
   defaultValues,
+  onSubmittingChange,
 }: ImagePostFormProps) {
   const { mutateAsync: createPost } = useCreatePost()
   const { mutateAsync: updatePost } = useUpdatePost()
@@ -38,13 +40,9 @@ export function ImagePostForm({
     } as ImagePostValues,
     validators: { onSubmit: imagePostSchema },
     onSubmit: async ({ value }) => {
+      onSubmittingChange?.(true)
       try {
         if (mode === "edit" && postId) {
-          // Só envia os campos que mudaram. A imagem é incluída apenas se o
-          // usuário a trocou (upload novo ou remoção via X). A legenda é
-          // incluída se o texto mudou — inclusive para `null` se o usuário
-          // apagou. Isso garante que o backend NÃO toque na imagem existente
-          // quando o usuário só mexe na legenda.
           const body = buildEditBody(
             { content: value.content, imageUrl: value.imageUrl },
             {
@@ -56,8 +54,12 @@ export function ImagePostForm({
             onSuccess()
             return
           }
-          await updatePost({ id: postId, body })
-          showSuccess("Publicação atualizada com sucesso!")
+          const result = await updatePost({ id: postId, body })
+          if (result.moderated) {
+            showWarning("Sua publicação foi retida para moderação e será revisada por um administrador.")
+          } else {
+            showSuccess("Publicação atualizada com sucesso!")
+          }
         } else {
           const body: Record<string, unknown> = {
             type: "image",
@@ -65,8 +67,12 @@ export function ImagePostForm({
           }
           const trimmed = value.content?.trim()
           if (trimmed) body.content = trimmed
-          await createPost(body)
-          showSuccess("Publicação criada com sucesso!")
+          const result = await createPost(body)
+          if (result.moderated) {
+            showWarning("Sua publicação foi retida para moderação e será revisada por um administrador.")
+          } else {
+            showSuccess("Publicação criada com sucesso!")
+          }
         }
         onSuccess()
       } catch (error) {
@@ -77,6 +83,8 @@ export function ImagePostForm({
               ? "Erro ao atualizar."
               : "Erro ao publicar.",
         )
+      } finally {
+        onSubmittingChange?.(false)
       }
     },
   })

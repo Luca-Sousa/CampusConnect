@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form"
 
 import { FieldGroup } from "@/components/ui/field"
-import { showError, showSuccess } from "@/lib/toast"
+import { showError, showSuccess, showWarning } from "@/lib/toast"
 import { FormInput } from "@/components/form/form-input"
 import { FormTextarea } from "@/components/form/form-textarea"
 import { useCreatePost } from "../../hooks/use-create-post"
@@ -21,6 +21,7 @@ interface NewsPostFormProps {
   mode?: "create" | "edit"
   postId?: string
   defaultValues?: Partial<NewsPostValues>
+  onSubmittingChange?: (submitting: boolean) => void
 }
 
 export function NewsPostForm({
@@ -28,6 +29,7 @@ export function NewsPostForm({
   mode = "create",
   postId,
   defaultValues,
+  onSubmittingChange,
 }: NewsPostFormProps) {
   const { mutateAsync: createPost } = useCreatePost()
   const { mutateAsync: updatePost } = useUpdatePost()
@@ -40,6 +42,7 @@ export function NewsPostForm({
     } as NewsPostValues,
     validators: { onSubmit: newsPostSchema },
     onSubmit: async ({ value }) => {
+      onSubmittingChange?.(true)
       try {
         if (mode === "edit" && postId) {
           const body = buildEditBody(
@@ -58,8 +61,12 @@ export function NewsPostForm({
             onSuccess()
             return
           }
-          await updatePost({ id: postId, body })
-          showSuccess("Comunicado atualizado com sucesso!")
+          const result = await updatePost({ id: postId, body })
+          if (result.moderated) {
+            showWarning("Sua publicação foi retida para moderação e será revisada por um administrador.")
+          } else {
+            showSuccess("Comunicado atualizado com sucesso!")
+          }
         } else {
           const body: Record<string, unknown> = {
             type: "news",
@@ -68,8 +75,12 @@ export function NewsPostForm({
           }
           const imageUrl = value.imageUrl?.trim()
           if (imageUrl) body.imageUrl = imageUrl
-          await createPost(body)
-          showSuccess("Comunicado publicado com sucesso!")
+          const result = await createPost(body)
+          if (result.moderated) {
+            showWarning("Sua publicação foi retida para moderação e será revisada por um administrador.")
+          } else {
+            showSuccess("Comunicado publicado com sucesso!")
+          }
         }
         onSuccess()
       } catch (error) {
@@ -80,6 +91,8 @@ export function NewsPostForm({
               ? "Erro ao atualizar."
               : "Erro ao publicar.",
         )
+      } finally {
+        onSubmittingChange?.(false)
       }
     },
   })

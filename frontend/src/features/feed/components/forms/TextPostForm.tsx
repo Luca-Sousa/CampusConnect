@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form"
 
 import { FieldGroup } from "@/components/ui/field"
-import { showError, showSuccess } from "@/lib/toast"
+import { showError, showSuccess, showWarning } from "@/lib/toast"
 import { FormTextarea } from "@/components/form/form-textarea"
 import { useCreatePost } from "../../hooks/use-create-post"
 import { useUpdatePost } from "../../hooks/use-update-post"
@@ -19,6 +19,7 @@ interface TextPostFormProps {
   mode?: "create" | "edit"
   postId?: string
   defaultValues?: Partial<TextPostValues>
+  onSubmittingChange?: (submitting: boolean) => void
 }
 
 export function TextPostForm({
@@ -26,6 +27,7 @@ export function TextPostForm({
   mode = "create",
   postId,
   defaultValues,
+  onSubmittingChange,
 }: TextPostFormProps) {
   const { mutateAsync: createPost } = useCreatePost()
   const { mutateAsync: updatePost } = useUpdatePost()
@@ -36,6 +38,7 @@ export function TextPostForm({
     } as TextPostValues,
     validators: { onSubmit: textPostSchema },
     onSubmit: async ({ value }) => {
+      onSubmittingChange?.(true)
       try {
         if (mode === "edit" && postId) {
           const body = buildEditBody(
@@ -46,11 +49,19 @@ export function TextPostForm({
             onSuccess()
             return
           }
-          await updatePost({ id: postId, body })
-          showSuccess("Publicação atualizada com sucesso!")
+          const result = await updatePost({ id: postId, body })
+          if (result.moderated) {
+            showWarning("Sua publicação foi retida para moderação e será revisada por um administrador.")
+          } else {
+            showSuccess("Publicação atualizada com sucesso!")
+          }
         } else {
-          await createPost({ type: "text", content: value.content.trim() })
-          showSuccess("Publicação criada com sucesso!")
+          const result = await createPost({ type: "text", content: value.content.trim() })
+          if (result.moderated) {
+            showWarning("Sua publicação foi retida para moderação e será revisada por um administrador.")
+          } else {
+            showSuccess("Publicação criada com sucesso!")
+          }
         }
         onSuccess()
       } catch (error) {
@@ -61,6 +72,8 @@ export function TextPostForm({
               ? "Erro ao atualizar."
               : "Erro ao publicar.",
         )
+      } finally {
+        onSubmittingChange?.(false)
       }
     },
   })

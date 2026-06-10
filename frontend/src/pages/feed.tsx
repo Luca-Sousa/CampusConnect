@@ -11,6 +11,8 @@ const FeedPage = () => {
   const { data: posts = [], isLoading } = usePosts();
   const [editingPost, setEditingPost] = useState<Post | null>(null);
 
+  const currentUserRole = (session?.user as { role?: string } | undefined)?.role;
+
   return (
     <div className="max-w-2xl mx-auto w-full px-4 py-6 flex flex-col gap-5">
       <PostComposer
@@ -30,6 +32,7 @@ const FeedPage = () => {
             key={post.id}
             post={post}
             currentUserId={session?.user?.id}
+            currentUserRole={currentUserRole}
             onEdit={setEditingPost}
           />
         ))

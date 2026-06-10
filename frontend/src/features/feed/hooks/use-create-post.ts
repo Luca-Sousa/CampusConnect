@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { showError } from "@/lib/toast";
 import { createPost } from "../api";
 import { feedKeys } from "../query-keys";
 import type { Post } from "../types";
@@ -7,11 +6,15 @@ import type { Post } from "../types";
 /**
  * Cria um novo post e insere-o no início do cache,
  * evitando um refetch completo.
+ *
+ * NOTA: O tratamento de erro é feito nos formulários (catch).
+ * O `onSuccess` aqui só atualiza o cache — os toasts são
+ * controlados pelos components que chamam `mutateAsync`.
  */
 export function useCreatePost() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: createPost,
     onSuccess: (newPost) => {
       queryClient.setQueryData<Post[]>(feedKeys.posts(), (old = []) => [
@@ -19,8 +22,10 @@ export function useCreatePost() {
         ...old,
       ]);
     },
-    onError: (error: Error) => {
-      showError(error.message || "Erro ao publicar.");
-    },
   });
+
+  return {
+    mutateAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+  };
 }

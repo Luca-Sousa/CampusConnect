@@ -2,6 +2,7 @@ import { useState } from "react"
 import {
   CalendarIcon,
   ImageIcon,
+  Loader2Icon,
   NewspaperIcon,
   PencilLineIcon,
   TextIcon,
@@ -129,6 +130,7 @@ export function PostComposer({
   // https://react.dev/learn/you-might-not-need-an-effect
   const [createOpen, setCreateOpen] = useState(false)
   const [createTab, setCreateTab] = useState<PostTab>("text")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const isEdit = editingPost != null
   const open = isEdit || createOpen
@@ -141,6 +143,7 @@ export function PostComposer({
     (session?.user as { role?: string } | undefined)?.role ?? ""
   const canPostNews =
     userRole === "admin" || OFFICIAL_CARGOS.has(userCargo as CargoValue)
+  const canPostEvents = userRole !== "aluno"
 
   const initials = authorName
     .split(" ")
@@ -180,6 +183,7 @@ export function PostComposer({
             postId={editingPost.id}
             defaultValues={textDefaults(editingPost)}
             onSuccess={handleSuccess}
+            onSubmittingChange={setIsSubmitting}
           />
         )
       case "image":
@@ -189,6 +193,7 @@ export function PostComposer({
             postId={editingPost.id}
             defaultValues={imageDefaults(editingPost)}
             onSuccess={handleSuccess}
+            onSubmittingChange={setIsSubmitting}
           />
         )
       case "event":
@@ -198,6 +203,7 @@ export function PostComposer({
             postId={editingPost.id}
             defaultValues={eventDefaults(editingPost)}
             onSuccess={handleSuccess}
+            onSubmittingChange={setIsSubmitting}
           />
         )
       case "news":
@@ -207,6 +213,7 @@ export function PostComposer({
             postId={editingPost.id}
             defaultValues={newsDefaults(editingPost)}
             onSuccess={handleSuccess}
+            onSubmittingChange={setIsSubmitting}
           />
         )
     }
@@ -215,17 +222,19 @@ export function PostComposer({
   const renderCreateForms = () => (
     <>
       <TabsContent value="text" className="pt-4">
-        <TextPostForm onSuccess={handleSuccess} />
+        <TextPostForm onSuccess={handleSuccess} onSubmittingChange={setIsSubmitting} />
       </TabsContent>
       <TabsContent value="image" className="pt-4">
-        <ImagePostForm onSuccess={handleSuccess} />
+        <ImagePostForm onSuccess={handleSuccess} onSubmittingChange={setIsSubmitting} />
       </TabsContent>
-      <TabsContent value="event" className="pt-4">
-        <EventPostForm onSuccess={handleSuccess} />
-      </TabsContent>
+      {canPostEvents && (
+        <TabsContent value="event" className="pt-4">
+          <EventPostForm onSuccess={handleSuccess} onSubmittingChange={setIsSubmitting} />
+        </TabsContent>
+      )}
       {canPostNews && (
         <TabsContent value="news" className="pt-4">
-          <NewsPostForm onSuccess={handleSuccess} />
+          <NewsPostForm onSuccess={handleSuccess} onSubmittingChange={setIsSubmitting} />
         </TabsContent>
       )}
     </>
@@ -278,17 +287,19 @@ export function PostComposer({
                   <span className="truncate">Foto</span>
                 </Button>
               </DialogTrigger>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex-1 gap-2 text-muted-foreground min-w-0"
-                  onClick={() => setCreateTab("event")}
-                >
-                  <CalendarIcon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">Evento</span>
-                </Button>
-              </DialogTrigger>
+              {canPostEvents && (
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1 gap-2 text-muted-foreground min-w-0"
+                    onClick={() => setCreateTab("event")}
+                  >
+                    <CalendarIcon className="h-4 w-4 shrink-0" />
+                    <span className="truncate">Evento</span>
+                  </Button>
+                </DialogTrigger>
+              )}
               {canPostNews && (
                 <DialogTrigger asChild>
                   <Button
@@ -325,7 +336,7 @@ export function PostComposer({
             >
               <TabsList
                 className={`grid w-full ${
-                  canPostNews ? "grid-cols-4" : "grid-cols-3"
+                  canPostNews && canPostEvents ? "grid-cols-4" : canPostNews || canPostEvents ? "grid-cols-3" : "grid-cols-2"
                 }`}
               >
                 <TabsTrigger value="text" className="gap-1.5">
@@ -336,10 +347,12 @@ export function PostComposer({
                   <ImageIcon className="h-3.5 w-3.5" />
                   Foto
                 </TabsTrigger>
-                <TabsTrigger value="event" className="gap-1.5">
-                  <CalendarIcon className="h-3.5 w-3.5" />
-                  Evento
-                </TabsTrigger>
+                {canPostEvents && (
+                  <TabsTrigger value="event" className="gap-1.5">
+                    <CalendarIcon className="h-3.5 w-3.5" />
+                    Evento
+                  </TabsTrigger>
+                )}
                 {canPostNews && (
                   <TabsTrigger value="news" className="gap-1.5">
                     <NewspaperIcon className="h-3.5 w-3.5" />
@@ -357,7 +370,9 @@ export function PostComposer({
             type="submit"
             form={FORM_ID_BY_TAB[activeTab]}
             className="w-full! sm:w-auto"
+            disabled={isSubmitting}
           >
+            {isSubmitting && <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />}
             {submitLabel}
           </Button>
         </AppDialogFooter>

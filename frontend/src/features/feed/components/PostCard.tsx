@@ -4,6 +4,7 @@ import {
   ClockIcon,
   MapPinIcon,
   NewspaperIcon,
+  ShieldAlertIcon,
   UsersIcon,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,10 +22,12 @@ import {
 } from "../utils/format";
 import { PostActionsMenu } from "./PostActionsMenu";
 import { ExpandableText } from "@/components/expandable-text";
+import { cn } from "@/lib/utils";
 
 interface PostCardProps {
   post: Post;
   currentUserId?: string;
+  currentUserRole?: string;
   onEdit: (post: Post) => void;
 }
 
@@ -35,13 +38,17 @@ interface PostCardProps {
 interface PostHeaderProps {
   post: Post;
   currentUserId?: string;
+  currentUserRole?: string;
   onEdit: (post: Post) => void;
 }
 
-function PostHeader({ post, currentUserId, onEdit }: PostHeaderProps) {
+function PostHeader({ post, currentUserId, currentUserRole, onEdit }: PostHeaderProps) {
   const authorName = post.author?.name ?? "Usuário";
   const cargo = post.author?.cargo ?? "aluno";
   const cargoConfig = CARGO_CONFIG[cargo] ?? CARGO_CONFIG["aluno"];
+  const isModerated = post.moderated === true;
+  const isAuthor = currentUserId === post.authorId;
+  const isAdmin = currentUserRole === "admin";
 
   return (
     <div className="flex items-center justify-between px-4 pt-4 pb-2">
@@ -69,9 +76,22 @@ function PostHeader({ post, currentUserId, onEdit }: PostHeaderProps) {
         </div>
       </div>
 
-      {currentUserId === post.authorId && (
-        <PostActionsMenu post={post} onEdit={onEdit} />
-      )}
+      <div className="flex items-center gap-2">
+        {isModerated && (
+          <span className={cn(
+            "inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full",
+            isAdmin
+              ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400"
+              : "bg-orange-500/20 text-orange-600 dark:text-orange-400",
+          )}>
+            <ShieldAlertIcon className="h-3 w-3" />
+            {isAdmin ? "Moderação Pendente" : "Aguardando moderação"}
+          </span>
+        )}
+        {(isAuthor || isAdmin) && (
+          <PostActionsMenu post={post} onEdit={onEdit} currentUserRole={currentUserRole} />
+        )}
+      </div>
     </div>
   );
 }
@@ -83,11 +103,15 @@ function PostHeader({ post, currentUserId, onEdit }: PostHeaderProps) {
 interface BannerAuthorRowProps {
   post: Post;
   currentUserId?: string;
+  currentUserRole?: string;
   onEdit: (post: Post) => void;
 }
 
-function BannerAuthorRow({ post, currentUserId, onEdit }: BannerAuthorRowProps) {
+function BannerAuthorRow({ post, currentUserId, currentUserRole, onEdit }: BannerAuthorRowProps) {
   const authorName = post.author?.name ?? "Usuário";
+  const isModerated = post.moderated === true;
+  const isAuthor = currentUserId === post.authorId;
+  const isAdmin = currentUserRole === "admin";
 
   return (
     <div className="flex items-center justify-between">
@@ -107,9 +131,17 @@ function BannerAuthorRow({ post, currentUserId, onEdit }: BannerAuthorRowProps) 
           </p>
         </div>
       </div>
-      {currentUserId === post.authorId && (
-        <PostActionsMenu post={post} onEdit={onEdit} variant="banner" />
-      )}
+      <div className="flex items-center gap-2">
+        {isModerated && (
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full bg-yellow-500/30 text-yellow-100">
+            <ShieldAlertIcon className="h-3 w-3" />
+            {isAdmin ? "Moderação Pendente" : "Aguardando moderação"}
+          </span>
+        )}
+        {(isAuthor || isAdmin) && (
+          <PostActionsMenu post={post} onEdit={onEdit} variant="banner" currentUserRole={currentUserRole} />
+        )}
+      </div>
     </div>
   );
 }
@@ -121,18 +153,29 @@ function BannerAuthorRow({ post, currentUserId, onEdit }: BannerAuthorRowProps) 
 function TextPostCard({
   post,
   currentUserId,
+  currentUserRole,
   onEdit,
 }: {
   post: TextPost;
   currentUserId?: string;
+  currentUserRole?: string;
   onEdit: (post: Post) => void;
 }) {
+  const isModerated = post.moderated === true;
+  const isAdmin = currentUserRole === "admin";
+  const isAuthor = currentUserId === post.authorId;
+  const hideActions = isModerated && !isAdmin && !isAuthor;
+
   return (
-    <Card className="shadow-sm overflow-hidden p-0">
+    <Card className={cn(
+      "shadow-sm overflow-hidden p-0",
+      isModerated && !isAdmin && "bg-muted/50 opacity-80",
+      isModerated && isAdmin && "bg-yellow-50/50 dark:bg-yellow-950/20",
+    )}>
       <CardContent className="p-0">
-        <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
+        <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} onEdit={onEdit} />
         <ExpandableText text={post.content ?? ""} />
-        <ActionBar postId={post.id} commentsCount={0} />
+        {!hideActions && <ActionBar postId={post.id} commentsCount={0} />}
       </CardContent>
     </Card>
   );
@@ -141,25 +184,40 @@ function TextPostCard({
 function ImagePostCard({
   post,
   currentUserId,
+  currentUserRole,
   onEdit,
 }: {
   post: ImagePost;
   currentUserId?: string;
+  currentUserRole?: string;
   onEdit: (post: Post) => void;
 }) {
+  const isModerated = post.moderated === true;
+  const isAdmin = currentUserRole === "admin";
+  const isAuthor = currentUserId === post.authorId;
+  const hideActions = isModerated && !isAdmin && !isAuthor;
+
   return (
-    <Card className="shadow-sm overflow-hidden p-0">
+    <Card className={cn(
+      "shadow-sm overflow-hidden p-0",
+      isModerated && !isAdmin && "bg-muted/50 opacity-80",
+      isModerated && isAdmin && "bg-yellow-50/50 dark:bg-yellow-950/20",
+    )}>
       <CardContent className="p-0">
-        <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
+        <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} onEdit={onEdit} />
         {post.content && (
           <ExpandableText text={post.content} />
         )}
         <img
           src={post.imageUrl}
           alt="Imagem da publicação"
-          className="w-full max-h-125 object-cover"
+          className={cn(
+            "w-full max-h-125 object-cover",
+            isModerated && !isAdmin && "grayscale",
+            isModerated && isAdmin && "brightness-95",
+          )}
         />
-        <ActionBar postId={post.id} commentsCount={0} />
+        {!hideActions && <ActionBar postId={post.id} commentsCount={0} />}
       </CardContent>
     </Card>
   );
@@ -168,20 +226,41 @@ function ImagePostCard({
 function EventPostCard({
   post,
   currentUserId,
+  currentUserRole,
   onEdit,
 }: {
   post: EventPost;
   currentUserId?: string;
+  currentUserRole?: string;
   onEdit: (post: Post) => void;
 }) {
   const { mutate: toggleRsvp, isPending } = useToggleRsvp();
+  const isModerated = post.moderated === true;
+  const isAdmin = currentUserRole === "admin";
+  const isAuthor = currentUserId === post.authorId;
+  const hideActions = isModerated && !isAdmin && !isAuthor;
 
   return (
-    <article className="rounded-xl border border-violet-200/60 dark:border-violet-800/40 bg-card shadow-sm overflow-hidden">
-      <div className="bg-linear-to-br from-violet-600 to-indigo-700 px-4 pt-4 pb-5">
+    <article className={cn(
+      "rounded-xl border shadow-sm overflow-hidden",
+      isModerated && !isAdmin
+        ? "border-gray-300 dark:border-gray-700 bg-card opacity-80"
+        : isModerated && isAdmin
+          ? "border-yellow-200/60 dark:border-yellow-800/40 bg-card"
+          : "border-violet-200/60 dark:border-violet-800/40 bg-card",
+    )}>
+      <div className={cn(
+        "bg-linear-to-br px-4 pt-4 pb-5",
+        isModerated && !isAdmin
+          ? "from-gray-400 to-gray-500"
+          : isModerated && isAdmin
+            ? "from-yellow-500 to-amber-600"
+            : "from-violet-600 to-indigo-700",
+      )}>
         <BannerAuthorRow
           post={post}
           currentUserId={currentUserId}
+          currentUserRole={currentUserRole}
           onEdit={onEdit}
         />
         <div className="mt-4 flex items-start gap-3">
@@ -213,7 +292,11 @@ function EventPostCard({
         <img
           src={post.imageUrl}
           alt="Imagem do evento"
-          className="w-full max-h-100 object-cover"
+          className={cn(
+            "w-full max-h-100 object-cover",
+            isModerated && !isAdmin && "grayscale",
+            isModerated && isAdmin && "brightness-95",
+          )}
         />
       )}
 
@@ -221,34 +304,36 @@ function EventPostCard({
         <ExpandableText text={post.content} className="px-4 pt-3 pb-1" />
       )}
 
-      <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-        <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <UsersIcon className="h-4 w-4 shrink-0" />
-          {post.rsvpCount}{" "}
-          {post.rsvpCount === 1 ? "confirmação" : "confirmações"}
-        </span>
-        <Button
-          size="sm"
-          variant={post.hasRsvp ? "default" : "outline"}
-          className={`gap-1.5 transition-all ${
-            post.hasRsvp
-              ? "bg-green-600 hover:bg-green-700 text-white border-transparent"
-              : "border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20"
-          }`}
-          disabled={isPending}
-          onClick={() => toggleRsvp(post.id)}
-        >
-          <CheckCircle2Icon className="h-4 w-4" />
-          <span className="hidden sm:inline">
-            {post.hasRsvp ? "Presença confirmada" : "Confirmar presença"}
+      {!hideActions && (
+        <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <UsersIcon className="h-4 w-4 shrink-0" />
+            {post.rsvpCount}{" "}
+            {post.rsvpCount === 1 ? "confirmação" : "confirmações"}
           </span>
-          <span className="sm:hidden">
-            {post.hasRsvp ? "Confirmado" : "Confirmar"}
-          </span>
-        </Button>
-      </div>
+          <Button
+            size="sm"
+            variant={post.hasRsvp ? "default" : "outline"}
+            className={`gap-1.5 transition-all ${
+              post.hasRsvp
+                ? "bg-green-600 hover:bg-green-700 text-white border-transparent"
+                : "border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20"
+            }`}
+            disabled={isPending}
+            onClick={() => toggleRsvp(post.id)}
+          >
+            <CheckCircle2Icon className="h-4 w-4" />
+            <span className="hidden sm:inline">
+              {post.hasRsvp ? "Presença confirmada" : "Confirmar presença"}
+            </span>
+            <span className="sm:hidden">
+              {post.hasRsvp ? "Confirmado" : "Confirmar"}
+            </span>
+          </Button>
+        </div>
+      )}
 
-      <ActionBar postId={post.id} commentsCount={0} />
+      {!hideActions && <ActionBar postId={post.id} commentsCount={0} />}
     </article>
   );
 }
@@ -256,15 +341,36 @@ function EventPostCard({
 function NewsPostCard({
   post,
   currentUserId,
+  currentUserRole,
   onEdit,
 }: {
   post: NewsPost;
   currentUserId?: string;
+  currentUserRole?: string;
   onEdit: (post: Post) => void;
 }) {
+  const isModerated = post.moderated === true;
+  const isAdmin = currentUserRole === "admin";
+  const isAuthor = currentUserId === post.authorId;
+  const hideActions = isModerated && !isAdmin && !isAuthor;
+
   return (
-    <article className="rounded-xl border border-orange-200/60 dark:border-orange-800/40 bg-card shadow-sm overflow-hidden">
-      <div className="bg-linear-to-br from-orange-500 to-amber-500 p-3">
+    <article className={cn(
+      "rounded-xl border shadow-sm overflow-hidden",
+      isModerated && !isAdmin
+        ? "border-gray-300 dark:border-gray-700 bg-card opacity-80"
+        : isModerated && isAdmin
+          ? "border-yellow-200/60 dark:border-yellow-800/40 bg-card"
+          : "border-orange-200/60 dark:border-orange-800/40 bg-card",
+    )}>
+      <div className={cn(
+        "bg-linear-to-br p-3",
+        isModerated && !isAdmin
+          ? "from-gray-400 to-gray-500"
+          : isModerated && isAdmin
+            ? "from-yellow-500 to-amber-600"
+            : "from-orange-500 to-amber-500",
+      )}>
         <div className="flex items-center gap-2 text-orange-100 text-xs font-semibold uppercase tracking-wider mb-3">
           <NewspaperIcon className="h-3.5 w-3.5 shrink-0" />
           Comunicado Oficial
@@ -274,13 +380,17 @@ function NewsPostCard({
         </h2>
       </div>
 
-      <PostHeader post={post} currentUserId={currentUserId} onEdit={onEdit} />
+      <PostHeader post={post} currentUserId={currentUserId} currentUserRole={currentUserRole} onEdit={onEdit} />
 
       {post.imageUrl && (
         <img
           src={post.imageUrl}
           alt="Imagem do comunicado"
-          className="w-full max-h-100 object-cover"
+          className={cn(
+            "w-full max-h-100 object-cover",
+            isModerated && !isAdmin && "grayscale",
+            isModerated && isAdmin && "brightness-95",
+          )}
         />
       )}
 
@@ -288,7 +398,7 @@ function NewsPostCard({
         <ExpandableText text={post.content} className="p-4" />
       )}
 
-      <ActionBar postId={post.id} commentsCount={0} />
+      {!hideActions && <ActionBar postId={post.id} commentsCount={0} />}
     </article>
   );
 }
@@ -297,13 +407,14 @@ function NewsPostCard({
 // Public API
 // ---------------------------------------------------------------------------
 
-export function PostCard({ post, currentUserId, onEdit }: PostCardProps) {
+export function PostCard({ post, currentUserId, currentUserRole, onEdit }: PostCardProps) {
   switch (post.type) {
     case "text":
       return (
         <TextPostCard
           post={post}
           currentUserId={currentUserId}
+          currentUserRole={currentUserRole}
           onEdit={onEdit}
         />
       );
@@ -312,6 +423,7 @@ export function PostCard({ post, currentUserId, onEdit }: PostCardProps) {
         <ImagePostCard
           post={post}
           currentUserId={currentUserId}
+          currentUserRole={currentUserRole}
           onEdit={onEdit}
         />
       );
@@ -320,6 +432,7 @@ export function PostCard({ post, currentUserId, onEdit }: PostCardProps) {
         <EventPostCard
           post={post}
           currentUserId={currentUserId}
+          currentUserRole={currentUserRole}
           onEdit={onEdit}
         />
       );
@@ -328,6 +441,7 @@ export function PostCard({ post, currentUserId, onEdit }: PostCardProps) {
         <NewsPostCard
           post={post}
           currentUserId={currentUserId}
+          currentUserRole={currentUserRole}
           onEdit={onEdit}
         />
       );

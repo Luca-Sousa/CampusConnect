@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   CalendarIcon,
+  CheckCircleIcon,
   ImageIcon,
   NewspaperIcon,
   MoreHorizontalIcon,
@@ -35,6 +36,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useDeletePost } from "../hooks/use-delete-post";
+import { useApprovePost } from "../hooks/use-approve-post";
 import { isEventInPast } from "../utils/format";
 import type { Post } from "../types";
 
@@ -58,13 +60,14 @@ interface PostActionsMenuProps {
   post: Post;
   onEdit: (post: Post) => void;
   variant?: "default" | "banner";
+  currentUserRole?: string;
 }
 
 /**
  * Menu de ações do dono (ou admin) de um post.
  *
  * Encapsula:
- *  - `<DropdownMenu>` com as ações **Editar** e **Excluir**.
+ *  - `<DropdownMenu>` com as ações **Aprovar** (se admin + moderado), **Editar** e **Excluir**.
  *  - `<AlertDialog>` de confirmação para a exclusão, com prévia do post.
  *
  * Comportamentos:
@@ -78,15 +81,27 @@ export function PostActionsMenu({
   post,
   onEdit,
   variant = "default",
+  currentUserRole,
 }: PostActionsMenuProps) {
   const [alertOpen, setAlertOpen] = useState(false);
+  const [approveAlertOpen, setApproveAlertOpen] = useState(false);
   const { mutate: deletePost, isPending } = useDeletePost();
+  const { mutate: approvePost, isPending: isApproving } = useApprovePost();
 
   const editingDisabled = post.type === "event" && isEventInPast(post);
+  const isModerated = post.moderated === true;
+  const isAdmin = currentUserRole === "admin";
+  const canApprove = isModerated && isAdmin;
 
   const handleConfirmDelete = () => {
     deletePost(post.id, {
       onSuccess: () => setAlertOpen(false),
+    });
+  };
+
+  const handleConfirmApprove = () => {
+    approvePost(post.id, {
+      onSuccess: () => setApproveAlertOpen(false),
     });
   };
 
@@ -109,11 +124,23 @@ export function PostActionsMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-44">
+          {canApprove && (
+            <>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setApproveAlertOpen(true);
+                }}
+              >
+                <CheckCircleIcon className="text-green-500" />
+                Aprovar publicação
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
           <Tooltip>
             <TooltipTrigger
               asChild
-              // `disabled` no TooltipTrigger impede o hover/focus que abriria
-              // o tooltip para o item "Editar" desabilitado.
               disabled={!editingDisabled}
             >
               <DropdownMenuItem
@@ -140,7 +167,6 @@ export function PostActionsMenu({
           <DropdownMenuItem
             variant="destructive"
             onSelect={(e) => {
-              // Impede que o Radix feche o dropdown antes do AlertDialog abrir.
               e.preventDefault();
               setAlertOpen(true);
             }}
@@ -151,6 +177,40 @@ export function PostActionsMenu({
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* Approve confirmation dialog */}
+      <AlertDialog open={approveAlertOpen} onOpenChange={setApproveAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400">
+              <CheckCircleIcon />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Aprovar publicação?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta publicação foi retida pela moderação de IA. Ao aprovar, ela
+              será publicada normalmente no feed e todos os usuários poderão
+              vê-la.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <PostPreview post={post} />
+
+          <AlertDialogFooter>
+            <AlertDialogCancel variant="outline" disabled={isApproving} size="lg">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmApprove}
+              disabled={isApproving}
+              className="bg-green-600 hover:bg-green-700 text-white"
+              size="lg"
+            >
+              <CheckCircleIcon className="size-4" />
+              {isApproving ? "Aprovando..." : "Aprovar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete confirmation dialog */}
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

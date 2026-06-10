@@ -2,7 +2,7 @@ import { useForm } from "@tanstack/react-form"
 import { CalendarIcon, MapPinIcon } from "lucide-react"
 
 import { FieldGroup } from "@/components/ui/field"
-import { showError, showSuccess } from "@/lib/toast"
+import { showError, showSuccess, showWarning } from "@/lib/toast"
 import { FormInput } from "@/components/form/form-input"
 import { FormTextarea } from "@/components/form/form-textarea"
 import { EventDateTimePicker } from "@/components/form/event-date-time-picker"
@@ -24,6 +24,7 @@ interface EventPostFormProps {
   mode?: "create" | "edit"
   postId?: string
   defaultValues?: Partial<EventPostValues>
+  onSubmittingChange?: (submitting: boolean) => void
 }
 
 export function EventPostForm({
@@ -31,6 +32,7 @@ export function EventPostForm({
   mode = "create",
   postId,
   defaultValues,
+  onSubmittingChange,
 }: EventPostFormProps) {
   const { mutateAsync: createPost } = useCreatePost()
   const { mutateAsync: updatePost } = useUpdatePost()
@@ -52,9 +54,9 @@ export function EventPostForm({
     } as EventPostValues,
     validators: { onSubmit: schema },
     onSubmit: async ({ value }) => {
+      onSubmittingChange?.(true)
       try {
         if (mode === "edit" && postId) {
-          // Backend espera `null` para `eventEndTime` quando vazio.
           const eventEndTime = value.eventEndTime || null
           const body = buildEditBody(
             {
@@ -80,8 +82,12 @@ export function EventPostForm({
             onSuccess()
             return
           }
-          await updatePost({ id: postId, body })
-          showSuccess("Evento atualizado com sucesso!")
+          const result = await updatePost({ id: postId, body })
+          if (result.moderated) {
+            showWarning("Sua publicação foi retida para moderação e será revisada por um administrador.")
+          } else {
+            showSuccess("Evento atualizado com sucesso!")
+          }
         } else {
           const body: Record<string, unknown> = {
             type: "event",
@@ -95,8 +101,12 @@ export function EventPostForm({
           if (trimmed) body.content = trimmed
           const imageUrl = value.imageUrl?.trim()
           if (imageUrl) body.imageUrl = imageUrl
-          await createPost(body)
-          showSuccess("Evento publicado com sucesso!")
+          const result = await createPost(body)
+          if (result.moderated) {
+            showWarning("Sua publicação foi retida para moderação e será revisada por um administrador.")
+          } else {
+            showSuccess("Evento publicado com sucesso!")
+          }
         }
         onSuccess()
       } catch (error) {
@@ -107,6 +117,8 @@ export function EventPostForm({
               ? "Erro ao atualizar."
               : "Erro ao publicar.",
         )
+      } finally {
+        onSubmittingChange?.(false)
       }
     },
   })
