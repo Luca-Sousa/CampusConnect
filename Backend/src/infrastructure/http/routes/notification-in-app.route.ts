@@ -1,21 +1,14 @@
 import type { FastifyInstance } from "fastify";
-import { z } from "zod";
-import { auth } from "../../auth/better-auth.js";
 import { NotificationDrizzleRepository } from "../../database/repositories/notification.drizzle-repository.js";
 import { ListNotificationsUseCase } from "../../../application/use-cases/notifications/list-notifications.use-case.js";
 import { MarkNotificationAsReadUseCase } from "../../../application/use-cases/notifications/mark-notification-as-read.use-case.js";
 import { MarkAllNotificationsAsReadUseCase } from "../../../application/use-cases/notifications/mark-all-notifications-as-read.use-case.js";
+import { getSession } from "../helpers/session.js";
 
 const notificationRepository = new NotificationDrizzleRepository();
 const listNotificationsUseCase = new ListNotificationsUseCase(notificationRepository);
 const markAsReadUseCase = new MarkNotificationAsReadUseCase(notificationRepository);
 const markAllAsReadUseCase = new MarkAllNotificationsAsReadUseCase(notificationRepository);
-
-async function getSession(request: { headers: { cookie?: string } }) {
-  const headers = new Headers();
-  if (request.headers.cookie) headers.set("cookie", request.headers.cookie);
-  return auth.api.getSession({ headers }).catch(() => null);
-}
 
 export async function notificationInAppRoutes(app: FastifyInstance): Promise<void> {
   /**

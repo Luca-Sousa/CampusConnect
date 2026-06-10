@@ -1,4 +1,6 @@
 import type { IPostRepository } from "../../../domain/ports/repositories/post.repository.js";
+import { NotFoundError } from "../../../domain/errors/not-found.js";
+import { ForbiddenError } from "../../../domain/errors/forbidden.js";
 
 export interface DeletePostCommand {
   postId: string;
@@ -18,11 +20,11 @@ export class DeletePostUseCase {
     const post = await this.postRepository.findById(command.postId);
 
     if (!post) {
-      throw new Error("NOT_FOUND");
+      throw new NotFoundError();
     }
 
     if (post.authorId !== command.userId && command.userRole !== "admin") {
-      throw new Error("FORBIDDEN");
+      throw new ForbiddenError();
     }
 
     // Check if we need to notify the author (admin deleting moderated post of another user)

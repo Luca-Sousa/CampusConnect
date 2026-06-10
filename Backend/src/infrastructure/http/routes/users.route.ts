@@ -1,18 +1,10 @@
 import type { FastifyInstance } from "fastify";
-import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { auth } from "../../auth/better-auth.js";
-import { db } from "../../database/client.js";
-import { user } from "../../database/schema/auth.schema.js";
+import { UserDrizzleRepository } from "../../database/repositories/user.drizzle-repository.js";
+import { getSession } from "../helpers/session.js";
 
-// ——— Helper de sessão ———
-async function getSession(request: { headers: { cookie?: string } }) {
-  const headers = new Headers();
-  if (request.headers.cookie) headers.set("cookie", request.headers.cookie);
-  return auth.api.getSession({ headers }).catch(() => null);
-}
+const userRepository = new UserDrizzleRepository();
 
-// ——— Schema de validação ———
 const updateProfileSchema = z.object({
   name: z.string().min(1, "Nome obrigatório.").max(200).optional(),
   image: z.string().max(10000000).nullable().optional(),
@@ -44,21 +36,19 @@ export async function usersRoute(app: FastifyInstance): Promise<void> {
       return reply.status(400).send({ error: "Nenhum campo para atualizar." });
     }
 
-    const [updated] = await db
-      .update(user)
-      .set({ ...fields, updatedAt: new Date() })
-      .where(eq(user.id, session.user.id))
-      .returning({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        image: user.image,
-        course: user.course,
-        bio: user.bio,
-        role: user.role,
-        cargo: user.cargo,
-      });
+    const updated = await userRepository.updateProfile(session.user.id, fields);
 
-    return reply.send({ user: updated });
+    return reply.send({
+      user: {
+        id: updated.id,
+        name: updated.name,
+        email: updated.email,
+        image: updated.image,
+        course: updated.course,
+        bio: updated.bio,
+        role: updated.role,
+        cargo: updated.cargo,
+      },
+    });
   });
 }

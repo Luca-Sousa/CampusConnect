@@ -1,9 +1,7 @@
 import type { IGroupRepository } from "../../../domain/ports/repositories/group.repository.js";
 import type { Group, CreateGroupInput } from "../../../domain/entities/group.js";
 
-export interface CreateGroupCommand extends CreateGroupInput {
-  userRole: string;
-}
+export interface CreateGroupCommand extends CreateGroupInput {}
 
 export class CreateGroupUseCase {
   constructor(private readonly groupRepository: IGroupRepository) {}

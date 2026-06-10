@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
-import { auth } from "../../auth/better-auth.js";
 import { emailService } from "../../email/nodemailer.service.js";
 import { buildNewLoginEmailHtml } from "../../email/templates.js";
 import { SendLoginNotificationUseCase } from "../../../application/use-cases/notifications/send-login-notification.use-case.js";
+import { getSession } from "../helpers/session.js";
 
 const sendLoginNotificationUseCase = new SendLoginNotificationUseCase(
   emailService,
@@ -15,11 +15,7 @@ export async function notificationsRoute(app: FastifyInstance): Promise<void> {
    * Chamado pelo cliente imediatamente após um login bem-sucedido.
    */
   app.post("/api/notifications/login", async (request, reply) => {
-    const headers = new Headers();
-    const cookie = request.headers.cookie;
-    if (cookie) headers.set("cookie", cookie);
-
-    const session = await auth.api.getSession({ headers }).catch(() => null);
+    const session = await getSession(request);
     if (!session) {
       return reply.status(401).send({ error: "Não autorizado." });
     }

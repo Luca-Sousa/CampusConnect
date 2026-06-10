@@ -1,6 +1,8 @@
 import type { IPostRepository } from "../../../domain/ports/repositories/post.repository.js";
 import type { Post } from "../../../domain/entities/post.js";
 import { OFFICIAL_CARGOS } from "../../constants/permissions.js";
+import { NotFoundError } from "../../../domain/errors/not-found.js";
+import { ForbiddenError } from "../../../domain/errors/forbidden.js";
 
 export interface ApprovePostCommand {
   postId: string;
@@ -23,7 +25,7 @@ export class ApprovePostUseCase {
     const post = await this.postRepository.findById(command.postId);
 
     if (!post) {
-      throw new Error("NOT_FOUND");
+      throw new NotFoundError();
     }
 
     const canApprove =
@@ -32,7 +34,7 @@ export class ApprovePostUseCase {
         OFFICIAL_CARGOS.has(command.userCargo));
 
     if (!canApprove) {
-      throw new Error("FORBIDDEN");
+      throw new ForbiddenError();
     }
 
     return this.postRepository.update(command.postId, {

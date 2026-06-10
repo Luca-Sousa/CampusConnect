@@ -1,4 +1,6 @@
 import type { IGroupRepository } from "../../../domain/ports/repositories/group.repository.js";
+import { NotFoundError } from "../../../domain/errors/not-found.js";
+import { ForbiddenError } from "../../../domain/errors/forbidden.js";
 
 export interface DeleteGroupCommand {
   groupId: string;
@@ -11,14 +13,14 @@ export class DeleteGroupUseCase {
 
   async execute(command: DeleteGroupCommand): Promise<void> {
     const existing = await this.groupRepository.findById(command.groupId);
-    if (!existing) throw new Error("NOT_FOUND");
+    if (!existing) throw new NotFoundError();
 
     const canDelete = await this.groupRepository.isAuthorOrAdmin(
       command.groupId,
       command.userId,
       command.userRole,
     );
-    if (!canDelete) throw new Error("FORBIDDEN");
+    if (!canDelete) throw new ForbiddenError();
 
     await this.groupRepository.delete(command.groupId);
   }

@@ -1,5 +1,7 @@
 import type { IGroupRepository } from "../../../domain/ports/repositories/group.repository.js";
 import type { Group, UpdateGroupInput } from "../../../domain/entities/group.js";
+import { NotFoundError } from "../../../domain/errors/not-found.js";
+import { ForbiddenError } from "../../../domain/errors/forbidden.js";
 
 export interface UpdateGroupCommand {
   groupId: string;
@@ -13,14 +15,14 @@ export class UpdateGroupUseCase {
 
   async execute(command: UpdateGroupCommand): Promise<Group> {
     const existing = await this.groupRepository.findById(command.groupId);
-    if (!existing) throw new Error("NOT_FOUND");
+    if (!existing) throw new NotFoundError();
 
     const canEdit = await this.groupRepository.isAuthorOrAdmin(
       command.groupId,
       command.userId,
       command.userRole,
     );
-    if (!canEdit) throw new Error("FORBIDDEN");
+    if (!canEdit) throw new ForbiddenError();
 
     return this.groupRepository.update(command.groupId, command.input);
   }

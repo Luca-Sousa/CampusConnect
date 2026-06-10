@@ -204,6 +204,10 @@ export class GroupDrizzleRepository implements IGroupRepository {
       );
   }
 
+  async deleteMessageAdmin(id: string): Promise<void> {
+    await db.delete(groupMessage).where(eq(groupMessage.id, id));
+  }
+
   async isAuthorOrAdmin(
     groupId: string,
     userId: string,

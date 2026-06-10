@@ -4,6 +4,8 @@ import type {
   UpdatePostInput,
 } from "../../../domain/entities/post.js";
 import type { ContentModerator } from "../../services/content-moderator.js";
+import { NotFoundError } from "../../../domain/errors/not-found.js";
+import { ForbiddenError } from "../../../domain/errors/forbidden.js";
 
 export interface UpdatePostCommand {
   postId: string;
@@ -40,11 +42,11 @@ export class UpdatePostUseCase {
     const post = await this.postRepository.findById(command.postId);
 
     if (!post) {
-      throw new Error("NOT_FOUND");
+      throw new NotFoundError();
     }
 
     if (post.authorId !== command.userId && command.userRole !== "admin") {
-      throw new Error("FORBIDDEN");
+      throw new ForbiddenError();
     }
 
     // Moderar apenas se o conteúdo está sendo alterado

@@ -14,6 +14,24 @@ import type {
   UpdatePostInput,
 } from "../../../domain/entities/post.js";
 
+// ——— Helpers ———
+
+function parseJsonArray(value: string | null): string[] | null {
+  if (!value) return null;
+  try {
+    return JSON.parse(value) as string[];
+  } catch {
+    return null;
+  }
+}
+
+function parsePostJsonFields<T extends { tags: string | null; moderationReasons: string | null }>(
+  row: T,
+): Omit<T, "tags" | "moderationReasons"> & { tags: string[] | null; moderationReasons: string[] | null } {
+  const { tags, moderationReasons, ...rest } = row;
+  return { ...rest, tags: parseJsonArray(tags), moderationReasons: parseJsonArray(moderationReasons) };
+}
+
 export class PostDrizzleRepository implements IPostRepository {
   async create(input: CreatePostInput): Promise<Post> {
     const [created] = await db
@@ -35,22 +53,7 @@ export class PostDrizzleRepository implements IPostRepository {
       })
       .returning();
 
-    // parse JSON fields
-    const parsed = { ...created } as any;
-    try {
-      parsed.tags = created.tags ? JSON.parse(created.tags) : null;
-    } catch (e) {
-      parsed.tags = null;
-    }
-    try {
-      parsed.moderationReasons = created.moderationReasons
-        ? JSON.parse(created.moderationReasons)
-        : null;
-    } catch (e) {
-      parsed.moderationReasons = null;
-    }
-
-    return parsed as Post;
+    return parsePostJsonFields(created) as Post;
   }
 
   async findById(
@@ -102,20 +105,8 @@ export class PostDrizzleRepository implements IPostRepository {
 
     return Promise.all(
       rows.map(async (row) => {
-        // parse JSON fields from DB
-        const parsedPost: any = { ...row.post };
-        try {
-          parsedPost.tags = row.post.tags ? JSON.parse(row.post.tags) : null;
-        } catch (e) {
-          parsedPost.tags = null;
-        }
-        try {
-          parsedPost.moderationReasons = row.post.moderationReasons
-            ? JSON.parse(row.post.moderationReasons)
-            : null;
-        } catch (e) {
-          parsedPost.moderationReasons = null;
-        }
+        const parsedPost = parsePostJsonFields(row.post);
+
         if (row.post.type !== "event" || !options.currentUserId) {
           return {
             ...parsedPost,
@@ -182,22 +173,7 @@ export class PostDrizzleRepository implements IPostRepository {
       .where(eq(post.id, id))
       .returning();
 
-    // parse JSON fields
-    const parsed = { ...updated } as any;
-    try {
-      parsed.tags = updated.tags ? JSON.parse(updated.tags) : null;
-    } catch (e) {
-      parsed.tags = null;
-    }
-    try {
-      parsed.moderationReasons = updated.moderationReasons
-        ? JSON.parse(updated.moderationReasons)
-        : null;
-    } catch (e) {
-      parsed.moderationReasons = null;
-    }
-
-    return parsed as Post;
+    return parsePostJsonFields(updated) as Post;
   }
 
   async findRsvp(

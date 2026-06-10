@@ -1,0 +1,22 @@
+import { GroupDrizzleRepository } from "../../database/repositories/group.drizzle-repository.js";
+import { CreateGroupUseCase } from "../../../application/use-cases/groups/create-group.use-case.js";
+import { ListGroupsUseCase } from "../../../application/use-cases/groups/list-groups.use-case.js";
+import { UpdateGroupUseCase } from "../../../application/use-cases/groups/update-group.use-case.js";
+import { DeleteGroupUseCase } from "../../../application/use-cases/groups/delete-group.use-case.js";
+import { JoinGroupUseCase } from "../../../application/use-cases/groups/join-group.use-case.js";
+import { LeaveGroupUseCase } from "../../../application/use-cases/groups/leave-group.use-case.js";
+import { ListGroupMessagesUseCase } from "../../../application/use-cases/groups/list-group-messages.use-case.js";
+import { SendGroupMessageUseCase } from "../../../application/use-cases/groups/send-group-message.use-case.js";
+import { NotificationService } from "../../../application/services/notification.service.js";
+import { notificationEventBus } from "../../events/index.js";
+
+export const groupRepository = new GroupDrizzleRepository();
+export const createGroupUseCase = new CreateGroupUseCase(groupRepository);
+export const listGroupsUseCase = new ListGroupsUseCase(groupRepository);
+export const updateGroupUseCase = new UpdateGroupUseCase(groupRepository);
+export const deleteGroupUseCase = new DeleteGroupUseCase(groupRepository);
+export const joinGroupUseCase = new JoinGroupUseCase(groupRepository);
+export const leaveGroupUseCase = new LeaveGroupUseCase(groupRepository);
+export const listGroupMessagesUseCase = new ListGroupMessagesUseCase(groupRepository);
+export const sendGroupMessageUseCase = new SendGroupMessageUseCase(groupRepository);
+export const notificationService = new NotificationService(notificationEventBus);

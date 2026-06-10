@@ -3,7 +3,7 @@ interface FormatZodErrorsInput {
     validationContext?: string;
     validation?: Array<{
       instancePath?: string;
-      keywork?: string;
+      keyword?: string;
       message: string;
       params?: {
         type?: string;
@@ -31,7 +31,7 @@ export function formatZodErrors({ error }: FormatZodErrorsInput) {
       let field = issue.instancePath?.replace(/^\//, "") || "";
 
       if (
-        issue.keywork === "invalid_type" &&
+        issue.keyword === "invalid_type" &&
         issue.params?.type === "required"
       ) {
         field = (issue.params.missingProperty as string) || field;
@@ -40,7 +40,7 @@ export function formatZodErrors({ error }: FormatZodErrorsInput) {
       formattedError.validation.push({
         field,
         message: issue.message || "Validation error",
-        code: issue.keywork || "unknown",
+        code: issue.keyword || "unknown",
         context: validationContext,
       });
     }

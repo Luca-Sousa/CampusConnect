@@ -20,7 +20,7 @@ export interface User {
   course: string | null;
   bio: string | null;
   role: UserRole;
-  cargo: UserCargo;
+  cargo?: UserCargo;
   createdAt: Date;
   updatedAt: Date;
 }

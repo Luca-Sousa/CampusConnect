@@ -1,52 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { z } from "zod";
-import { auth } from "../../auth/better-auth.js";
-import { GroupDrizzleRepository } from "../../database/repositories/group.drizzle-repository.js";
-import { CreateGroupUseCase } from "../../../application/use-cases/groups/create-group.use-case.js";
-import { ListGroupsUseCase } from "../../../application/use-cases/groups/list-groups.use-case.js";
-import { UpdateGroupUseCase } from "../../../application/use-cases/groups/update-group.use-case.js";
-import { DeleteGroupUseCase } from "../../../application/use-cases/groups/delete-group.use-case.js";
-import { JoinGroupUseCase } from "../../../application/use-cases/groups/join-group.use-case.js";
-import { LeaveGroupUseCase } from "../../../application/use-cases/groups/leave-group.use-case.js";
-import { ListGroupMessagesUseCase } from "../../../application/use-cases/groups/list-group-messages.use-case.js";
-import { SendGroupMessageUseCase } from "../../../application/use-cases/groups/send-group-message.use-case.js";
-import { notificationEventBus } from "../../events/index.js";
-import { getAllUserIds, getGroupMemberIds } from "../../helpers/user-ids.js";
-
-// ——— Singletons de repositório e casos de uso ———
-const groupRepository = new GroupDrizzleRepository();
-const createGroupUseCase = new CreateGroupUseCase(groupRepository);
-const listGroupsUseCase = new ListGroupsUseCase(groupRepository);
-const updateGroupUseCase = new UpdateGroupUseCase(groupRepository);
-const deleteGroupUseCase = new DeleteGroupUseCase(groupRepository);
-const joinGroupUseCase = new JoinGroupUseCase(groupRepository);
-const leaveGroupUseCase = new LeaveGroupUseCase(groupRepository);
-const listGroupMessagesUseCase = new ListGroupMessagesUseCase(groupRepository);
-const sendGroupMessageUseCase = new SendGroupMessageUseCase(groupRepository);
-
-// ——— Helper de sessão ———
-async function getSession(request: { headers: { cookie?: string } }) {
-  const headers = new Headers();
-  if (request.headers.cookie) headers.set("cookie", request.headers.cookie);
-  return auth.api.getSession({ headers }).catch(() => null);
-}
-
-// ——— Schemas de validação ———
-const createGroupSchema = z.object({
-  name: z.string().min(1, "Nome obrigatório.").max(200),
-  description: z.string().max(2000).optional(),
-  icon: z.string().max(10).nullable().optional(),
-});
-
-const updateGroupSchema = z.object({
-  name: z.string().min(1, "Nome obrigatório.").max(200).optional(),
-  description: z.string().max(2000).nullable().optional(),
-  icon: z.string().max(10).nullable().optional(),
-});
-
-const sendMessageSchema = z.object({
-  content: z.string().min(1, "Mensagem obrigatória.").max(2000),
-});
+import { createGroupSchema, updateGroupSchema, sendMessageSchema } from "../schemas/group.schemas.js";
+import { groupRepository, createGroupUseCase, listGroupsUseCase, updateGroupUseCase, deleteGroupUseCase, joinGroupUseCase, leaveGroupUseCase, listGroupMessagesUseCase, sendGroupMessageUseCase, notificationService } from "../di/groups.di.js";
+import { getSession } from "../helpers/session.js";
 
 export async function groupsRoute(app: FastifyInstance): Promise<void> {
   /**
@@ -88,23 +43,9 @@ export async function groupsRoute(app: FastifyInstance): Promise<void> {
     const group = await createGroupUseCase.execute({
       ...parsed.data,
       authorId: session.user.id,
-      userRole: ((session.user as Record<string, unknown>).role as string) ?? "aluno",
     });
 
-    // Notificar todos os usuários (exceto o criador)
-    const allUserIds = await getAllUserIds();
-    const recipientIds = allUserIds.filter((id) => id !== session.user.id);
-
-    if (recipientIds.length > 0) {
-      notificationEventBus.emit({
-        type: "group_created",
-        actorId: session.user.id,
-        entityType: "group",
-        entityId: group.id,
-        recipientIds,
-        message: `${session.user.name} criou o grupo "${group.name}".`,
-      });
-    }
+    await notificationService.notifyGroupCreated(group.id, group.name, session.user.id, session.user.name);
 
     return reply.status(201).send(group);
   });
@@ -126,26 +67,14 @@ export async function groupsRoute(app: FastifyInstance): Promise<void> {
       return reply.status(400).send({ error: parsed.error.issues[0]?.message });
     }
 
-    try {
-      const updated = await updateGroupUseCase.execute({
-        groupId: id,
-        userId: session.user.id,
-        userRole: ((session.user as Record<string, unknown>).role as string) ?? "aluno",
-        input: parsed.data,
-      });
+    const updated = await updateGroupUseCase.execute({
+      groupId: id,
+      userId: session.user.id,
+      userRole: ((session.user as Record<string, unknown>).role as string) ?? "aluno",
+      input: parsed.data,
+    });
 
-      return reply.send(updated);
-    } catch (err) {
-      if (err instanceof Error) {
-        if (err.message === "NOT_FOUND") {
-          return reply.status(404).send({ error: "Grupo não encontrado." });
-        }
-        if (err.message === "FORBIDDEN") {
-          return reply.status(403).send({ error: "Sem permissão para editar este grupo." });
-        }
-      }
-      throw err;
-    }
+    return reply.send(updated);
   });
 
   /**
@@ -160,25 +89,13 @@ export async function groupsRoute(app: FastifyInstance): Promise<void> {
 
     const { id } = request.params as { id: string };
 
-    try {
-      await deleteGroupUseCase.execute({
-        groupId: id,
-        userId: session.user.id,
-        userRole: ((session.user as Record<string, unknown>).role as string) ?? "aluno",
-      });
+    await deleteGroupUseCase.execute({
+      groupId: id,
+      userId: session.user.id,
+      userRole: ((session.user as Record<string, unknown>).role as string) ?? "aluno",
+    });
 
-      return reply.status(204).send();
-    } catch (err) {
-      if (err instanceof Error) {
-        if (err.message === "NOT_FOUND") {
-          return reply.status(404).send({ error: "Grupo não encontrado." });
-        }
-        if (err.message === "FORBIDDEN") {
-          return reply.status(403).send({ error: "Sem permissão para remover este grupo." });
-        }
-      }
-      throw err;
-    }
+    return reply.status(204).send();
   });
 
   /**
@@ -193,19 +110,12 @@ export async function groupsRoute(app: FastifyInstance): Promise<void> {
 
     const { id } = request.params as { id: string };
 
-    try {
-      const result = await joinGroupUseCase.execute({
-        groupId: id,
-        userId: session.user.id,
-      });
+    const result = await joinGroupUseCase.execute({
+      groupId: id,
+      userId: session.user.id,
+    });
 
-      return reply.send(result);
-    } catch (err) {
-      if (err instanceof Error && err.message === "NOT_FOUND") {
-        return reply.status(404).send({ error: "Grupo não encontrado." });
-      }
-      throw err;
-    }
+    return reply.send(result);
   });
 
   /**
@@ -220,24 +130,12 @@ export async function groupsRoute(app: FastifyInstance): Promise<void> {
 
     const { id } = request.params as { id: string };
 
-    try {
-      await leaveGroupUseCase.execute({
-        groupId: id,
-        userId: session.user.id,
-      });
+    await leaveGroupUseCase.execute({
+      groupId: id,
+      userId: session.user.id,
+    });
 
-      return reply.status(204).send();
-    } catch (err) {
-      if (err instanceof Error) {
-        if (err.message === "NOT_FOUND") {
-          return reply.status(404).send({ error: "Grupo não encontrado." });
-        }
-        if (err.message === "FORBIDDEN") {
-          return reply.status(403).send({ error: "O criador não pode sair do grupo." });
-        }
-      }
-      throw err;
-    }
+    return reply.status(204).send();
   });
 
   /**
@@ -255,20 +153,13 @@ export async function groupsRoute(app: FastifyInstance): Promise<void> {
     const limit = Math.min(Math.max(Number(query.limit) || 50, 1), 100);
     const offset = Math.max(Number(query.offset) || 0, 0);
 
-    try {
-      const messages = await listGroupMessagesUseCase.execute({
-        groupId: id,
-        limit,
-        offset,
-      });
+    const messages = await listGroupMessagesUseCase.execute({
+      groupId: id,
+      limit,
+      offset,
+    });
 
-      return reply.send(messages);
-    } catch (err) {
-      if (err instanceof Error && err.message === "NOT_FOUND") {
-        return reply.status(404).send({ error: "Grupo não encontrado." });
-      }
-      throw err;
-    }
+    return reply.send(messages);
   });
 
   /**
@@ -288,42 +179,16 @@ export async function groupsRoute(app: FastifyInstance): Promise<void> {
       return reply.status(400).send({ error: parsed.error.issues[0]?.message });
     }
 
-    try {
-      const message = await sendGroupMessageUseCase.execute({
-        groupId: id,
-        authorId: session.user.id,
-        content: parsed.data.content,
-      });
+    const message = await sendGroupMessageUseCase.execute({
+      groupId: id,
+      authorId: session.user.id,
+      content: parsed.data.content,
+    });
 
-      // Notificar outros membros do grupo (exceto o autor)
-      const memberIds = await getGroupMemberIds(id, session.user.id);
+    const group = await groupRepository.findById(id);
+    await notificationService.notifyGroupMessage(id, group?.name ?? "grupo", message.id, session.user.id, session.user.name, parsed.data.content);
 
-      if (memberIds.length > 0) {
-        const group = await groupRepository.findById(id);
-        const truncated = parsed.data.content.slice(0, 50);
-        const suffix = parsed.data.content.length > 50 ? "..." : "";
-        notificationEventBus.emit({
-          type: "group_message",
-          actorId: session.user.id,
-          entityType: "group_message",
-          entityId: message.id,
-          recipientIds: memberIds,
-          message: `${session.user.name} enviou uma mensagem em "${group?.name ?? "grupo"}": "${truncated}${suffix}"`,
-        });
-      }
-
-      return reply.status(201).send(message);
-    } catch (err) {
-      if (err instanceof Error) {
-        if (err.message === "NOT_FOUND") {
-          return reply.status(404).send({ error: "Grupo não encontrado." });
-        }
-        if (err.message === "FORBIDDEN") {
-          return reply.status(403).send({ error: "Você não é membro deste grupo." });
-        }
-      }
-      throw err;
-    }
+    return reply.status(201).send(message);
   });
 
   /**
@@ -338,24 +203,15 @@ export async function groupsRoute(app: FastifyInstance): Promise<void> {
 
     const { id } = request.params as { id: string };
 
-    try {
-      // Para messages, precisamos do groupId para verificar autor ou admin.
-      // Como o endpoint é por messageId, buscamos a mensagem diretamente.
-      // O repositório deleteMessage já valida que o userId é o autor.
-      const userRole =
-        ((session.user as Record<string, unknown>).role as string) ?? "aluno";
+    const userRole =
+      ((session.user as Record<string, unknown>).role as string) ?? "aluno";
 
-      if (userRole === "admin") {
-        // Admin pode deletar qualquer mensagem
-        await groupRepository.deleteMessage(id, session.user.id);
-      } else {
-        // Usuário só pode deletar suas próprias mensagens
-        await groupRepository.deleteMessage(id, session.user.id);
-      }
-
-      return reply.status(204).send();
-    } catch {
-      return reply.status(404).send({ error: "Mensagem não encontrada." });
+    if (userRole === "admin") {
+      await groupRepository.deleteMessageAdmin(id);
+    } else {
+      await groupRepository.deleteMessage(id, session.user.id);
     }
+
+    return reply.status(204).send();
   });
 }

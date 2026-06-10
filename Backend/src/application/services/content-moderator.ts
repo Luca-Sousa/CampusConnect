@@ -1,4 +1,5 @@
 import type { IAIService } from "../../domain/ports/services/ai.service.js";
+import { InvalidError } from "../../domain/errors/invalid.js";
 
 /**
  * Resultado da moderação de conteúdo.
@@ -63,9 +64,7 @@ export class ContentModerator {
     );
 
     if (isSevere) {
-      throw new Error(
-        "INVALID:Sua publicação contém conteúdo tóxico grave e não pode ser publicada.",
-      );
+      throw new InvalidError("Sua publicação contém conteúdo tóxico grave e não pode ser publicada.");
     }
 
     return {

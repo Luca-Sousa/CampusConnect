@@ -9,7 +9,9 @@ export class InMemoryNotificationEventBus implements INotificationEventBus {
 
   emit(event: NotificationEvent): void {
     for (const handler of this.handlers) {
-      handler(event);
+      Promise.resolve(handler(event)).catch((err) => {
+        console.error("[NotificationEventBus] Handler error:", err);
+      });
     }
   }
 

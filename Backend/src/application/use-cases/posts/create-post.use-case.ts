@@ -2,6 +2,7 @@ import type { IPostRepository } from "../../../domain/ports/repositories/post.re
 import type { Post, CreatePostInput } from "../../../domain/entities/post.js";
 import { OFFICIAL_CARGOS } from "../../constants/permissions.js";
 import type { ContentModerator } from "../../services/content-moderator.js";
+import { ForbiddenError } from "../../../domain/errors/forbidden.js";
 
 export interface CreatePostCommand extends CreatePostInput {
   userRole: string;
@@ -50,12 +51,10 @@ export class CreatePostUseCase {
   private assertTypePermissions(command: CreatePostCommand): void {
     if (command.userRole === "aluno") {
       if (command.type === "event") {
-        throw new Error("FORBIDDEN:Alunos não podem criar eventos.");
+        throw new ForbiddenError("Alunos não podem criar eventos.");
       }
       if (command.type === "news") {
-        throw new Error(
-          "FORBIDDEN:Apenas perfis oficiais podem publicar notícias.",
-        );
+        throw new ForbiddenError("Apenas perfis oficiais podem publicar notícias.");
       }
     }
 
@@ -64,7 +63,7 @@ export class CreatePostUseCase {
       command.userRole !== "admin" &&
       !OFFICIAL_CARGOS.has(command.userCargo)
     ) {
-      throw new Error("FORBIDDEN");
+      throw new ForbiddenError();
     }
   }
 }

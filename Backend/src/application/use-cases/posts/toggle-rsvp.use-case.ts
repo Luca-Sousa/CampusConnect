@@ -1,4 +1,6 @@
 import type { IPostRepository } from "../../../domain/ports/repositories/post.repository.js";
+import { NotFoundError } from "../../../domain/errors/not-found.js";
+import { InvalidError } from "../../../domain/errors/invalid.js";
 
 export interface ToggleRsvpCommand {
   postId: string;
@@ -16,11 +18,11 @@ export class ToggleRsvpUseCase {
     const post = await this.postRepository.findById(command.postId);
 
     if (!post) {
-      throw new Error("NOT_FOUND");
+      throw new NotFoundError();
     }
 
     if (post.type !== "event") {
-      throw new Error("INVALID: RSVP só é válido para eventos.");
+      throw new InvalidError("RSVP só é válido para eventos.");
     }
 
     const existingRsvp = await this.postRepository.findRsvp(

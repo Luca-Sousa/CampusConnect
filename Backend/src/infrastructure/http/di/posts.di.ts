@@ -1,0 +1,33 @@
+import { PostDrizzleRepository } from "../../database/repositories/post.drizzle-repository.js";
+import { LikeDrizzleRepository } from "../../database/repositories/like.drizzle-repository.js";
+import { CommentDrizzleRepository } from "../../database/repositories/comment.drizzle-repository.js";
+import { GroqAIService } from "../../ai/groq-ai.service.js";
+import { ContentModerator } from "../../../application/services/content-moderator.js";
+import { CreatePostUseCase } from "../../../application/use-cases/posts/create-post.use-case.js";
+import { ListPostsUseCase } from "../../../application/use-cases/posts/list-posts.use-case.js";
+import { DeletePostUseCase } from "../../../application/use-cases/posts/delete-post.use-case.js";
+import { ToggleRsvpUseCase } from "../../../application/use-cases/posts/toggle-rsvp.use-case.js";
+import { UpdatePostUseCase } from "../../../application/use-cases/posts/update-post.use-case.js";
+import { ApprovePostUseCase } from "../../../application/use-cases/posts/approve-post.use-case.js";
+import { ToggleLikeUseCase } from "../../../application/use-cases/toggle-like.use-case.js";
+import { ListCommentsUseCase } from "../../../application/use-cases/list-comments.use-case.js";
+import { AddCommentUseCase } from "../../../application/use-cases/add-comment.use-case.js";
+import { NotificationService } from "../../../application/services/notification.service.js";
+import { notificationEventBus } from "../../events/index.js";
+
+const aiService = new GroqAIService();
+const contentModerator = new ContentModerator(aiService);
+
+export const postRepository = new PostDrizzleRepository();
+export const likeRepository = new LikeDrizzleRepository();
+export const commentRepository = new CommentDrizzleRepository();
+export const createPostUseCase = new CreatePostUseCase(postRepository, contentModerator);
+export const listPostsUseCase = new ListPostsUseCase(postRepository);
+export const deletePostUseCase = new DeletePostUseCase(postRepository);
+export const toggleRsvpUseCase = new ToggleRsvpUseCase(postRepository);
+export const updatePostUseCase = new UpdatePostUseCase(postRepository, contentModerator);
+export const approvePostUseCase = new ApprovePostUseCase(postRepository);
+export const toggleLikeUseCase = new ToggleLikeUseCase(likeRepository);
+export const listCommentsUseCase = new ListCommentsUseCase(commentRepository);
+export const addCommentUseCase = new AddCommentUseCase(commentRepository);
+export const notificationService = new NotificationService(notificationEventBus);

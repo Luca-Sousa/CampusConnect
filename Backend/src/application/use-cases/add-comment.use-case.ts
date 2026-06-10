@@ -1,5 +1,6 @@
 import type { Comment } from "../../domain/entities/comment.js";
 import type { ICommentRepository } from "../../domain/ports/repositories/comment-repository.js";
+import { InvalidError } from "../../domain/errors/invalid.js";
 
 export class AddCommentUseCase {
   constructor(private commentRepository: ICommentRepository) {}
@@ -13,7 +14,7 @@ export class AddCommentUseCase {
     if (input.parentId) {
       const parent = await this.commentRepository.findById(input.parentId);
       if (!parent || parent.postId !== input.postId) {
-        throw new Error("INVALID:Parent comment not found");
+        throw new InvalidError("Comentário pai não encontrado.");
       }
     }
 

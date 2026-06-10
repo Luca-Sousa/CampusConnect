@@ -40,6 +40,7 @@ export interface IGroupRepository {
     content: string,
   ): Promise<GroupMessageWithAuthor>;
   deleteMessage(id: string, userId: string): Promise<void>;
+  deleteMessageAdmin(id: string): Promise<void>;
   isAuthorOrAdmin(
     groupId: string,
     userId: string,

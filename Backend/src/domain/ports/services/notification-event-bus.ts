@@ -9,7 +9,7 @@ export interface NotificationEvent {
   message: string;
 }
 
-export type NotificationEventHandler = (event: NotificationEvent) => void;
+export type NotificationEventHandler = (event: NotificationEvent) => void | Promise<void>;
 
 export interface INotificationEventBus {
   emit(event: NotificationEvent): void;

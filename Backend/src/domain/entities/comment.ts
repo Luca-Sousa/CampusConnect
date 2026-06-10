@@ -19,7 +19,3 @@ export interface CommentWithAuthor extends Comment {
   author: CommentAuthor | null;
   replies?: CommentWithAuthor[];
 }
-
-export interface CommentStats {
-  commentsCount: number;
-}
