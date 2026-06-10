@@ -95,8 +95,8 @@ export function PostActionsMenu({
   const isModerated = post.moderated === true;
   const isAuthor = currentUserId === post.authorId;
   const canModerate = canModeratePost(currentUserRole, currentUserCargo);
-  const showModerationActions = isModerated && canModerate;
-  const showOwnerActions = isAuthor && !isModerated;
+  const showModerationActions = isModerated && canModerate && !isAuthor;
+  const showOwnerActions = isAuthor;
 
   const editingDisabled = post.type === "event" && isEventInPast(post);
 
