@@ -98,7 +98,9 @@ export class GroqAIService implements IAIService {
   }
 
   private buildModerationResult(response: ModerationResponse): ModerationResult {
-    const allowed = response.category === "Aceitavel";
+    const normalize = (s: string) =>
+      s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const allowed = normalize(response.category) === normalize("Aceitável");
     const categories: ModerationCategory[] = [
       { name: response.category, score: allowed ? 0 : 1 },
     ];
